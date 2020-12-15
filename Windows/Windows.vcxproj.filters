@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{fa39dd90-9864-4b96-802b-48da41b4c7b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{2de2f958-dc59-4603-bc41-c51618b9cccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{60c1d41a-a209-4e2a-9035-b07b78baef64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{e51b3fdd-0ded-4e63-8c52-e039c34744c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AssetManager">
+      <UniqueIdentifier>{40225051-af13-41a0-8d57-88d8190f5a17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Engine">
+      <UniqueIdentifier>{3e011b78-ef17-4c87-aa9d-23abf5dcf085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawable">
+      <UniqueIdentifier>{986b3355-31fa-4057-aecf-a153a0808164}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameMaster">
+      <UniqueIdentifier>{48167594-e71d-4e69-91db-4fc8611e1c79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawables Library">
+      <UniqueIdentifier>{58325a04-d936-468b-b031-f39b229c9819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawables Library\Sprite">
+      <UniqueIdentifier>{e8345815-e7fb-4a44-aa60-c9a18f8ce7d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawables Library\AnimatedSprite">
+      <UniqueIdentifier>{b0720df3-66c9-4b77-95b0-b4133d381f4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InputHandler">
+      <UniqueIdentifier>{bdaaf006-9eaf-4d2c-b779-585c0658a7ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioEngine.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorLogging.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="MiscUtility.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>AssetManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngine.cpp">
+      <Filter>Graphics\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable.cpp">
+      <Filter>Graphics\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Graphics\Drawables Library\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMaster.cpp">
+      <Filter>GameMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatedSprite.cpp">
+      <Filter>Graphics\Drawables Library\AnimatedSprite</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>InputHandler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AudioEngine.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorLogging.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="STLHeader.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscUtility.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>AssetManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngine.h">
+      <Filter>Graphics\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.h">
+      <Filter>Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Graphics\Drawables Library\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMaster.h">
+      <Filter>GameMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedSprite.h">
+      <Filter>Graphics\Drawables Library\AnimatedSprite</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>InputHandler</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
