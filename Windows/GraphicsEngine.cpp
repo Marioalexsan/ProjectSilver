@@ -7,6 +7,9 @@ namespace Game {
 	SDL_Window*			GraphicsEngine::Window = nullptr;
 	SDL_Renderer*		GraphicsEngine::Renderer = nullptr;
 
+	int	GraphicsEngine::windowWidth = 0;
+	int	GraphicsEngine::windowHeight = 0;
+
 	double	GraphicsEngine::centeredCameraX = 0;
 	double	GraphicsEngine::centeredCameraY = 0;
 
@@ -22,12 +25,12 @@ namespace Game {
 	};
 
 	GraphicsEngine::GraphicsEngine() :
-		currentID(0),
-		windowWidth(1920),
-		windowHeight(1080),
-		renderWidth(windowWidth),
-		renderHeight(windowHeight)
+		currentID(0)
 	{
+		windowWidth = 1920;
+		windowHeight = 1080;
+		renderWidth = 1920;
+		renderHeight = 1080;
 		if (currentEngine == nullptr) {
 			currentEngine = this;
 		}
@@ -40,7 +43,11 @@ namespace Game {
 			currentEngine = nullptr;
 		}
 	}
-	using std::cout;
+
+	pair<int, int> GraphicsEngine::GetWindowSize() {
+		return { windowWidth, windowHeight };
+	}
+	
 	bool GraphicsEngine::SetDisplayMode(VideoMode mode) {
 		renderWidth = mode.width;
 		renderHeight = mode.height;
@@ -124,11 +131,12 @@ namespace Game {
 		centeredCameraY += y;
 	}
 
-	//#pragma warning(supress: 26812)
+	// Has Camera feature
+	// Has Offset feature
 	void GraphicsEngine::RenderCopyExWithCamera(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip) {
 		
 		if (dstrect) {
-			SDL_Rect newdstrect = Utility::MakeSDLRect(dstrect->x - centeredCameraX, dstrect->y - centeredCameraY, dstrect->w, dstrect->h);
+			SDL_Rect newdstrect = Utility::MakeSDLRect(dstrect->x - centeredCameraX - center->x, dstrect->y - centeredCameraY - center->y, dstrect->w, dstrect->h);
 			SDL_RenderCopyEx(Renderer, texture, srcrect, &newdstrect, angle, center, flip);
 		}
 		else {

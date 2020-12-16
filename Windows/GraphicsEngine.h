@@ -32,8 +32,8 @@ namespace Game {
 		// Current State Variables
 		uint64_t currentID;
 
-		int windowWidth;
-		int windowHeight;
+		static int windowWidth;
+		static int windowHeight;
 
 		int renderWidth;
 		int renderHeight;
@@ -50,6 +50,7 @@ namespace Game {
 		static double centeredCameraY;
 
 	public:
+		static pair<int, int> GetWindowSize();
 		bool SetDisplayMode(VideoMode mode);
 		void SetStandardViewport();
 		void SetStandardScaling();

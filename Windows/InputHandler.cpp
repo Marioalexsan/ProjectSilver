@@ -2,6 +2,7 @@
 
 #include "InputHandler.h"
 #include "MiscUtility.h"
+#include "GraphicsEngine.h"
 
 namespace Game {
 	const map<SDL_Scancode, InputHandler::KeyCode> InputHandler::keyTranslation = {
@@ -35,8 +36,19 @@ namespace Game {
 		}
 	}
 
+	// "World" position
 	pair<int, int> InputHandler::GetMousePosition() {
 		return { virtualMouseX, virtualMouseY };
+	}
+
+	// "True" positon
+	pair<int, int> InputHandler::GetRelativeMousePosition() {
+		auto var = GraphicsEngine::GetWindowSize();
+		return { virtualMouseX * var.first / 1920, virtualMouseY * var.second / 1080};
+	}
+
+	void InputHandler::SetMouseGrab(bool grab) {
+		SDL_SetRelativeMouseMode((SDL_bool)grab);
 	}
 
 	void InputHandler::PushFrame() {
@@ -79,8 +91,8 @@ namespace Game {
 
 			case SDL_EventType::SDL_MOUSEMOTION:
 				// Limited to game area
-				virtualMouseX = Utility::ClampValue(0, virtualMouseX + event.motion.xrel, 1920);
-				virtualMouseY = Utility::ClampValue(0, virtualMouseY + event.motion.yrel, 1080);
+				virtualMouseX = Utility::ClampValue(virtualMouseX + event.motion.xrel, 0, 1920);
+				virtualMouseY = Utility::ClampValue(virtualMouseY + event.motion.yrel, 0, 1080);
 				break;
 
 				// Misc
@@ -94,6 +106,7 @@ namespace Game {
 					gameFocused = false;
 					break;
 				case SDL_QUIT:
+				case SDL_WINDOWEVENT_CLOSE:
 					quitCalled = true;
 					break;
 				}
@@ -117,5 +130,9 @@ namespace Game {
 
 	bool InputHandler::IsButtonPressedThisFrame(ButtonCode code) {
 		return ButtonFrames[0][code] && !ButtonFrames[1][code];
+	}
+
+	bool InputHandler::WasQuitCalled() {
+		return quitCalled;
 	}
 }

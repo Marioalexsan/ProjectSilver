@@ -80,6 +80,9 @@ int main(int argc, char* args[]) {
 
     ProjectSilver.Assets.LoadTexture("Checks", "Untitled.png");
     ProjectSilver.Assets.LoadTexture("Test", "Untitled2.png");
+    ProjectSilver.Assets.LoadTexture("Char", "Char.png");
+
+    ProjectSilver.Assets.LoadTexture("Target", "target.png");
 
     Game::AnimatedSprite animation;
     animation.SetAnimationInfo(12, 4, 1, Game::AnimatedSprite::LoopMode::PingPongLoop);
@@ -107,18 +110,20 @@ int main(int argc, char* args[]) {
     ProjectSilver.Graphics.AddDrawable(&sprite3);
 
     Game::Sprite sprite4;
-    sprite4.SetTexture(&ProjectSilver.Assets, "Checks");
+    sprite4.SetTexture(&ProjectSilver.Assets, "Target");
     sprite4.MoveTo({ 1266, 668 });
-    sprite4.SetCenter({ 0, 0 });
+    sprite4.SetCenter({ 21, 21 });
     ProjectSilver.Graphics.AddDrawable(&sprite4);
 
     Game::Sprite sprite5;
-    sprite5.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite5.MoveTo({ 1500, 800 });
-    sprite5.SetCenter({ 0, 0 });
+    sprite5.SetTexture(&ProjectSilver.Assets, "Char");
+    sprite5.MoveTo({ 200, 200 });
+    sprite5.SetCenter({ 50, 70 });
     ProjectSilver.Graphics.AddDrawable(&sprite5);
 
     ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1600.900.w"));
+
+    ProjectSilver.Input.SetMouseGrab(true);
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -156,18 +161,27 @@ int main(int argc, char* args[]) {
         if (ProjectSilver.Input.IsKeyDown(KeyCode::D)) {
             ProjectSilver.Graphics.PushCamera(10, 0);
         }
-        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle)) {
+        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || ProjectSilver.Input.WasQuitCalled()) {
             ProjectSilver.Stop();
         }
+        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Right)) {
 
+            sprite5.SetCenter({ 150, 150 });
+        }
+
+        animation.PushBy({ 0.5, 0.5 });
+        sprite5.RotateBy(1);
+
+        auto var = ProjectSilver.Input.GetMousePosition();
+        sprite5.SetAngle(Game::Point(var.first - 200.0, var.second - 200.0).Angle());
+        sprite4.MoveTo({ var.first, var.second });
+
+        cout << Game::Point(var.first - 200.0, var.second - 200.0).Angle() << endl;
         // Code end
 
         prevTime = currentTime;
 
         ProjectSilver.Graphics.RenderAll();
-        SDL_Event trash;
-
-        SDL_PollEvent(&trash);
     }
 
     #pragma endregion

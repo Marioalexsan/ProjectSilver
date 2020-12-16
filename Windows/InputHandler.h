@@ -44,13 +44,18 @@ namespace Game {
 	public:
 		InputHandler();
 
+		void SetMouseGrab(bool grab);
+
 		void Update();
 		pair<int, int> GetMousePosition();
+		pair<int, int> GetRelativeMousePosition();
 
 		bool IsKeyDown(KeyCode code);
 		bool IsButtonDown(ButtonCode code);
 		bool IsKeyPressedThisFrame(KeyCode code);
 		bool IsButtonPressedThisFrame(ButtonCode code);
+
+		bool WasQuitCalled();
 	};
 }
 

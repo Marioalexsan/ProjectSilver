@@ -20,6 +20,7 @@ namespace Game {
 
 		Point();
 		Point(double, double);
+		Point(int, int);
 
 		double Length();
 		double Angle();

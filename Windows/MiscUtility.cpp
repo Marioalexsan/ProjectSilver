@@ -12,6 +12,10 @@ namespace Game {
 		x(x),
 		y(y) {}
 
+	Point::Point(int x, int y) :
+		x(double(x)),
+		y(double(y)) {}
+
 	double Point::Length() {
 		return sqrt(x * x + y * y);
 	}
@@ -19,7 +23,7 @@ namespace Game {
 	// OY+ -> Vector in clockwise direction = angle in degrees
 
 	double Point::Angle() {
-		return 360.0 - atan2(y, x) * 180 / Math::PI + (y > 0 && x > 0) ? 270.0 : -90.0;
+		return atan2(y, x) * 180 / Math::PI + ((y < 0 && x < 0) ? 450.0 : 90.0);
 	}
 
 
@@ -40,10 +44,10 @@ namespace Game {
 	}
 
 	int Utility::ClampValue(int val, int min, int max) {
-		return val < min ? min : (val > max ? max : val);
+		return val < min ? min : (val >= max ? max : val);
 	}
 
 	double Utility::ClampValue(double val, double min, double max) {
-		return val < min ? min : (val > max ? max : val);
+		return val < min ? min : (val >= max ? max : val);
 	}
 }
