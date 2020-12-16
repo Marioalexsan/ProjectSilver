@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "AudioEngine.h"
 #include "GraphicsEngine.h"
+#include "InputHandler.h"
 
 namespace Game {
 	class GameMaster {
@@ -16,6 +17,7 @@ namespace Game {
 		Game::AudioEngine Audio;
 		Game::GraphicsEngine Graphics;
 		Game::AssetManager Assets;
+		Game::InputHandler Input;
 
 		GameMaster();
 

@@ -1,7 +1,8 @@
 #ifndef SPRITE_HEADER
 #define SPRITE_HEADER
 
-#include <SDL.h>
+#include "PCHeader.h"
+
 #include "Drawable.h"
 #include "AssetManager.h"
 

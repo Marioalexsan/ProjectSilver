@@ -1,3 +1,5 @@
+#include "PCHeader.h"
+
 #include "AnimatedSprite.h"
 #include "GraphicsEngine.h"
 
@@ -89,6 +91,6 @@ namespace Game {
 
 		SDL_Point cen = Game::Utility::MakeSDLPoint(center.x, center.y);
 
-		SDL_RenderCopyEx(Game::GraphicsEngine::Renderer, texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE);
+		GraphicsEngine::RenderCopyExWithCamera(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE);
 	}
 }

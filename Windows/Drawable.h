@@ -1,7 +1,8 @@
 #ifndef TEXTURE_HEADER
 #define TEXTURE_HEADER
 
-#include "STLHeader.h"
+#include "PCHeader.h"
+
 #include "MiscUtility.h"
 
 namespace Game {

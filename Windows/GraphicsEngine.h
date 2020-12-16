@@ -1,10 +1,9 @@
 #ifndef GRAPHICS_HEADER
 #define GRAPHICS_HEADER
 
-#include <SDL.h>
+#include "PCHeader.h"
 
 #include "AssetManager.h"
-#include "STLHeader.h"
 #include "MiscUtility.h"
 #include "Drawable.h"
 
@@ -27,6 +26,8 @@ namespace Game {
 		static const int ResolutionTargetWidth = 1920;
 		static const int ResolutionTargetHeight = 1080;
 
+		static void RenderCopyExWithCamera(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip);
+
 	private:
 		// Current State Variables
 		uint64_t currentID;
@@ -45,6 +46,9 @@ namespace Game {
 
 		uint64_t NextID();
 
+		static double centeredCameraX;
+		static double centeredCameraY;
+
 	public:
 		bool SetDisplayMode(VideoMode mode);
 		void SetStandardViewport();
@@ -59,7 +63,9 @@ namespace Game {
 
 		void RenderAll();
 
-		void SetCamera(int x, int y, int w, int h);
+		void SetCamera(double x, double y);
+		pair<double, double> GetCamera();
+		void PushCamera(double x, double y);
 	};
 }
 

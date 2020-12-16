@@ -1,5 +1,6 @@
+#include "PCHeader.h"
+
 #include "MiscUtility.h"
-#include <cmath>
 
 namespace Game {
 
@@ -36,5 +37,13 @@ namespace Game {
 		lmao.x = x;
 		lmao.y = y;
 		return lmao;
+	}
+
+	int Utility::ClampValue(int val, int min, int max) {
+		return val < min ? min : (val > max ? max : val);
+	}
+
+	double Utility::ClampValue(double val, double min, double max) {
+		return val < min ? min : (val > max ? max : val);
 	}
 }

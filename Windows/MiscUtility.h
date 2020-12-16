@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL.h>
+#include "PCHeader.h"
 
 namespace Game {
 	namespace Math {
@@ -10,6 +10,8 @@ namespace Game {
 	namespace Utility {
 		SDL_Rect MakeSDLRect(int x, int y, int w, int h);
 		SDL_Point MakeSDLPoint(int x, int y);
+		int ClampValue(int val, int min, int max);
+		double ClampValue(double val, double min, double max);
 	}
 
 	struct Point {

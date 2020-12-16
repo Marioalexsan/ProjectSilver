@@ -1,10 +1,14 @@
+#include "PCHeader.h"
+
 #include "GraphicsEngine.h"
-#include <iostream>
 
 namespace Game {
 	GraphicsEngine*		GraphicsEngine::currentEngine = nullptr;
 	SDL_Window*			GraphicsEngine::Window = nullptr;
 	SDL_Renderer*		GraphicsEngine::Renderer = nullptr;
+
+	double	GraphicsEngine::centeredCameraX = 0;
+	double	GraphicsEngine::centeredCameraY = 0;
 
 	const map<string, GraphicsEngine::VideoMode> GraphicsEngine::VideoModes = {
 		{"1920.1080.f", {1920, 1080, true}},
@@ -63,12 +67,12 @@ namespace Game {
 		else {
 			SDL_RenderSetScale(Renderer, 1.0f, 1.0f);
 		}
-		SDL_RenderSetClipRect(Renderer, &Utility::MakeSDLRect(0, 0, windowWidth, windowHeight));
+		SDL_RenderSetClipRect(Renderer, &Utility::MakeSDLRect(0, 0, ResolutionTargetWidth, ResolutionTargetWidth));
 		return true;
 	}
 
 	void GraphicsEngine::SetStandardViewport() {
-		SDL_RenderSetViewport(Renderer, &Utility::MakeSDLRect(0, 0, ResolutionTargetWidth, ResolutionTargetHeight));
+		SDL_RenderSetViewport(Renderer, &Utility::MakeSDLRect(0, 0, windowWidth, windowHeight));
 	}
 
 	uint64_t GraphicsEngine::NextID() {
@@ -102,6 +106,35 @@ namespace Game {
 			elem.second->Draw();
 		}
 		SDL_RenderPresent(Renderer);
+	}
+
+	void GraphicsEngine::SetCamera(double x, double y)
+	{
+		centeredCameraX = x;
+		centeredCameraY = y;
+	}
+
+	pair<double, double> GraphicsEngine::GetCamera() {
+		return { centeredCameraX, centeredCameraY };
+	}
+
+	void GraphicsEngine::PushCamera(double x, double y)
+	{
+		centeredCameraX += x;
+		centeredCameraY += y;
+	}
+
+	//#pragma warning(supress: 26812)
+	void GraphicsEngine::RenderCopyExWithCamera(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip) {
+		
+		if (dstrect) {
+			SDL_Rect newdstrect = Utility::MakeSDLRect(dstrect->x - centeredCameraX, dstrect->y - centeredCameraY, dstrect->w, dstrect->h);
+			SDL_RenderCopyEx(Renderer, texture, srcrect, &newdstrect, angle, center, flip);
+		}
+		else {
+			SDL_RenderCopyEx(Renderer, texture, srcrect, dstrect, angle, center, flip);
+		}
+		
 	}
 
 }

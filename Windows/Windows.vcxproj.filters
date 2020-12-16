@@ -72,15 +72,15 @@
     <ClCompile Include="InputHandler.cpp">
       <Filter>InputHandler</Filter>
     </ClCompile>
+    <ClCompile Include="PCHeader.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
       <Filter>Audio</Filter>
     </ClInclude>
     <ClInclude Include="ErrorLogging.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="STLHeader.h">
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="MiscUtility.h">
@@ -106,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="InputHandler.h">
       <Filter>InputHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="PCHeader.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

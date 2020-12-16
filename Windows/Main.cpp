@@ -1,11 +1,6 @@
-// SDL2 Hello, World!
-// This should display a white screen for 2 seconds
-// compile with: clang++ main.cpp -o hello_sdl2 -lSDL2
-// run with: ./hello_sdl2
-#include <SDL.h>
-#include <stdio.h>
-#include <SDL_mixer.h>
-//#include <SDL_image.h>
+// Project Silver
+
+#include "PCHeader.h"
 
 #include <iostream>
 using std::cout;
@@ -107,21 +102,23 @@ int main(int argc, char* args[]) {
 
     Game::Sprite sprite3;
     sprite3.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite3.MoveTo({ 1720, 880 });
+    sprite3.MoveTo({ 1180, 620 });
     sprite3.SetCenter({ 0, 0 });
     ProjectSilver.Graphics.AddDrawable(&sprite3);
 
     Game::Sprite sprite4;
     sprite4.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite4.MoveTo({ 1620, 780 });
+    sprite4.MoveTo({ 1266, 668 });
     sprite4.SetCenter({ 0, 0 });
     ProjectSilver.Graphics.AddDrawable(&sprite4);
 
     Game::Sprite sprite5;
     sprite5.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite5.MoveTo({ 1520, 680 });
+    sprite5.MoveTo({ 1500, 800 });
     sprite5.SetCenter({ 0, 0 });
     ProjectSilver.Graphics.AddDrawable(&sprite5);
+
+    ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1600.900.w"));
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -134,7 +131,7 @@ int main(int argc, char* args[]) {
             SDL_Delay((uint32_t)(step - (double)delta));
             currentTime = SDL_GetTicks();
         }
-        int bonusUpdates = round(delta / step) - 1;
+        int bonusUpdates = (int)round(delta / step) - 1;
 
         // Do code
         
@@ -142,19 +139,26 @@ int main(int argc, char* args[]) {
             ProjectSilver.Update(true);
         }
 
-        if (prevTime < 3000 && currentTime >= 3000) {
-            ProjectSilver.Graphics.SetDisplayMode(Game::GraphicsEngine::VideoModes.at("1600.900.f"));
-        }
-        if (prevTime < 7000 && currentTime >= 7000) {
-            ProjectSilver.Graphics.SetDisplayMode(Game::GraphicsEngine::VideoModes.at("1366.768.w"));
-        }
-        if (prevTime < 11000 && currentTime >= 11000) {
-            ProjectSilver.Graphics.SetDisplayMode(Game::GraphicsEngine::VideoModes.at("1600.900.w"));
-        }
-
         animation.Update();
-        animation.PushBy({ 0.5, 0.5 });
-        animation.RotateBy(0.1);
+        ProjectSilver.Input.Update();
+
+        using KeyCode = Game::InputHandler::KeyCode;
+        using ButtonCode = Game::InputHandler::ButtonCode;
+        if (ProjectSilver.Input.IsKeyDown(KeyCode::W)) {
+            ProjectSilver.Graphics.PushCamera(0, -10);
+        }
+        if (ProjectSilver.Input.IsKeyDown(KeyCode::S)) {
+            ProjectSilver.Graphics.PushCamera(0, 10);
+        }
+        if (ProjectSilver.Input.IsKeyDown(KeyCode::A)) {
+            ProjectSilver.Graphics.PushCamera(-10, 0);
+        }
+        if (ProjectSilver.Input.IsKeyDown(KeyCode::D)) {
+            ProjectSilver.Graphics.PushCamera(10, 0);
+        }
+        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle)) {
+            ProjectSilver.Stop();
+        }
 
         // Code end
 

@@ -1,10 +1,8 @@
 #ifndef AUDIOENGINE_HEADER
 #define AUDIOENGINE_HEADER
 
-#include <SDL.h>
-#include <SDL_mixer.h>
+#include "PCHeader.h"
 
-#include "STLHeader.h"
 #include "MiscUtility.h"
 
 #include "AssetManager.h"
