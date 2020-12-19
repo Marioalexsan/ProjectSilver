@@ -74,8 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)SDL2_image\include;$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)SDL2_image\include;$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2_ttf\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(SolutionDir)SDL2_ttf\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -152,6 +152,7 @@
     <ClCompile Include="AnimatedSprite.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="AudioEngine.cpp" />
+    <ClCompile Include="BasicText.cpp" />
     <ClCompile Include="ErrorLogging.cpp" />
     <ClCompile Include="GameMaster.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="AudioEngine.h" />
+    <ClInclude Include="BasicText.h" />
     <ClInclude Include="ErrorLogging.h" />
     <ClInclude Include="GameMaster.h" />
     <ClInclude Include="GraphicsEngine.h" />

@@ -8,7 +8,8 @@ namespace Game {
 		position({ 0, 0 }),
 		center({ 0, 0 }),
 		rotation(0.0),
-		layer(Game::GraphicsEngine::WorldBaseLayer) {}
+		relativeToCamera(true),
+		layer(Game::GraphicsEngine::CommonLayers::WorldBase) {}
 
 	void Drawable::SetAngle(double angle) {
 		this->rotation = angle;
@@ -18,29 +19,37 @@ namespace Game {
 		this->rotation += angle;
 	}
 
-	void Drawable::MoveTo(Point position) {
+	void Drawable::MoveTo(Vector2 position) {
 		this->position = position;
 	}
 
-	void Drawable::PushBy(Point amount) {
+	void Drawable::PushBy(Vector2 amount) {
 		this->position += amount;
 	}
 
-	void Drawable::SetCenter(Point center) {
+	void Drawable::SetCenter(Vector2 center) {
 		this->center = center;
+	}
+
+	int Drawable::GetLayer() {
+		return layer;
 	}
 
 	void Drawable::SetLayer(int layer) {
 		this->layer = layer;
 	}
 
-	Point Drawable::GetPosition() {
+	Vector2 Drawable::GetPosition() {
 		return position;
 	}
-	Point Drawable::GetCenter() {
+	Vector2 Drawable::GetCenter() {
 		return center;
 	}
 	double Drawable::GetRotation() {
 		return rotation;
+	}
+
+	void Drawable::SetRelativeToCamera(bool relativity) {
+		relativeToCamera = relativity;
 	}
 }

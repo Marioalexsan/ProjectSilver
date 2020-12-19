@@ -1,5 +1,8 @@
 // Project Silver
 
+// TO DO:
+// Ensure that if a resource is destroyed (texture, data, etc.), all existin pointers to it are also set to nullptr.
+
 #include "PCHeader.h"
 
 #include <iostream>
@@ -9,6 +12,7 @@ using std::endl;
 
 #include "GameMaster.h"
 #include "Sprite.h"
+#include "BasicText.h"
 #include "AnimatedSprite.h"
 
 #pragma region Global Variables
@@ -83,6 +87,8 @@ int main(int argc, char* args[]) {
     ProjectSilver.Assets.LoadTexture("Char", "Char.png");
 
     ProjectSilver.Assets.LoadTexture("Target", "target.png");
+    ProjectSilver.Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
+    ProjectSilver.Assets.LoadSpriteFont("Big", "Fonts/CourierNewBig_0.png", "Fonts/CourierNewBig.fnt");
 
     Game::AnimatedSprite animation;
     animation.SetAnimationInfo(12, 4, 1, Game::AnimatedSprite::LoopMode::PingPongLoop);
@@ -95,6 +101,7 @@ int main(int argc, char* args[]) {
     sprite.SetTexture(&ProjectSilver.Assets, "Checks");
     sprite.MoveTo({ 0, 0 });
     sprite.SetCenter({ 50, 50 });
+    sprite.SetRelativeToCamera(false);
     ProjectSilver.Graphics.AddDrawable(&sprite);
 
     Game::Sprite sprite2;
@@ -113,15 +120,31 @@ int main(int argc, char* args[]) {
     sprite4.SetTexture(&ProjectSilver.Assets, "Target");
     sprite4.MoveTo({ 1266, 668 });
     sprite4.SetCenter({ 21, 21 });
+    sprite4.SetRelativeToCamera(false);
     ProjectSilver.Graphics.AddDrawable(&sprite4);
+    sprite4.SetLayer(-1);
 
     Game::Sprite sprite5;
     sprite5.SetTexture(&ProjectSilver.Assets, "Char");
     sprite5.MoveTo({ 200, 200 });
     sprite5.SetCenter({ 50, 70 });
     ProjectSilver.Graphics.AddDrawable(&sprite5);
+    sprite5.SetLayer(255);
 
-    ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1600.900.w"));
+    Game::BasicText text;
+    text.SetText("yro\'ue mom gae xd");
+    text.SetFont(&ProjectSilver.Assets, "Big");
+    ProjectSilver.Graphics.AddDrawable(&text);
+
+    Game::BasicText angleDebug;
+    angleDebug.SetFont(&ProjectSilver.Assets, "Huge");
+    angleDebug.SetRelativeToCamera(false);
+    ProjectSilver.Graphics.AddDrawable(&angleDebug);
+    
+    ProjectSilver.Assets.LoadMusic("YourMom", "digi.ogg");
+    ProjectSilver.Audio.PlayMusic("YourMom");
+
+    ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1920.1080.f"));
 
     ProjectSilver.Input.SetMouseGrab(true);
 
@@ -147,36 +170,40 @@ int main(int argc, char* args[]) {
         animation.Update();
         ProjectSilver.Input.Update();
 
+        ProjectSilver.Graphics.CenterCameraOn(sprite5.GetPosition());
+
         using KeyCode = Game::InputHandler::KeyCode;
         using ButtonCode = Game::InputHandler::ButtonCode;
         if (ProjectSilver.Input.IsKeyDown(KeyCode::W)) {
-            ProjectSilver.Graphics.PushCamera(0, -10);
+            ProjectSilver.Graphics.PushCamera({ 0, -10 });
+            sprite5.PushBy({ 0, -10 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::S)) {
-            ProjectSilver.Graphics.PushCamera(0, 10);
+            ProjectSilver.Graphics.PushCamera({ 0, 10 });
+            sprite5.PushBy({ 0, 10 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::A)) {
-            ProjectSilver.Graphics.PushCamera(-10, 0);
+            ProjectSilver.Graphics.PushCamera({ -10, 0 });
+            sprite5.PushBy({ -10, 0 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::D)) {
-            ProjectSilver.Graphics.PushCamera(10, 0);
+            ProjectSilver.Graphics.PushCamera({ 10, 0 });
+            sprite5.PushBy({ 10, 0 });
         }
         if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || ProjectSilver.Input.WasQuitCalled()) {
             ProjectSilver.Stop();
-        }
-        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Right)) {
-
-            sprite5.SetCenter({ 150, 150 });
         }
 
         animation.PushBy({ 0.5, 0.5 });
         sprite5.RotateBy(1);
 
         auto var = ProjectSilver.Input.GetMousePosition();
-        sprite5.SetAngle(Game::Point(var.first - 200.0, var.second - 200.0).Angle());
+        auto angle = Game::Vector2(var.first - 960.0, var.second - 540.0).Angle();
+        sprite5.SetAngle(angle);
         sprite4.MoveTo({ var.first, var.second });
 
-        cout << Game::Point(var.first - 200.0, var.second - 200.0).Angle() << endl;
+        cout << angle << endl;
+        angleDebug.SetText("Angle: " + std::to_string(angle));
         // Code end
 
         prevTime = currentTime;

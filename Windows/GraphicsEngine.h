@@ -15,19 +15,23 @@ namespace Game {
 			int height;
 			bool fullscreen;
 		};
+
+		enum CommonLayers {
+			WorldBase = 0,
+			GUI = 255,
+		};
+
 		static const map<string, VideoMode> VideoModes;
 
-		static GraphicsEngine* currentEngine;
-		static const int GUILayer = 255;
-		static const int WorldBaseLayer = 0;
+		static GraphicsEngine* CurrentEngine;
 
 		static SDL_Window* Window;
 		static SDL_Renderer* Renderer;
+
 		static const int ResolutionTargetWidth = 1920;
 		static const int ResolutionTargetHeight = 1080;
 
-		static void RenderCopyExWithCamera(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip);
-
+		static void RenderCopyExAdvanced(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip, bool useCamera = true);
 	private:
 		// Current State Variables
 		uint64_t currentID;
@@ -35,38 +39,37 @@ namespace Game {
 		static int windowWidth;
 		static int windowHeight;
 
-		int renderWidth;
-		int renderHeight;
+		static int renderWidth;
+		static int renderHeight;
 
-		bool bFullscreen;
+		bool fullscreen;
 
-		// Drawables Library
-		map<int, Drawable*> drawableLibrary;
-
+		// Library of Drawable objects
+		map<uint64_t, Drawable*> drawableLibrary;
 
 		uint64_t NextID();
 
-		static double centeredCameraX;
-		static double centeredCameraY;
+		static Vector2 cameraPosition;
 
 	public:
-		static pair<int, int> GetWindowSize();
-		bool SetDisplayMode(VideoMode mode);
-		void SetStandardViewport();
-		void SetStandardScaling();
-
 		GraphicsEngine();
 		~GraphicsEngine();
 
-		int AddDrawable(Drawable* element);
-		bool RemoveDrawable(int ID);
-		void ClearDrawables();
+		static Vector2 GetWindowSize();
+		bool SetDisplayMode(VideoMode mode);
+		void SetStandardViewport();
+
+		uint64_t AddDrawable(Drawable* element);
+		bool	 RemoveDrawable(int ID);
+		void	 ClearDrawables();
 
 		void RenderAll();
 
-		void SetCamera(double x, double y);
-		pair<double, double> GetCamera();
-		void PushCamera(double x, double y);
+		void	SetCameraPosition(Vector2 position);
+		Vector2	GetCameraPosition();
+		void	CenterCameraOn(Vector2 position);
+
+		void	PushCamera(Vector2 amount);
 	};
 }
 

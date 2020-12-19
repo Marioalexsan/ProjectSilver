@@ -87,10 +87,10 @@ namespace Game {
 
 		SDL_Rect src = Game::Utility::MakeSDLRect(frameWidth * collumn, frameHeight * row, frameWidth, frameHeight);
 
-		SDL_Rect dest = Game::Utility::MakeSDLRect(position.x, position.y, frameWidth, frameHeight);
+		SDL_Rect dest = Game::Utility::MakeSDLRect(int(position.x), int(position.y), frameWidth, frameHeight);
 
-		SDL_Point cen = Game::Utility::MakeSDLPoint(center.x, center.y);
+		SDL_Point cen = Game::Utility::MakeSDLPoint(int(center.x), int(center.y));
 
-		GraphicsEngine::RenderCopyExWithCamera(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE);
+		GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 	}
 }

@@ -19,11 +19,11 @@ namespace Game {
 
 		SDL_Rect src = Game::Utility::MakeSDLRect(0, 0, w, h);
 
-		SDL_Rect dest = Game::Utility::MakeSDLRect(position.x, position.y, w, h);
+		SDL_Rect dest = Game::Utility::MakeSDLRect(int(position.x), int(position.y), w, h);
 
-		SDL_Point cen = Game::Utility::MakeSDLPoint(center.x, center.y);
+		SDL_Point cen = Game::Utility::MakeSDLPoint(int(center.x), int(center.y));
 
-		GraphicsEngine::RenderCopyExWithCamera(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE);
+		GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 	}
 
 	void Sprite::SetTexture(SDL_Texture* texture) {
@@ -39,7 +39,7 @@ namespace Game {
 		this->texture = lib.at(ID).texture;
 	}
 	
-	Point Sprite::GetSize() {
+	Vector2 Sprite::GetSize() {
 		uint32_t format;
 		int access, w, h;
 		SDL_QueryTexture(texture, &format, &access, &w, &h);

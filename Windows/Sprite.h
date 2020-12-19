@@ -15,7 +15,7 @@ namespace Game {
 		virtual void Draw();
 		virtual void SetTexture(SDL_Texture* texture);
 		virtual void SetTexture(AssetManager* manager, const string& ID);
-		Point GetSize();
+		Vector2 GetSize();
 	};
 }
 

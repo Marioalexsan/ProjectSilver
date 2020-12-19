@@ -49,7 +49,7 @@ namespace Game {
 		return manager->GetSoundLibrary().at(ID);
 	}
 
-	uint64_t AudioEngine::PlaySound(const string& ID, const Point pos) {
+	uint64_t AudioEngine::PlaySound(const string& ID, const Vector2 pos) {
 		if (soundCount >= maxChannels) {
 			// Auto fail
 			return 0;
@@ -68,7 +68,7 @@ namespace Game {
 		// Set Volume
 		Mix_Volume(channel, int(double(soundVolume) * 100.0 / 128.0));
 
-		int nextID = NextID();
+		auto nextID = NextID();
 
 		// I suppose there's no other ID of that type
 		sounds[nextID] = { ID, pos, channel };
@@ -204,14 +204,14 @@ namespace Game {
 				case MusicAction::SubType::None:
 					if (Mix_PlayingMusic() != 0) {
 						// Use fast fade
-						Mix_FadeOutMusic(defaultFadeTime * 0.4);
+						Mix_FadeOutMusic(int(defaultFadeTime * 0.4));
 						actionQueue.front().subType = MusicAction::SubType::FadeOutSection;
 					}
 					break;
 				case MusicAction::SubType::FadeOutSection:
 					if (Mix_PlayingMusic() == 0) {
 						music.timePos = SearchMusicLib(music.dataID).sectionList.at(action.param).start;
-						Mix_FadeInMusicPos(SearchMusicLib(music.dataID).samples, -1, defaultFadeTime * 0.4, double(music.timePos) / 1000.0);
+						Mix_FadeInMusicPos(SearchMusicLib(music.dataID).samples, -1, int(defaultFadeTime * 0.4), double(music.timePos) / 1000.0);
 						actionQueue.front().subType = MusicAction::SubType::FadeInSection;
 					}
 					break;
@@ -280,13 +280,13 @@ namespace Game {
 	}
 
 	void AudioEngine::HaltEngine() {
-		actionQueue.empty();
+		queue<AudioEngine::MusicAction>().swap(actionQueue); // Empties queue
 		Mix_HaltMusic();
 		for (auto& it : sounds) {
 			Mix_HaltChannel(it.second.channel);
 		}
 		music.dataID = "";
-		sounds.empty();
+		sounds.clear();
 	}
 
 	bool AudioEngine::SetLoopSection(const string& section) {

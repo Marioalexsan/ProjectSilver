@@ -55,6 +55,33 @@ namespace Game {
 			TextureData(const string&, SDL_Texture*);
 		};
 
+		// Only supports single page sets, latin
+		struct SpriteFontData {
+			struct CharData {
+				int x;
+				int y;
+				int width;
+				int height;
+				int xoffset;
+				int yoffset;
+				int xadvance;
+				int channel;
+			};
+
+			string face;
+			string charset;
+			string file;
+
+			map<string, int> arbitraryValues;
+
+			int padding[4];
+			int spacing[2];
+
+			map<char, CharData> charLibrary;
+
+			//map<string, int> arbitraryValues;
+		};
+
 		#pragma endregion
 
 	private:
@@ -62,6 +89,7 @@ namespace Game {
 		map<string, MusicData> musicLibrary;
 		map<string, SoundData> soundLibrary;
 		map<string, TextureData> textureLibrary;
+		map <string, pair<SpriteFontData, TextureData>> fontLibrary;
 
 	public:
 		AssetManager();
@@ -70,17 +98,19 @@ namespace Game {
 		bool LoadSound(const string& ID, const string& path);
 		bool LoadMusic(const string& ID, const string& path, uint64_t duration = 0);
 		bool LoadTexture(const string& ID, const string& path);
-
+		bool LoadSpriteFont(const string& ID, const string& texPath, const string& dataPath);
 		
 		bool UnloadSound(const string& ID); // WARNING: Do not call UnloadSound if it is still playing!
 		bool UnloadMusic(const string& ID);
 		bool UnloadTexture(const string& ID);
+		bool UnloadSpriteFont(const string& ID);
 
 		bool LoadMusicSections(const string& ID, const map<string, Section>& sectionList);
 
 		const map<string, MusicData>& GetMusicLibrary();
 		const map<string, SoundData>& GetSoundLibrary();
 		const map<string, TextureData>& GetTextureLibrary();
+		const map<string, pair<SpriteFontData, TextureData>>& GetFontLibrary();
 	};
 }
 

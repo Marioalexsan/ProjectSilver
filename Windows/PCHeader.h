@@ -10,6 +10,8 @@
 
 // STL Stuff
 
+#include <algorithm>
+
 #include <string>
 using std::string;
 
@@ -39,6 +41,8 @@ using std::queue;
 using std::pair;
 
 #include <cmath>
+
+#include <fstream>
 
 // SDL Libraries
 

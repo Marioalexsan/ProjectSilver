@@ -40,7 +40,7 @@ namespace Game {
 		// A sound instance that's currently playing
 		struct Sound {
 			string		dataID;
-			Point		worldPos;
+			Vector2		worldPos;
 			int			channel;
 		};
 
@@ -128,7 +128,7 @@ namespace Game {
 
 		void SetContentManager(Game::AssetManager* manager);
 
-		uint64_t PlaySound(const string& ID, const Point pos = {});
+		uint64_t PlaySound(const string& ID, const Vector2 pos = {});
 		bool StopSound(const string& ID);
 		bool StopSound(uint64_t ID);
 

@@ -44,7 +44,7 @@ namespace Game {
 	// "True" positon
 	pair<int, int> InputHandler::GetRelativeMousePosition() {
 		auto var = GraphicsEngine::GetWindowSize();
-		return { virtualMouseX * var.first / 1920, virtualMouseY * var.second / 1080};
+		return { virtualMouseX * var.x / 1920, virtualMouseY * var.y / 1080};
 	}
 
 	void InputHandler::SetMouseGrab(bool grab) {

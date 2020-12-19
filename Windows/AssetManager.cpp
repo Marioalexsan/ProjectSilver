@@ -176,4 +176,182 @@ namespace Game {
 	const map<string, AssetManager::TextureData>& AssetManager::GetTextureLibrary() {
 		return textureLibrary;
 	}
+
+	void DiscardWord(std::ifstream& file, char delim = ' ') {
+		file >> std::ws;
+		file.ignore(std::numeric_limits<std::streamsize>::max(), delim);
+	}
+
+	void ReadWordPair(std::ifstream& file, pair<string, string>& dst, char delim = '\"') {
+		file >> std::ws;
+		getline(file, dst.first, '=');
+		file.ignore();
+		getline(file, dst.second, delim);
+	}
+
+	void ReadField(std::ifstream& file, pair<string, int>& dst, char delim = ' ') {
+		file >> std::ws;
+		getline(file, dst.first, '=');
+		string temp;
+		getline(file, temp, delim);
+		dst.second = std::stoi(temp);
+	}
+
+	void ReadPadding(std::ifstream& file, int* padArray, char delim = ' ') {
+		file >> std::ws;
+		file.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+		string temp;
+		for (int i = 0; i < 3; i++) {
+			getline(file, temp, ',');
+			padArray[i] = std::stoi(temp);
+		}
+		getline(file, temp, delim);
+		padArray[3] = std::stoi(temp);
+	}
+
+	void ReadSpacing(std::ifstream& file, int* spaceArray, char delim = ' ') {
+		file >> std::ws;
+		file.ignore(std::numeric_limits<std::streamsize>::max(), '=');
+		string temp;
+		getline(file, temp, ',');
+		spaceArray[0] = std::stoi(temp);
+		getline(file, temp, delim);
+		spaceArray[1] = std::stoi(temp);
+	}
+
+	bool AssetManager::LoadSpriteFont(const string& ID, const string& texPath, const string& dataPath) {
+		// Functia asta se putea de scris mai bine....
+		
+		if (fontLibrary.find(ID) != fontLibrary.end()) {
+			return false;
+		}
+
+		SpriteFontData data;
+		
+		std::ifstream fontData(dataPath);
+		if (!fontData.good()) {
+			return false;
+		}
+		map<string, int> arbitraries;
+
+		int section = 0;
+		try {
+			using std::getline;
+			pair<string, string> strpair;
+			pair<string, int> field;
+
+			// Info section
+			DiscardWord(fontData);
+			ReadWordPair(fontData, strpair);
+			data.face = strpair.second;
+
+			for (int i = 0; i < 3; i++) {
+				ReadField(fontData, field);
+				data.arbitraryValues[field.first] = field.second;
+			}
+
+			ReadWordPair(fontData, strpair);
+			data.charset = strpair.second;
+
+			for (int i = 0; i < 4; i++) {
+				ReadField(fontData, field);
+				data.arbitraryValues[field.first] = field.second;
+			}
+
+			ReadPadding(fontData, data.padding);
+			ReadSpacing(fontData, data.spacing);
+
+			ReadField(fontData, field, '\n');
+			data.arbitraryValues[field.first] = field.second;
+
+			// Common section
+			DiscardWord(fontData);
+
+			for (int i = 0; i < 9; i++) {
+				ReadField(fontData, field);
+				data.arbitraryValues[field.first] = field.second;
+			}
+			ReadField(fontData, field, '\n');
+			data.arbitraryValues[field.first] = field.second;
+
+			// Page section
+
+			DiscardWord(fontData);
+			ReadField(fontData, field); // Discard
+			ReadWordPair(fontData, strpair);
+			data.file = strpair.second;
+
+			// Chars header
+			DiscardWord(fontData);
+			ReadField(fontData, field, '\n');
+			int count = field.second;
+
+			for (int i = 0; i < count; i++) {
+				// Read chars
+				DiscardWord(fontData);
+				ReadField(fontData, field);
+				int index = field.second;
+
+				ReadField(fontData, field);
+				data.charLibrary[index].x = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].y = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].width = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].height = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].xoffset = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].yoffset = field.second;
+				ReadField(fontData, field);
+				data.charLibrary[index].xadvance = field.second;
+				ReadField(fontData, field); // Discard
+				ReadField(fontData, field, '\n');
+				data.charLibrary[index].channel = field.second;
+			}
+
+		}
+		catch (...) {
+			return false;
+		}
+
+		fontData.close();
+
+		// Try load
+		SDL_Surface* surf = IMG_Load(texPath.c_str());
+		if (surf == nullptr) {
+			// Failed to read
+			return false;
+		}
+
+		//Try convert
+		SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::GraphicsEngine::Renderer, surf);
+		SDL_FreeSurface(surf); // Don't need this later
+
+		if (tex == nullptr) {
+			// Failed to convert
+			return false;
+		}
+
+		TextureData texData = { texPath, tex };
+
+		fontLibrary[ID] = { data, texData };
+		return true;
+	}
+
+	bool AssetManager::UnloadSpriteFont(const string& ID) {
+		if (fontLibrary.find(ID) == fontLibrary.end()) {
+			// Error
+			return false;
+		}
+
+		SDL_DestroyTexture(fontLibrary[ID].second.texture);
+		textureLibrary.erase(ID);
+		return true;
+	}
+
+	const map<string, pair<AssetManager::SpriteFontData, AssetManager::TextureData>>& AssetManager::GetFontLibrary() {
+		return fontLibrary;
+	}
 }

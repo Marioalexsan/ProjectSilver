@@ -12,11 +12,13 @@ namespace Game {
 
 	class Drawable {
 	protected:
-		Point position;
-		Point center;
+		Vector2 position;
+		Vector2 center;
 		double rotation;
 
 		int layer;
+
+		bool relativeToCamera;
 	public:
 		Drawable();
 		virtual void Draw() = 0;
@@ -24,16 +26,19 @@ namespace Game {
 		void SetAngle(double angle);
 		void RotateBy(double angle);
 
-		void MoveTo(Point position);
-		void PushBy(Point amount);
+		void MoveTo(Vector2 position);
+		void PushBy(Vector2 amount);
 
-		void SetCenter(Point center);
+		void SetCenter(Vector2 center);
 
 		void SetLayer(int layer);
+		int  GetLayer();
 
-		Point GetPosition();
-		Point GetCenter();
+		Vector2 GetPosition();
+		Vector2 GetCenter();
 		double GetRotation();
+
+		void SetRelativeToCamera(bool relativity);
 	};
 }
 

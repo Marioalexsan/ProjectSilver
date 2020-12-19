@@ -37,6 +37,9 @@
     <Filter Include="InputHandler">
       <UniqueIdentifier>{bdaaf006-9eaf-4d2c-b779-585c0658a7ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Drawables Library\Basic Text">
+      <UniqueIdentifier>{702f9888-1fdf-4a4c-a35a-49c368dde1ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -75,6 +78,9 @@
     <ClCompile Include="PCHeader.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="BasicText.cpp">
+      <Filter>Graphics\Drawables Library\Basic Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -109,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="PCHeader.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicText.h">
+      <Filter>Graphics\Drawables Library\Basic Text</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

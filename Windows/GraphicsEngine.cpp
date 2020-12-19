@@ -3,15 +3,17 @@
 #include "GraphicsEngine.h"
 
 namespace Game {
-	GraphicsEngine*		GraphicsEngine::currentEngine = nullptr;
-	SDL_Window*			GraphicsEngine::Window = nullptr;
-	SDL_Renderer*		GraphicsEngine::Renderer = nullptr;
+	GraphicsEngine*	GraphicsEngine::CurrentEngine = nullptr;
+	SDL_Window*		GraphicsEngine::Window = nullptr;
+	SDL_Renderer*	GraphicsEngine::Renderer = nullptr;
 
 	int	GraphicsEngine::windowWidth = 0;
 	int	GraphicsEngine::windowHeight = 0;
+	int GraphicsEngine::renderWidth = 0;
+	int GraphicsEngine::renderHeight = 0;
 
-	double	GraphicsEngine::centeredCameraX = 0;
-	double	GraphicsEngine::centeredCameraY = 0;
+
+	Vector2	GraphicsEngine::cameraPosition = { 0.0, 0.0 };
 
 	const map<string, GraphicsEngine::VideoMode> GraphicsEngine::VideoModes = {
 		{"1920.1080.f", {1920, 1080, true}},
@@ -31,20 +33,19 @@ namespace Game {
 		windowHeight = 1080;
 		renderWidth = 1920;
 		renderHeight = 1080;
-		if (currentEngine == nullptr) {
-			currentEngine = this;
+		if (CurrentEngine == nullptr) {
+			CurrentEngine = this;
 		}
-		//SDL_RenderSetClipRect(Renderer, &Utility::MakeSDLRect(0, 0, ResolutionTargetWidth, ResolutionTargetHeight));
 		SetDisplayMode(VideoModes.at("1920.1080.w"));
 	}
 
 	GraphicsEngine::~GraphicsEngine() {
-		if (currentEngine == this) {
-			currentEngine = nullptr;
+		if (CurrentEngine == this) {
+			CurrentEngine = nullptr;
 		}
 	}
 
-	pair<int, int> GraphicsEngine::GetWindowSize() {
+	Vector2 GraphicsEngine::GetWindowSize() {
 		return { windowWidth, windowHeight };
 	}
 	
@@ -53,12 +54,7 @@ namespace Game {
 		renderHeight = mode.height;
 		if (mode.fullscreen) {
 			SDL_SetWindowFullscreen(GraphicsEngine::Window, SDL_WINDOW_FULLSCREEN);
-			SDL_DisplayMode display;
-			display.w = mode.width;
-			display.h = mode.height;
-			display.driverdata = 0;
-			display.refresh_rate = 0;
-			display.format = SDL_PIXELFORMAT_RGBA32;
+			SDL_DisplayMode display = {SDL_PIXELFORMAT_RGBA32, mode.width, mode.height, 0, 0};
 			SDL_SetWindowDisplayMode(Window, &display);
 			SDL_GetWindowSize(Window, &windowWidth, &windowHeight);
 		}
@@ -88,8 +84,8 @@ namespace Game {
 		return val;
 	}
 
-	int GraphicsEngine::AddDrawable(Drawable* element) {
-		int ID = NextID();
+	uint64_t GraphicsEngine::AddDrawable(Drawable* element) {
+		auto ID = NextID();
 		drawableLibrary[ID] = element;
 		return ID;
 	}
@@ -103,40 +99,56 @@ namespace Game {
 	}
 
 	void GraphicsEngine::ClearDrawables() {
-		drawableLibrary.empty();
+		drawableLibrary.clear();
 	}
 
 	void GraphicsEngine::RenderAll() {
-		SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
 		SDL_RenderClear(Renderer);
+
+		map<int, vector<Drawable*>> layeredDrawables;
+
 		for (auto& elem : drawableLibrary) {
-			elem.second->Draw();
+			layeredDrawables[elem.second->GetLayer()].push_back(elem.second);
 		}
+		for (auto& elem : layeredDrawables) {
+			for (auto& draw : elem.second) {
+				draw->Draw();
+			}
+		}
+
 		SDL_RenderPresent(Renderer);
 	}
 
-	void GraphicsEngine::SetCamera(double x, double y)
+	void GraphicsEngine::SetCameraPosition(Vector2 position)
 	{
-		centeredCameraX = x;
-		centeredCameraY = y;
+		cameraPosition = position;
 	}
 
-	pair<double, double> GraphicsEngine::GetCamera() {
-		return { centeredCameraX, centeredCameraY };
+	Vector2 GraphicsEngine::GetCameraPosition() {
+		return cameraPosition;
 	}
 
-	void GraphicsEngine::PushCamera(double x, double y)
+	void GraphicsEngine::CenterCameraOn(Vector2 position) {
+		cameraPosition = position - Vector2(960.0, 540.0);
+	}
+
+	void GraphicsEngine::PushCamera(Vector2 pushAmount)
 	{
-		centeredCameraX += x;
-		centeredCameraY += y;
+		cameraPosition += pushAmount;
 	}
 
 	// Has Camera feature
 	// Has Offset feature
-	void GraphicsEngine::RenderCopyExWithCamera(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip) {
+	void GraphicsEngine::RenderCopyExAdvanced(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip, bool useCamera) {
 		
 		if (dstrect) {
-			SDL_Rect newdstrect = Utility::MakeSDLRect(dstrect->x - centeredCameraX - center->x, dstrect->y - centeredCameraY - center->y, dstrect->w, dstrect->h);
+			SDL_Rect newdstrect = Utility::MakeSDLRect(int(dstrect->x - center->x), int(dstrect->y - center->y), dstrect->w, dstrect->h);
+			if (useCamera) {
+				newdstrect.x -= int(cameraPosition.x);
+				newdstrect.y -= int(cameraPosition.y);
+			}
+			
 			SDL_RenderCopyEx(Renderer, texture, srcrect, &newdstrect, angle, center, flip);
 		}
 		else {

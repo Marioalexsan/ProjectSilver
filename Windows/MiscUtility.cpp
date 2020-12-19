@@ -4,25 +4,24 @@
 
 namespace Game {
 
-	Point::Point():
+	Vector2::Vector2():
 		x(0),
 		y(0) {}
 
-	Point::Point(double x, double y):
+	Vector2::Vector2(double x, double y):
 		x(x),
 		y(y) {}
 
-	Point::Point(int x, int y) :
+	Vector2::Vector2(int x, int y) :
 		x(double(x)),
 		y(double(y)) {}
 
-	double Point::Length() {
+	double Vector2::Length() {
 		return sqrt(x * x + y * y);
 	}
 
-	// OY+ -> Vector in clockwise direction = angle in degrees
-
-	double Point::Angle() {
+	//  Calculates angle from OY- to Vector, 
+	double Vector2::Angle() {
 		return atan2(y, x) * 180 / Math::PI + ((y < 0 && x < 0) ? 450.0 : 90.0);
 	}
 

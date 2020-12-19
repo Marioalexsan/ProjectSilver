@@ -8,37 +8,38 @@ namespace Game {
 	};
 
 	namespace Utility {
-		SDL_Rect MakeSDLRect(int x, int y, int w, int h);
-		SDL_Point MakeSDLPoint(int x, int y);
-		int ClampValue(int val, int min, int max);
-		double ClampValue(double val, double min, double max);
+		SDL_Rect	MakeSDLRect(int x, int y, int w, int h);
+		SDL_Point	MakeSDLPoint(int x, int y);
+
+		int		ClampValue(int val, int min, int max);
+		double	ClampValue(double val, double min, double max);
 	}
 
-	struct Point {
+	struct Vector2 {
 		double x;
 		double y;
 
-		Point();
-		Point(double, double);
-		Point(int, int);
+		Vector2();
+		Vector2(double, double);
+		Vector2(int, int);
 
 		double Length();
 		double Angle();
 
-		inline Point operator+(const Point& other) {
-			return Point(x + other.x, y + other.y);
+		inline Vector2 operator+(const Vector2& other) {
+			return Vector2(x + other.x, y + other.y);
 		}
 
-		inline void operator+=(const Point& other) {
+		inline void operator+=(const Vector2& other) {
 			x += other.x;
 			y += other.y;
 		}
 
-		inline Point operator-(const Point& other) {
-			return Point(x - other.x, y - other.y);
+		inline Vector2 operator-(const Vector2& other) {
+			return Vector2(x - other.x, y - other.y);
 		}
 
-		inline void operator-=(const Point& other) {
+		inline void operator-=(const Vector2& other) {
 			x -= other.x;
 			y -= other.y;
 		}
