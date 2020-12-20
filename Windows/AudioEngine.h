@@ -2,18 +2,14 @@
 #define AUDIOENGINE_HEADER
 
 #include "PCHeader.h"
-
 #include "MiscUtility.h"
 
-#include "AssetManager.h"
-using Game::AssetManager;
+class AssetManager;
 
-#include <cstdint>
 using std::uint64_t;
 
 namespace Game {
 
-	// Callbacks
 	// Can't actually use callbacks due to a race condition between main thread and audio thread
 
 
@@ -27,7 +23,6 @@ namespace Game {
 	*/
 	class AudioEngine {
 	public:
-		static AudioEngine* currentEngine;
 		static const int maxChannels = 32;
 		static const int maxDistance = 1000;
 		static const int defaultFadeTime = 400;
@@ -35,8 +30,6 @@ namespace Game {
 
 
 	private:
-		Game::AssetManager* manager;
-
 		// A sound instance that's currently playing
 		struct Sound {
 			string		dataID;
@@ -125,8 +118,6 @@ namespace Game {
 
 		AudioEngine();
 		~AudioEngine();
-
-		void SetContentManager(Game::AssetManager* manager);
 
 		uint64_t PlaySound(const string& ID, const Vector2 pos = {});
 		bool StopSound(const string& ID);

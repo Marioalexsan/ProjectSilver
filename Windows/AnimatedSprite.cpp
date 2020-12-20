@@ -24,9 +24,17 @@ namespace Game {
 
 	void AnimatedSprite::SetFrame(int frame) {
 		currentFrame = frame;
+		accumulatedUpdates = 0;
 		if (currentFrame >= totalFrames) {
 			currentFrame = totalFrames - 1;
 		}
+	}
+
+	void AnimatedSprite::Restart() {
+		direction = 1;
+		currentFrame = -1;
+		accumulatedUpdates = 0;
+		finished = false;
 	}
 
 	void AnimatedSprite::Update(int frameUpdates) {
@@ -43,7 +51,7 @@ namespace Game {
 							direction = -1;
 						}
 					}
-					else {
+					else if(direction == -1) {
 						currentFrame--;
 						if (currentFrame < 0) {
 							currentFrame += 2;
@@ -57,27 +65,29 @@ namespace Game {
 						currentFrame = 0;
 					}
 				} break;
+				case LoopMode::PlayOnce: {
+					if (direction != 0) {
+						currentFrame++;
+						if (currentFrame >= totalFrames) {
+							currentFrame = totalFrames - 1;
+							direction = 0;
+							finished = true;
+						}
+					}
+				} break;
 			}
 		}
 		
-
-		if (currentFrame < 0) {
-			currentFrame = 0;
-		}
-		if (currentFrame >= totalFrames) {
-			currentFrame = totalFrames - 1;
-		}
+		currentFrame = Utility::ClampValue(currentFrame, 0, totalFrames - 1);
 	}
 
 	void AnimatedSprite::Draw() {
+		using namespace Game::Utility;
 		if (texture == nullptr || currentFrame < 0 || currentFrame >= totalFrames) {
-			// Bad draw
 			return;
 		}
-
-		uint32_t format;
-		int access, w, h;
-		SDL_QueryTexture(texture, &format, &access, &w, &h);
+		int w, h;
+		SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
 
 		int frameWidth = w / framesPerRow;
 		int frameHeight = h / framesPerCollumn;
@@ -85,12 +95,11 @@ namespace Game {
 		int collumn = currentFrame % framesPerRow;
 		int row = currentFrame / framesPerRow;
 
-		SDL_Rect src = Game::Utility::MakeSDLRect(frameWidth * collumn, frameHeight * row, frameWidth, frameHeight);
-
-		SDL_Rect dest = Game::Utility::MakeSDLRect(int(position.x), int(position.y), frameWidth, frameHeight);
-
-		SDL_Point cen = Game::Utility::MakeSDLPoint(int(center.x), int(center.y));
+		SDL_Rect src = MakeSDLRect(frameWidth * collumn, frameHeight * row, frameWidth, frameHeight);
+		SDL_Rect dest = MakeSDLRect(int(position.x), int(position.y), frameWidth, frameHeight);
+		SDL_Point cen = MakeSDLPoint(int(center.x), int(center.y));
 
 		GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 	}
+
 }

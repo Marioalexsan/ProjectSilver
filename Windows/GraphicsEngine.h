@@ -23,8 +23,6 @@ namespace Game {
 
 		static const map<string, VideoMode> VideoModes;
 
-		static GraphicsEngine* CurrentEngine;
-
 		static SDL_Window* Window;
 		static SDL_Renderer* Renderer;
 
@@ -60,7 +58,7 @@ namespace Game {
 		void SetStandardViewport();
 
 		uint64_t AddDrawable(Drawable* element);
-		bool	 RemoveDrawable(int ID);
+		bool	 RemoveDrawable(uint64_t ID);
 		void	 ClearDrawables();
 
 		void RenderAll();

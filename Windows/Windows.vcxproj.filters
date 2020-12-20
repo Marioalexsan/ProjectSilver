@@ -19,9 +19,6 @@
     <Filter Include="Graphics\Engine">
       <UniqueIdentifier>{3e011b78-ef17-4c87-aa9d-23abf5dcf085}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Graphics\Drawable">
-      <UniqueIdentifier>{986b3355-31fa-4057-aecf-a153a0808164}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameMaster">
       <UniqueIdentifier>{48167594-e71d-4e69-91db-4fc8611e1c79}</UniqueIdentifier>
     </Filter>
@@ -39,6 +36,33 @@
     </Filter>
     <Filter Include="Graphics\Drawables Library\Basic Text">
       <UniqueIdentifier>{702f9888-1fdf-4a4c-a35a-49c368dde1ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawables Library\Drawable">
+      <UniqueIdentifier>{986b3355-31fa-4057-aecf-a153a0808164}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library">
+      <UniqueIdentifier>{cc27e77d-8755-48ef-8970-f739c9e97c39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\Entity">
+      <UniqueIdentifier>{dd1d5645-69ad-4439-a3ab-d357c6bbec8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\Actor">
+      <UniqueIdentifier>{20b9d966-1fef-47b6-b030-f807d6b142cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\Player">
+      <UniqueIdentifier>{6e5b0c18-531f-4681-81b8-190f4b7179a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures">
+      <UniqueIdentifier>{12e75455-ba1d-4bb4-a34e-c3516235babb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Globals">
+      <UniqueIdentifier>{9d2510a5-4394-4b94-b719-c9db1013d99a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\Animation">
+      <UniqueIdentifier>{b0b15716-cd90-4146-ad36-bf0b880a0b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Drawables Library\RenderComponent">
+      <UniqueIdentifier>{57047928-d5dc-4568-934b-cf48537ee021}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +85,7 @@
       <Filter>Graphics\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Drawable.cpp">
-      <Filter>Graphics\Drawable</Filter>
+      <Filter>Graphics\Drawables Library\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="Sprite.cpp">
       <Filter>Graphics\Drawables Library\Sprite</Filter>
@@ -81,6 +105,24 @@
     <ClCompile Include="BasicText.cpp">
       <Filter>Graphics\Drawables Library\Basic Text</Filter>
     </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Entity Library\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Entity Library\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Entity Library\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>Globals</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>ComplexFeatures\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderComponent.cpp">
+      <Filter>Graphics\Drawables Library\RenderComponent</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -99,7 +141,7 @@
       <Filter>Graphics\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Drawable.h">
-      <Filter>Graphics\Drawable</Filter>
+      <Filter>Graphics\Drawables Library\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Sprite.h">
       <Filter>Graphics\Drawables Library\Sprite</Filter>
@@ -118,6 +160,24 @@
     </ClInclude>
     <ClInclude Include="BasicText.h">
       <Filter>Graphics\Drawables Library\Basic Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Entity Library\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor.h">
+      <Filter>Entity Library\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Entity Library\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>ComplexFeatures\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderComponent.h">
+      <Filter>Graphics\Drawables Library\RenderComponent</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

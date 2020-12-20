@@ -1,78 +1,55 @@
 #include "PCHeader.h"
 
+#include "Globals.h" // Also includes the required AssetManager
 #include "AudioEngine.h"
 
 namespace Game {
-	AudioEngine* AudioEngine::currentEngine = nullptr;
-
 	AudioEngine::AudioEngine() :
 		currentTicks(SDL_GetTicks()),
 		channels{ 0 },
 		currentID(1),
 		soundCount(0),
 		musicVolume(75),
-		soundVolume(75),
-		manager(nullptr)
+		soundVolume(75)
 	{
-		if (currentEngine == nullptr) {
-			currentEngine = this;
-		}
 		Mix_AllocateChannels(maxChannels);
 	}
 
 	AudioEngine::~AudioEngine() {
 		if (Mix_Init(0) != 0) {
-			Mix_AllocateChannels(0);
-		}
-		if (currentEngine == this) {
-			currentEngine = nullptr;
+			Mix_AllocateChannels(0); // Destructor might be called after Mix_Quit() was called
 		}
 	}
-
-	void AudioEngine::SetContentManager(Game::AssetManager* manager) {
-		this->manager = manager;
-	}
-
 
 	const map<string, AssetManager::MusicData>& AudioEngine::GetMusicLib() {
-		return manager->GetMusicLibrary();
+		return Globals::Assets().GetMusicLibrary();
 	}
 	const map<string, AssetManager::SoundData>& AudioEngine::GetSoundLib() {
-		return manager->GetSoundLibrary();
+		return Globals::Assets().GetSoundLibrary();
 	}
 
 	const AssetManager::MusicData& AudioEngine::SearchMusicLib(const string& ID) {
-		return manager->GetMusicLibrary().at(ID);
+		return Globals::Assets().GetMusicLibrary().at(ID);
 	}
 
 	const AssetManager::SoundData& AudioEngine::SearchSoundLib(const string& ID){
-		return manager->GetSoundLibrary().at(ID);
+		return Globals::Assets().GetSoundLibrary().at(ID);
 	}
 
 	uint64_t AudioEngine::PlaySound(const string& ID, const Vector2 pos) {
-		if (soundCount >= maxChannels) {
-			// Auto fail
+		if (soundCount >= maxChannels || GetSoundLib().find(ID) == GetSoundLib().end()) {
 			return 0;
 		}
-		if (GetSoundLib().find(ID) == GetSoundLib().end()) {
-			// Error
-			return 0;
-		}
+
 		int channel = Mix_PlayChannel(-1, SearchSoundLib(ID).samples, 0);
-
 		if (channel == -1) {
-			// Error
 			return 0;
 		}
 
-		// Set Volume
-		Mix_Volume(channel, int(double(soundVolume) * 100.0 / 128.0));
+		Mix_Volume(channel, int(double(soundVolume))); // Max is 128, but (as a convention), we can just use 0-100. That way, the sound won't be stupidly loud.
 
 		auto nextID = NextID();
-
-		// I suppose there's no other ID of that type
 		sounds[nextID] = { ID, pos, channel };
-
 		channels[channel] = nextID;
 		soundCount++;
 		return nextID;
@@ -80,7 +57,6 @@ namespace Game {
 
 	bool AudioEngine::StopSound(uint64_t ID) {
 		if (sounds.find(ID) == sounds.end()) {
-			// Error
 			return false;
 		}
 
@@ -115,7 +91,6 @@ namespace Game {
 	}
 
 	void AudioEngine::Update() {
-		// Update info
 		uint32_t time = SDL_GetTicks();
 		uint32_t delta = time - currentTicks;
 		currentTicks = time;
@@ -167,7 +142,7 @@ namespace Game {
 						// Error
 						break;
 					}
-					Mix_VolumeMusic(int(double(musicVolume) * 100.0 / 128.0));
+					Mix_VolumeMusic(int(double(musicVolume))); // Max is 128, but we'll use the range 0-100
 					music = { action.param, action.extraParams[0], 0, 0 };
 
 					//Also do next action in sequence, *if* possible
@@ -188,7 +163,7 @@ namespace Game {
 				}
 				break;
 			case MusicAction::Type::Seek: {
-				if (manager->GetMusicLibrary().find(music.dataID) == manager->GetMusicLibrary().end()) {
+				if (GetMusicLib().find(music.dataID) == GetMusicLib().end()) {
 					// Broken
 					actionQueue.pop();
 					break;
@@ -264,7 +239,7 @@ namespace Game {
 		}
 		AddAction(MusicAction::Type::Start, ID, { timePos });
 
-		// Probably bad, but inits everything NOW, so it's needed
+		// Run an update to init actions
 		Update();
 
 		return true;

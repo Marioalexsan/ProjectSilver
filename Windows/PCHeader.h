@@ -44,6 +44,13 @@ using std::pair;
 
 #include <fstream>
 
+#include <functional>
+using std::function;
+
+#include <exception>
+
+#include <cstdint>
+
 // SDL Libraries
 
 #include <SDL.h>

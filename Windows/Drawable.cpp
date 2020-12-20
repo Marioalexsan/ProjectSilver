@@ -2,6 +2,7 @@
 
 #include "Drawable.h"
 #include "GraphicsEngine.h"
+#include "Globals.h"
 
 namespace Game {
 	Drawable::Drawable() :
@@ -10,6 +11,11 @@ namespace Game {
 		rotation(0.0),
 		relativeToCamera(true),
 		layer(Game::GraphicsEngine::CommonLayers::WorldBase) {}
+
+	Drawable::~Drawable() {
+		// Destroy existing pointers to this drawable
+		RemoveDrawableFromGraphics();
+	}
 
 	void Drawable::SetAngle(double angle) {
 		this->rotation = angle;
@@ -51,5 +57,17 @@ namespace Game {
 
 	void Drawable::SetRelativeToCamera(bool relativity) {
 		relativeToCamera = relativity;
+	}
+
+
+	void Drawable::AddDrawableToGraphics() {
+		if (drawableGraphicsID == 0) {
+			drawableGraphicsID = Globals::Graphics().AddDrawable(this);
+		}
+	}
+
+	void Drawable::RemoveDrawableFromGraphics() {
+		Globals::Graphics().RemoveDrawable(drawableGraphicsID);
+		drawableGraphicsID = 0;
 	}
 }

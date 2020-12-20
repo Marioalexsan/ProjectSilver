@@ -4,6 +4,8 @@
 
 namespace Game {
 
+	const Vector2 Vector2::Zero = { 0, 0 };
+
 	Vector2::Vector2():
 		x(0),
 		y(0) {}
@@ -48,5 +50,14 @@ namespace Game {
 
 	double Utility::ClampValue(double val, double min, double max) {
 		return val < min ? min : (val >= max ? max : val);
+	}
+
+	bool Utility::InRange(int val, int min, int max) {
+		return val >= min && val <= max;
+	}
+
+	// Reminder: direction is from North, clockwise, starting at 0
+	Vector2 Vector2::NormalVector(double direction) {
+		return Vector2(cos(270.0 + direction), sin(180.0 + direction));
 	}
 }

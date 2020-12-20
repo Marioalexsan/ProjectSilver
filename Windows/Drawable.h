@@ -2,7 +2,6 @@
 #define TEXTURE_HEADER
 
 #include "PCHeader.h"
-
 #include "MiscUtility.h"
 
 namespace Game {
@@ -19,8 +18,11 @@ namespace Game {
 		int layer;
 
 		bool relativeToCamera;
+
+		uint64_t drawableGraphicsID = 0;
 	public:
 		Drawable();
+		virtual ~Drawable();
 		virtual void Draw() = 0;
 
 		void SetAngle(double angle);
@@ -39,6 +41,9 @@ namespace Game {
 		double GetRotation();
 
 		void SetRelativeToCamera(bool relativity);
+
+		void AddDrawableToGraphics();
+		void RemoveDrawableFromGraphics();
 	};
 }
 

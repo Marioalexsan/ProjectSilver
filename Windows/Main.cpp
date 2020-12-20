@@ -14,6 +14,8 @@ using std::endl;
 #include "Sprite.h"
 #include "BasicText.h"
 #include "AnimatedSprite.h"
+#include "RenderComponent.h"
+#include "Globals.h"
 
 #pragma region Global Variables
 
@@ -79,6 +81,7 @@ int main(int argc, char* args[]) {
     #pragma region Game Loop
     
     Game::GameMaster ProjectSilver;
+    Game::Globals::SetTheGame(ProjectSilver);
 
     int prevTime = SDL_GetTicks();
 
@@ -90,34 +93,14 @@ int main(int argc, char* args[]) {
     ProjectSilver.Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
     ProjectSilver.Assets.LoadSpriteFont("Big", "Fonts/CourierNewBig_0.png", "Fonts/CourierNewBig.fnt");
 
-    Game::AnimatedSprite animation;
-    animation.SetAnimationInfo(12, 4, 1, Game::AnimatedSprite::LoopMode::PingPongLoop);
-    animation.SetTexture(&ProjectSilver.Assets, "Test");
-    ProjectSilver.Graphics.AddDrawable(&animation);
-    animation.MoveTo({ 0, 0 });
-    animation.SetCenter({ 50, 50 });
-
-    Game::Sprite sprite;
-    sprite.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite.MoveTo({ 0, 0 });
-    sprite.SetCenter({ 50, 50 });
-    sprite.SetRelativeToCamera(false);
-    ProjectSilver.Graphics.AddDrawable(&sprite);
-
     Game::Sprite sprite2;
-    sprite2.SetTexture(&ProjectSilver.Assets, "Checks");
+    sprite2.SetTexture("Checks");
     sprite2.MoveTo({ 1820, 980 });
     sprite2.SetCenter({ 0, 0 });
     ProjectSilver.Graphics.AddDrawable(&sprite2);
 
-    Game::Sprite sprite3;
-    sprite3.SetTexture(&ProjectSilver.Assets, "Checks");
-    sprite3.MoveTo({ 1180, 620 });
-    sprite3.SetCenter({ 0, 0 });
-    ProjectSilver.Graphics.AddDrawable(&sprite3);
-
     Game::Sprite sprite4;
-    sprite4.SetTexture(&ProjectSilver.Assets, "Target");
+    sprite4.SetTexture("Target");
     sprite4.MoveTo({ 1266, 668 });
     sprite4.SetCenter({ 21, 21 });
     sprite4.SetRelativeToCamera(false);
@@ -125,7 +108,7 @@ int main(int argc, char* args[]) {
     sprite4.SetLayer(-1);
 
     Game::Sprite sprite5;
-    sprite5.SetTexture(&ProjectSilver.Assets, "Char");
+    sprite5.SetTexture("Char");
     sprite5.MoveTo({ 200, 200 });
     sprite5.SetCenter({ 50, 70 });
     ProjectSilver.Graphics.AddDrawable(&sprite5);
@@ -142,11 +125,26 @@ int main(int argc, char* args[]) {
     ProjectSilver.Graphics.AddDrawable(&angleDebug);
     
     ProjectSilver.Assets.LoadMusic("YourMom", "digi.ogg");
+    ProjectSilver.Assets.LoadSound("Mooz", "Mooz.ogg");
     ProjectSilver.Audio.PlayMusic("YourMom");
 
     ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1920.1080.f"));
 
     ProjectSilver.Input.SetMouseGrab(true);
+
+    vector<Game::Animation::Action> actio = {
+        {{Game::Animation::AnimationCriteria::TriggerAtStart, ""}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}},
+        {{Game::Animation::AnimationCriteria::TriggerAtEnd, ""}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}},
+        {{Game::Animation::AnimationCriteria::TriggerAtFrameX, "2"}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}}
+    };
+    ProjectSilver.AddAnimation("BoxThing", Game::Animation("Test", actio));
+    ProjectSilver.SetAnimationInfo("BoxThing", { 40, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+
+    Game::RenderComponent comp;
+    comp.AddAnimation("BoxThing");
+    comp.SetDefaultAnimation("BoxThing");
+    ProjectSilver.Graphics.AddDrawable(&comp);
+    comp.SwitchAnimation("BoxThing");
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -167,7 +165,7 @@ int main(int argc, char* args[]) {
             ProjectSilver.Update(true);
         }
 
-        animation.Update();
+        comp.Update();
         ProjectSilver.Input.Update();
 
         ProjectSilver.Graphics.CenterCameraOn(sprite5.GetPosition());
@@ -194,7 +192,6 @@ int main(int argc, char* args[]) {
             ProjectSilver.Stop();
         }
 
-        animation.PushBy({ 0.5, 0.5 });
         sprite5.RotateBy(1);
 
         auto var = ProjectSilver.Input.GetMousePosition();

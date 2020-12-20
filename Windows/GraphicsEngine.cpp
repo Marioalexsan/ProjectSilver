@@ -3,7 +3,6 @@
 #include "GraphicsEngine.h"
 
 namespace Game {
-	GraphicsEngine*	GraphicsEngine::CurrentEngine = nullptr;
 	SDL_Window*		GraphicsEngine::Window = nullptr;
 	SDL_Renderer*	GraphicsEngine::Renderer = nullptr;
 
@@ -33,16 +32,10 @@ namespace Game {
 		windowHeight = 1080;
 		renderWidth = 1920;
 		renderHeight = 1080;
-		if (CurrentEngine == nullptr) {
-			CurrentEngine = this;
-		}
 		SetDisplayMode(VideoModes.at("1920.1080.w"));
 	}
 
 	GraphicsEngine::~GraphicsEngine() {
-		if (CurrentEngine == this) {
-			CurrentEngine = nullptr;
-		}
 	}
 
 	Vector2 GraphicsEngine::GetWindowSize() {
@@ -90,7 +83,7 @@ namespace Game {
 		return ID;
 	}
 
-	bool GraphicsEngine::RemoveDrawable(int ID) {
+	bool GraphicsEngine::RemoveDrawable(uint64_t ID) {
 		if (drawableLibrary.find(ID) == drawableLibrary.end()) {
 			return false;
 		}

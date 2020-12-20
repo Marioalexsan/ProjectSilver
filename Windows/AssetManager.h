@@ -1,10 +1,6 @@
 #ifndef ASSET_HEADER
 #define ASSET_HEADER
 
-#include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
-
 #include "PCHeader.h"
 #include "MiscUtility.h"
 
@@ -21,13 +17,13 @@ namespace Game {
 
 		// Holds the data about a music entry (streamed audio)
 		struct MusicData {
-			map<string, Section>	sectionList;
+			map<string, Section> sectionList;
 
-			string		path;
-			double		baseVolume;
+			string	   path;
+			double	   baseVolume;
 			Mix_Music* samples;
 
-			uint64_t	duration; // In Milliseconds
+			uint64_t   duration; // In Milliseconds
 
 			MusicData();
 			MusicData(const string&, double, Mix_Music*, uint64_t);
@@ -35,8 +31,8 @@ namespace Game {
 
 		// Holds the data about a sound entry (streamed music)
 		struct SoundData {
-			string		path;
-			double		baseVolume;
+			string	   path;
+			double	   baseVolume;
 			Mix_Chunk* samples;
 
 			SoundData();

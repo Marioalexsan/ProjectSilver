@@ -1,6 +1,7 @@
 #ifndef ANIMATION_HEADER
 #define ANIMATION_HEADER
 
+#include "PCHeader.h"
 #include "Sprite.h"
 
 namespace Game {
@@ -9,7 +10,8 @@ namespace Game {
 		enum LoopMode {
 			NormalLoop,
 			Static,
-			PingPongLoop
+			PingPongLoop,
+			PlayOnce
 		};
 	protected:
 		int updatesPerFrame; // Number of game frames it takes to switch to a new animation frame
@@ -21,13 +23,17 @@ namespace Game {
 		int direction;
 		int currentFrame;
 		int accumulatedUpdates;
+
+		bool finished; // Used for animations that don't replay
 	public:
 		AnimatedSprite();
 
 		void SetAnimationInfo(int updatesPerFrame, int framesPerRow, int framesPerCollumn, LoopMode mode = LoopMode::NormalLoop);
 		void SetFrame(int frame);
-		void Update(int frameUpdates = 1);
 
+		void Restart();
+
+		virtual void Update(int frameUpdates = 1);
 		virtual void Draw();
 	};
 }
