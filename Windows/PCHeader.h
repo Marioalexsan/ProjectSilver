@@ -51,6 +51,9 @@ using std::function;
 
 #include <cstdint>
 
+#include <list>
+using std::list;
+
 // SDL Libraries
 
 #include <SDL.h>

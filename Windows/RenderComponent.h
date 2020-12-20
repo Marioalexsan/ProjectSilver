@@ -9,9 +9,9 @@
 namespace Game {
 	class RenderComponent : public AnimatedSprite {
 	protected:
-		const Animation* currentInfo;
-		const Animation* defaultInfo;
-		vector<string> animations;
+		string currentAnimation;
+		string defaultAnimation;
+		list<string> animations;
 
 		void ParseActions(int startFrame, int endFrame);
 		void ActivateAction(Animation::Action action);
@@ -20,6 +20,11 @@ namespace Game {
 		bool parsedEnd;
 
 		bool switchToDefaultOnEnd;
+
+		bool IsCurrentValid();
+		bool IsDefaultValid();
+		const Animation& GetCurrentAnimation();
+		const Animation& GetDefaultAnimation();
 	public:
 		RenderComponent();
 
@@ -27,6 +32,8 @@ namespace Game {
 
 		void AddAnimation(const string& ID);
 		void SwitchAnimation(const string& ID);
+
+		void SwitchToDefault();
 
 		virtual void Update(int frameupdates = 1);
 	};

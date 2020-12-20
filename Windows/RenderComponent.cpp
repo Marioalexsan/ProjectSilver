@@ -3,17 +3,35 @@
 
 namespace Game {
 	RenderComponent::RenderComponent() :
-		currentInfo(nullptr),
-		defaultInfo(nullptr),
+		currentAnimation(""),
+		defaultAnimation(""),
 		switchToDefaultOnEnd(false),
 		parsedStart(false),
 		parsedEnd(false) {}
 
+	bool RenderComponent::IsCurrentValid() {
+		auto lib = Globals::Game().GetAnimationLibrary();
+		return lib.find(currentAnimation) != lib.end();
+	}
+
+	bool RenderComponent::IsDefaultValid() {
+		auto lib = Globals::Game().GetAnimationLibrary();
+		return lib.find(defaultAnimation) != lib.end();
+	}
+
+	const Animation& RenderComponent::GetCurrentAnimation() {
+		return Globals::Game().GetAnimationLibrary().at(currentAnimation);
+	}
+
+	const Animation& RenderComponent::GetDefaultAnimation() {
+		return Globals::Game().GetAnimationLibrary().at(defaultAnimation);
+	}
+
 	void RenderComponent::ParseActions(int startFrame, int endFrame) { // Usually the interval is one frame in size
-		if (currentInfo == nullptr) {
+		if (!IsCurrentValid()) {
 			return;
 		}
-		for (auto& elem : currentInfo->GetActions()) {
+		for (auto& elem : GetCurrentAnimation().GetActions()) {
 			switch (elem.criteria.what) {
 
 			case Animation::AnimationCriteria::TriggerAtFrameX: {
@@ -50,7 +68,7 @@ namespace Game {
 	void RenderComponent::ActivateAction(Animation::Action action) {
 		switch (action.instruction.what) {
 		case Animation::AnimationInstruction::ExecuteCallback: {
-			currentInfo->ExecCallback();
+			GetCurrentAnimation().ExecCallback();
 		} break;
 		case Animation::AnimationInstruction::PlaySound: {
 			Globals::Audio().PlaySound(action.instruction.param);
@@ -63,10 +81,10 @@ namespace Game {
 
 	void RenderComponent::SetDefaultAnimation(const string& ID) {
 		auto lib = Globals::Game().GetAnimationLibrary();
-		if (lib.find(ID) == lib.end() || std::find(animations.begin(), animations.end(), ID) != animations.end()) {
+		if (lib.find(ID) == lib.end() || std::find(animations.begin(), animations.end(), ID) == animations.end()) {
 			return;
 		}
-		defaultInfo = &lib.at(ID);
+		defaultAnimation = ID;
 	}
 
 	void RenderComponent::AddAnimation(const string& ID) {
@@ -82,9 +100,9 @@ namespace Game {
 			return;
 		}
 		parsedEnd = false;
-		currentInfo = &Globals::Game().GetAnimationLibrary().at(ID);
+		currentAnimation = ID;
 
-		auto info = currentInfo->GetInfo();
+		auto info = GetCurrentAnimation().GetInfo();
 
 		updatesPerFrame = info.updatesPerFrame;
 		framesPerRow = info.framesPerRow;
@@ -92,11 +110,30 @@ namespace Game {
 		totalFrames = info.framesPerCollumn * info.framesPerRow;
 		mode = info.mode;
 
-		SetTexture(currentInfo->GetAnimationTexture());
+		SetTexture(GetCurrentAnimation().GetAnimationTexture());
 
 		Restart();
 	}
 	
+	void RenderComponent::SwitchToDefault() {
+		if (IsDefaultValid()) {
+			parsedStart = false;
+			parsedEnd = false;
+			currentAnimation = defaultAnimation;
+
+			auto info = GetCurrentAnimation().GetInfo();
+
+			updatesPerFrame = info.updatesPerFrame;
+			framesPerRow = info.framesPerRow;
+			framesPerCollumn = info.framesPerCollumn;
+			totalFrames = info.framesPerCollumn * info.framesPerRow;
+			mode = info.mode;
+
+			SetTexture(GetCurrentAnimation().GetAnimationTexture());
+
+			Restart();
+		}
+	}
 
 	void RenderComponent::Update(int frameUpdates) {
 		int lastFrame = currentFrame;
@@ -107,5 +144,10 @@ namespace Game {
 		else if (!parsedEnd && finished) {
 			ParseActions(totalFrames - 1, totalFrames - 1);
 		}
+		if (finished) {
+			SwitchToDefault();
+			AnimatedSprite::Update(1);
+		}
 	}
+
 }

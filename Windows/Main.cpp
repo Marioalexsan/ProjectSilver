@@ -88,6 +88,7 @@ int main(int argc, char* args[]) {
     ProjectSilver.Assets.LoadTexture("Checks", "Untitled.png");
     ProjectSilver.Assets.LoadTexture("Test", "Untitled2.png");
     ProjectSilver.Assets.LoadTexture("Char", "Char.png");
+    ProjectSilver.Assets.LoadTexture("Test2", "Untitled3.png");
 
     ProjectSilver.Assets.LoadTexture("Target", "target.png");
     ProjectSilver.Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
@@ -128,23 +129,26 @@ int main(int argc, char* args[]) {
     ProjectSilver.Assets.LoadSound("Mooz", "Mooz.ogg");
     ProjectSilver.Audio.PlayMusic("YourMom");
 
-    ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1920.1080.f"));
+    ProjectSilver.Graphics.SetDisplayMode(ProjectSilver.Graphics.VideoModes.at("1920.1080.w"));
 
     ProjectSilver.Input.SetMouseGrab(true);
 
     vector<Game::Animation::Action> actio = {
-        {{Game::Animation::AnimationCriteria::TriggerAtStart, ""}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}},
-        {{Game::Animation::AnimationCriteria::TriggerAtEnd, ""}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}},
-        {{Game::Animation::AnimationCriteria::TriggerAtFrameX, "2"}, {Game::Animation::AnimationInstruction::PlaySound, "Mooz"}}
+        
     };
     ProjectSilver.AddAnimation("BoxThing", Game::Animation("Test", actio));
-    ProjectSilver.SetAnimationInfo("BoxThing", { 40, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+    ProjectSilver.SetAnimationInfo("BoxThing", { 20, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
+    ProjectSilver.AddAnimation("BoxThing2", Game::Animation("Test2", actio));
+    ProjectSilver.SetAnimationInfo("BoxThing2", { 10, 4, 2, Game::AnimatedSprite::LoopMode::PlayOnce });
+
 
     Game::RenderComponent comp;
     comp.AddAnimation("BoxThing");
+    comp.AddAnimation("BoxThing2");
     comp.SetDefaultAnimation("BoxThing");
+    comp.SwitchToDefault();
     ProjectSilver.Graphics.AddDrawable(&comp);
-    comp.SwitchAnimation("BoxThing");
+    //comp.SwitchToDefault();
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -165,7 +169,6 @@ int main(int argc, char* args[]) {
             ProjectSilver.Update(true);
         }
 
-        comp.Update();
         ProjectSilver.Input.Update();
 
         ProjectSilver.Graphics.CenterCameraOn(sprite5.GetPosition());
@@ -188,10 +191,14 @@ int main(int argc, char* args[]) {
             ProjectSilver.Graphics.PushCamera({ 10, 0 });
             sprite5.PushBy({ 10, 0 });
         }
+        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Left)) {
+            comp.SwitchAnimation("BoxThing2");
+        }
         if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || ProjectSilver.Input.WasQuitCalled()) {
             ProjectSilver.Stop();
         }
 
+        comp.Update();
         sprite5.RotateBy(1);
 
         auto var = ProjectSilver.Input.GetMousePosition();
