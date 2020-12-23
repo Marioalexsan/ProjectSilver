@@ -32,10 +32,10 @@ namespace Game {
 		SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
 
 		SDL_Rect src = MakeSDLRect(0, 0, w, h);
-		SDL_Rect dest = MakeSDLRect(int(position.x), int(position.y), w, h);
-		SDL_Point cen = MakeSDLPoint(int(center.x), int(center.y));
+		SDL_Rect dest = MakeSDLRect(int(transform.position.x), int(transform.position.y), w, h);
+		SDL_Point cen = MakeSDLPoint(int(transform.center.x), int(transform.center.y));
 
-		GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, rotation, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
+		GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform.direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 	}
 
 	

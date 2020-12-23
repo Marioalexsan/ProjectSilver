@@ -16,6 +16,7 @@ using std::endl;
 #include "AnimatedSprite.h"
 #include "RenderComponent.h"
 #include "Globals.h"
+#include "CollisionMaster.h"
 
 #pragma region Global Variables
 
@@ -89,6 +90,8 @@ int main(int argc, char* args[]) {
     ProjectSilver.Assets.LoadTexture("Test", "Untitled2.png");
     ProjectSilver.Assets.LoadTexture("Char", "Char.png");
     ProjectSilver.Assets.LoadTexture("Test2", "Untitled3.png");
+    ProjectSilver.Assets.LoadTexture("Level", "Level.png");
+    ProjectSilver.Assets.LoadTexture("CharCircle", "CharCircle.png");
 
     ProjectSilver.Assets.LoadTexture("Target", "target.png");
     ProjectSilver.Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
@@ -96,29 +99,35 @@ int main(int argc, char* args[]) {
 
     Game::Sprite sprite2;
     sprite2.SetTexture("Checks");
-    sprite2.MoveTo({ 1820, 980 });
+    sprite2.SetPosition({ 1820, 980 });
     sprite2.SetCenter({ 0, 0 });
     ProjectSilver.Graphics.AddDrawable(&sprite2);
 
+    Game::Sprite spriteL;
+    sprite2.SetTexture("Level");
+    sprite2.SetPosition({ 0, 0 });
+    sprite2.SetCenter({ 0, 0 });
+    ProjectSilver.Graphics.AddDrawable(&spriteL);
+
     Game::Sprite sprite4;
     sprite4.SetTexture("Target");
-    sprite4.MoveTo({ 1266, 668 });
+    sprite4.SetPosition({ 1266, 668 });
     sprite4.SetCenter({ 21, 21 });
     sprite4.SetRelativeToCamera(false);
     ProjectSilver.Graphics.AddDrawable(&sprite4);
-    sprite4.SetLayer(-1);
+    sprite4.SetLayer(200);
 
     Game::Sprite sprite5;
-    sprite5.SetTexture("Char");
-    sprite5.MoveTo({ 200, 200 });
-    sprite5.SetCenter({ 50, 70 });
+    sprite5.SetTexture("CharCircle");
+    sprite5.SetPosition({ 0, 0 });
+    sprite5.SetCenter({ 50, 50 });
     ProjectSilver.Graphics.AddDrawable(&sprite5);
     sprite5.SetLayer(255);
 
     Game::BasicText text;
     text.SetText("yro\'ue mom gae xd");
     text.SetFont(&ProjectSilver.Assets, "Big");
-    ProjectSilver.Graphics.AddDrawable(&text);
+    //ProjectSilver.Graphics.AddDrawable(&text);
 
     Game::BasicText angleDebug;
     angleDebug.SetFont(&ProjectSilver.Assets, "Huge");
@@ -133,12 +142,10 @@ int main(int argc, char* args[]) {
 
     ProjectSilver.Input.SetMouseGrab(true);
 
-    vector<Game::Animation::Action> actio = {
-        
-    };
-    ProjectSilver.AddAnimation("BoxThing", Game::Animation("Test", actio));
+
+    ProjectSilver.AddAnimation("BoxThing", Game::Animation("Test", {}));
     ProjectSilver.SetAnimationInfo("BoxThing", { 20, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
-    ProjectSilver.AddAnimation("BoxThing2", Game::Animation("Test2", actio));
+    ProjectSilver.AddAnimation("BoxThing2", Game::Animation("Test2", {}));
     ProjectSilver.SetAnimationInfo("BoxThing2", { 10, 4, 2, Game::AnimatedSprite::LoopMode::PlayOnce });
 
 
@@ -147,8 +154,31 @@ int main(int argc, char* args[]) {
     comp.AddAnimation("BoxThing2");
     comp.SetDefaultAnimation("BoxThing");
     comp.SwitchToDefault();
+    comp.SetCenter({ 0, 0 });
+    comp.SetPosition({ -100, -100 });
     ProjectSilver.Graphics.AddDrawable(&comp);
+
     //comp.SwitchToDefault();
+
+    Game::SphereCollider sphereL;
+    sphereL.SetPosition({ 473, 300 });
+    sphereL.SetRadius(50);
+    Game::BoxCollider box1L;
+    box1L.SetPosition({ 0, 0 });
+    box1L.SetSize(300, 100);
+    Game::BoxCollider box2L;
+    box2L.SetPosition({ 0, 0 });
+    box2L.SetSize(100, 600);
+    Game::BoxCollider box3L;
+    box3L.SetPosition({ 0, 500 });
+    box3L.SetSize(800, 100);
+    Game::BoxCollider box4L;
+    box4L.SetPosition({ 700, 0 });
+    box4L.SetSize(100, 600);
+
+
+    Game::SphereCollider sphere2;
+    sphere2.SetRadius(50);
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -171,27 +201,40 @@ int main(int argc, char* args[]) {
 
         ProjectSilver.Input.Update();
 
-        ProjectSilver.Graphics.CenterCameraOn(sprite5.GetPosition());
 
+        
+        double speed = 3;
         using KeyCode = Game::InputHandler::KeyCode;
         using ButtonCode = Game::InputHandler::ButtonCode;
         if (ProjectSilver.Input.IsKeyDown(KeyCode::W)) {
-            ProjectSilver.Graphics.PushCamera({ 0, -10 });
-            sprite5.PushBy({ 0, -10 });
+            sphere2.Move({ 0, -10 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::S)) {
-            ProjectSilver.Graphics.PushCamera({ 0, 10 });
-            sprite5.PushBy({ 0, 10 });
+            sphere2.Move({ 0, 10 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::A)) {
-            ProjectSilver.Graphics.PushCamera({ -10, 0 });
-            sprite5.PushBy({ -10, 0 });
+            sphere2.Move({ -10, 0 });
         }
         if (ProjectSilver.Input.IsKeyDown(KeyCode::D)) {
-            ProjectSilver.Graphics.PushCamera({ 10, 0 });
-            sprite5.PushBy({ 10, 0 });
+            sphere2.Move({ 10, 0 });
         }
-        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Left)) {
+
+        auto prevPos = sphere2.GetPosition();
+        auto info = Game::CollisionMaster::CheckCollision(box1L, sphere2);
+        sphere2.Move(info.second);
+        info = Game::CollisionMaster::CheckCollision(box2L, sphere2);
+        sphere2.Move(info.second);
+        info = Game::CollisionMaster::CheckCollision(box3L, sphere2);
+        sphere2.Move(info.second);
+        info = Game::CollisionMaster::CheckCollision(box4L, sphere2);
+        sphere2.Move(info.second);
+        info = Game::CollisionMaster::CheckCollision(sphereL, sphere2);
+        sphere2.Move(info.second);
+        sprite5.SetPosition(sphere2.GetPosition());
+
+
+        ProjectSilver.Graphics.CenterCameraOn(sprite5.GetTransform().position);
+        if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Left) && comp.GetCurrentAnimationID() != "BoxThing2") {
             comp.SwitchAnimation("BoxThing2");
         }
         if (ProjectSilver.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || ProjectSilver.Input.WasQuitCalled()) {
@@ -199,21 +242,24 @@ int main(int argc, char* args[]) {
         }
 
         comp.Update();
-        sprite5.RotateBy(1);
+        //comp.Rotate(1);
+
 
         auto var = ProjectSilver.Input.GetMousePosition();
         auto angle = Game::Vector2(var.first - 960.0, var.second - 540.0).Angle();
-        sprite5.SetAngle(angle);
-        sprite4.MoveTo({ var.first, var.second });
+        sprite5.SetDirection(angle);
+        sprite4.SetPosition({ var.first, var.second });
 
         cout << angle << endl;
         angleDebug.SetText("Angle: " + std::to_string(angle));
         // Code end
 
+
         prevTime = currentTime;
 
         ProjectSilver.Graphics.RenderAll();
     }
+
 
     #pragma endregion
 

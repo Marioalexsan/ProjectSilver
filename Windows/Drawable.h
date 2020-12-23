@@ -11,12 +11,9 @@ namespace Game {
 
 	class Drawable {
 	protected:
-		Vector2 position;
-		Vector2 center;
-		double rotation;
+		Game::Transform transform;
 
 		int layer;
-
 		bool relativeToCamera;
 
 		uint64_t drawableGraphicsID = 0;
@@ -25,25 +22,23 @@ namespace Game {
 		virtual ~Drawable();
 		virtual void Draw() = 0;
 
-		void SetAngle(double angle);
-		void RotateBy(double angle);
+		const Game::Transform& GetTransform();
 
-		void MoveTo(Vector2 position);
-		void PushBy(Vector2 amount);
+		void SetDirection(double direction);
+		void Rotate(double angle);
 
-		void SetCenter(Vector2 center);
+		void SetPosition(const Vector2& position);
+		void Move(const Vector2& amount);
 
-		void SetLayer(int layer);
+		void SetCenter(const Vector2& center);
+
 		int  GetLayer();
-
-		Vector2 GetPosition();
-		Vector2 GetCenter();
-		double GetRotation();
+		void SetLayer(int layer);
 
 		void SetRelativeToCamera(bool relativity);
 
-		void AddDrawableToGraphics();
-		void RemoveDrawableFromGraphics();
+		void RegisterDrawable();
+		void UnregisterDrawable();
 	};
 }
 

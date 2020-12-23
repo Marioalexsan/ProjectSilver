@@ -6,35 +6,38 @@
 
 namespace Game {
 	Drawable::Drawable() :
-		position({ 0, 0 }),
-		center({ 0, 0 }),
-		rotation(0.0),
+		transform(),
 		relativeToCamera(true),
-		layer(Game::GraphicsEngine::CommonLayers::WorldBase) {}
+		layer(Game::GraphicsEngine::CommonLayers::WorldBase),
+		drawableGraphicsID(0) {}
 
 	Drawable::~Drawable() {
 		// Destroy existing pointers to this drawable
-		RemoveDrawableFromGraphics();
+		UnregisterDrawable();
 	}
 
-	void Drawable::SetAngle(double angle) {
-		this->rotation = angle;
+	const Game::Transform& Drawable::GetTransform() {
+		return transform;
 	}
 
-	void Drawable::RotateBy(double angle) {
-		this->rotation += angle;
+	void Drawable::SetDirection(double direction) {
+		transform.direction = direction;
 	}
 
-	void Drawable::MoveTo(Vector2 position) {
-		this->position = position;
+	void Drawable::Rotate(double angle) {
+		transform.direction += angle;
 	}
 
-	void Drawable::PushBy(Vector2 amount) {
-		this->position += amount;
+	void Drawable::SetPosition(const Vector2& position) {
+		transform.position = position;
 	}
 
-	void Drawable::SetCenter(Vector2 center) {
-		this->center = center;
+	void Drawable::Move(const Vector2& amount) {
+		transform.position += amount;
+	}
+
+	void Drawable::SetCenter(const Vector2& center) {
+		transform.center = center;
 	}
 
 	int Drawable::GetLayer() {
@@ -45,28 +48,18 @@ namespace Game {
 		this->layer = layer;
 	}
 
-	Vector2 Drawable::GetPosition() {
-		return position;
-	}
-	Vector2 Drawable::GetCenter() {
-		return center;
-	}
-	double Drawable::GetRotation() {
-		return rotation;
-	}
-
 	void Drawable::SetRelativeToCamera(bool relativity) {
 		relativeToCamera = relativity;
 	}
 
 
-	void Drawable::AddDrawableToGraphics() {
+	void Drawable::RegisterDrawable() {
 		if (drawableGraphicsID == 0) {
 			drawableGraphicsID = Globals::Graphics().AddDrawable(this);
 		}
 	}
 
-	void Drawable::RemoveDrawableFromGraphics() {
+	void Drawable::UnregisterDrawable() {
 		Globals::Graphics().RemoveDrawable(drawableGraphicsID);
 		drawableGraphicsID = 0;
 	}

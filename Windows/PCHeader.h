@@ -32,7 +32,6 @@ using std::cerr;
 using std::endl;
 
 #include <algorithm>
-using std::clamp;
 
 #include <queue>
 using std::queue;

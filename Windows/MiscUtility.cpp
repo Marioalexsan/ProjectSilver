@@ -58,6 +58,16 @@ namespace Game {
 
 	// Reminder: direction is from North, clockwise, starting at 0
 	Vector2 Vector2::NormalVector(double direction) {
-		return Vector2(cos(270.0 + direction), sin(180.0 + direction));
+		return Vector2(sin(Math::DegToRads(direction)), cos(Math::DegToRads(direction + 180)));
 	}
+
+	Transform::Transform():
+		position(0.0, 0.0),
+		center(0.0, 0.0),
+		direction(0.0) {}
+
+	Transform::Transform(const Vector2& position, const Vector2& center, double direction):
+		position(position),
+		center(center),
+		direction(direction) {}
 }

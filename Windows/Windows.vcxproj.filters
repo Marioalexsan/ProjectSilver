@@ -64,6 +64,30 @@
     <Filter Include="Graphics\Drawables Library\RenderComponent">
       <UniqueIdentifier>{57047928-d5dc-4568-934b-cf48537ee021}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility\Precompiled Header">
+      <UniqueIdentifier>{4cfe65da-99e2-4c69-af60-e27dde26346e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\MiscUtility">
+      <UniqueIdentifier>{7923a0cb-c04e-4b81-97bd-c5255da6324a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\ErrorLogging">
+      <UniqueIdentifier>{bc300dde-c226-4dc0-bf3f-1ca432c58822}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{f2e9b77f-cccc-4d85-8980-b5d298a3cd08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Collider">
+      <UniqueIdentifier>{91592349-a193-497c-a076-dbb9365905a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Sphere">
+      <UniqueIdentifier>{9cdd4d79-8345-42f0-a1a9-34148b229a4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Box">
+      <UniqueIdentifier>{0c65414d-2566-49bc-a277-5b281b8974d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\CollisionMaster">
+      <UniqueIdentifier>{f2f2884b-0740-4f81-a749-8a4b1ed0fb4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -71,12 +95,6 @@
     </ClCompile>
     <ClCompile Include="AudioEngine.cpp">
       <Filter>Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorLogging.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="MiscUtility.cpp">
-      <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="AssetManager.cpp">
       <Filter>AssetManager</Filter>
@@ -99,9 +117,6 @@
     <ClCompile Include="InputHandler.cpp">
       <Filter>InputHandler</Filter>
     </ClCompile>
-    <ClCompile Include="PCHeader.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
     <ClCompile Include="BasicText.cpp">
       <Filter>Graphics\Drawables Library\Basic Text</Filter>
     </ClCompile>
@@ -123,16 +138,31 @@
     <ClCompile Include="RenderComponent.cpp">
       <Filter>Graphics\Drawables Library\RenderComponent</Filter>
     </ClCompile>
+    <ClCompile Include="PCHeader.cpp">
+      <Filter>Utility\Precompiled Header</Filter>
+    </ClCompile>
+    <ClCompile Include="MiscUtility.cpp">
+      <Filter>Utility\MiscUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorLogging.cpp">
+      <Filter>Utility\ErrorLogging</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>Collision\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionMaster.cpp">
+      <Filter>Collision\CollisionMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollider.cpp">
+      <Filter>Collision\Sphere</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>Collision\Box</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
       <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorLogging.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="MiscUtility.h">
-      <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="AssetManager.h">
       <Filter>AssetManager</Filter>
@@ -155,9 +185,6 @@
     <ClInclude Include="InputHandler.h">
       <Filter>InputHandler</Filter>
     </ClInclude>
-    <ClInclude Include="PCHeader.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="BasicText.h">
       <Filter>Graphics\Drawables Library\Basic Text</Filter>
     </ClInclude>
@@ -178,6 +205,27 @@
     </ClInclude>
     <ClInclude Include="RenderComponent.h">
       <Filter>Graphics\Drawables Library\RenderComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="PCHeader.h">
+      <Filter>Utility\Precompiled Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscUtility.h">
+      <Filter>Utility\MiscUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorLogging.h">
+      <Filter>Utility\ErrorLogging</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>Collision\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionMaster.h">
+      <Filter>Collision\CollisionMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>Collision\Sphere</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxCollider.h">
+      <Filter>Collision\Box</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

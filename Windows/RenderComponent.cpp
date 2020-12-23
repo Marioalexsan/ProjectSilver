@@ -135,16 +135,20 @@ namespace Game {
 		}
 	}
 
+	const string& RenderComponent::GetCurrentAnimationID() {
+		return currentAnimation;
+	}
+
 	void RenderComponent::Update(int frameUpdates) {
 		int lastFrame = currentFrame;
 		AnimatedSprite::Update(frameUpdates);
 		if (currentFrame > lastFrame) {
 			ParseActions(lastFrame + 1, currentFrame);
 		}
-		else if (!parsedEnd && finished) {
-			ParseActions(totalFrames - 1, totalFrames - 1);
-		}
-		if (finished) {
+		else if (finished) {
+			if (!parsedEnd) {
+				ParseActions(totalFrames - 1, totalFrames - 1);
+			}
 			SwitchToDefault();
 			AnimatedSprite::Update(1);
 		}

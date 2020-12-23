@@ -5,6 +5,14 @@
 namespace Game {
 	namespace Math {
 		const double PI = 3.14159265358979323846;
+
+		inline double RadsToDeg(double rads) {
+			return rads * (180.0 / PI);
+		}
+
+		inline double DegToRads(double degrees) {
+			return degrees / (180.0 / PI);
+		}
 	};
 
 	namespace Utility {
@@ -28,7 +36,7 @@ namespace Game {
 		double Length();
 		double Angle();
 
-		inline Vector2 operator+(const Vector2& other) {
+		inline Vector2 operator+(const Vector2& other) const {
 			return Vector2(x + other.x, y + other.y);
 		}
 
@@ -38,7 +46,7 @@ namespace Game {
 			return *this;
 		}
 
-		inline Vector2 operator-(const Vector2& other) {
+		inline Vector2 operator-(const Vector2& other) const {
 			return Vector2(x - other.x, y - other.y);
 		}
 
@@ -48,7 +56,7 @@ namespace Game {
 			return *this;
 		}
 
-		inline Vector2 operator*(double scale) {
+		inline Vector2 operator*(double scale) const {
 			return Vector2(x * scale, y * scale);
 		}
 
@@ -61,5 +69,14 @@ namespace Game {
 		static Vector2 NormalVector(double direction = 90.0);
 
 		static const Vector2 Zero;
+	};
+
+	struct Transform {
+		Vector2 position;
+		Vector2 center;
+		double direction;
+
+		Transform();
+		Transform(const Vector2& position, const Vector2& center, double direction);
 	};
 }

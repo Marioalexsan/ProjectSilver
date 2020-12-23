@@ -74,16 +74,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)SDL2_image\include;$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2_ttf\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(SolutionDir)SDL2_ttf\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)SDL2_image\include;$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(SolutionDir)SDL2_image\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -145,12 +145,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="AnimatedSprite.cpp" />
+    <ClCompile Include="BoxCollider.cpp" />
+    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="CollisionMaster.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AssetManager.cpp" />
@@ -170,11 +173,15 @@
     </ClCompile>
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
+    <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="Sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="AnimatedSprite.h" />
+    <ClInclude Include="BoxCollider.h" />
+    <ClInclude Include="Collider.h" />
+    <ClInclude Include="CollisionMaster.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AssetManager.h" />
@@ -188,6 +195,7 @@
     <ClInclude Include="MiscUtility.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RenderComponent.h" />
+    <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="PCHeader.h" />
     <ClInclude Include="Drawable.h" />

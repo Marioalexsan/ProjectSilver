@@ -23,9 +23,11 @@ namespace Game {
 
 		bool IsCurrentValid();
 		bool IsDefaultValid();
+
 		const Animation& GetCurrentAnimation();
 		const Animation& GetDefaultAnimation();
 	public:
+
 		RenderComponent();
 
 		void SetDefaultAnimation(const string& ID);
@@ -34,6 +36,8 @@ namespace Game {
 		void SwitchAnimation(const string& ID);
 
 		void SwitchToDefault();
+
+		const string& GetCurrentAnimationID();
 
 		virtual void Update(int frameupdates = 1);
 	};
