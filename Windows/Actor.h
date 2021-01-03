@@ -3,8 +3,10 @@
 
 #include "PCHeader.h"
 #include "Entity.h"
+#include "RenderComponent.h"
 
 namespace Game {
+	class AI;
 	
 	class Actor : public Entity {
 	public:
@@ -21,29 +23,46 @@ namespace Game {
 
 			bool invulnerable;
 			bool isDead;
+
+			int currentInvincibilityFrames;
+			int onHitInvincibilityFrames;
 		};
 
 		enum ActorType {
 			Unknown,
 			Player,
 			Enemy,
-			Process // Spells, projectiles, etc.
+			NonSentient // Spells, projectiles, etc.
 		};
 	protected:
 		ActorStats baseStats;
 		Vector2 knockback;
 
+		SphereCollider collider;
+		RenderComponent render;
+
+		AI* brain;
+
 		void ApplyKnockbackStep();
+		void ApplyKnockback();
 	public:
+		Actor(AI* brain);
+		//Actor();
+		~Actor();
+
+		inline AI* GetAI() {
+			return brain;
+		}
+
+		inline SphereCollider& GetCollider() { return collider; }
+
+		inline RenderComponent& GetComponent() { return render; }
 		
 		void Move(Vector2 vector);
 		void MoveForward(double amount);
 		ActorStats& GetStatsReference();
 
 		virtual void Update();
-		virtual void OnAttackHit() = 0;
-		virtual void OnHitByAttack() = 0;
-		virtual void OnDeathOverride() = 0;
 	};
 }
 

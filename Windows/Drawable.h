@@ -2,7 +2,6 @@
 #define TEXTURE_HEADER
 
 #include "PCHeader.h"
-#include "MiscUtility.h"
 
 namespace Game {
 
@@ -11,7 +10,7 @@ namespace Game {
 
 	class Drawable {
 	protected:
-		Game::Transform transform;
+		Trackable<Game::Transform> transform;
 
 		int layer;
 		bool relativeToCamera;
@@ -22,7 +21,7 @@ namespace Game {
 		virtual ~Drawable();
 		virtual void Draw() = 0;
 
-		const Game::Transform& GetTransform();
+		Trackable<Game::Transform>& GetTransform();
 
 		void SetDirection(double direction);
 		void Rotate(double angle);
@@ -37,8 +36,8 @@ namespace Game {
 
 		void SetRelativeToCamera(bool relativity);
 
-		void RegisterDrawable();
-		void UnregisterDrawable();
+		void RegisterToGame();
+		void UnregisterFromGame();
 	};
 }
 

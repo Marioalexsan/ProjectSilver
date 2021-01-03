@@ -1,42 +1,53 @@
 #include "PCHeader.h"
 #include "Collider.h"
+#include "Globals.h"
 
 namespace Game {
 	Collider::Collider():
-		position(),
-		mass(100.0),
-		ownerType(Environment),
-		colType(Static),
-		combatType(Generic) {}
+		transform(),
+		mass(80.0),
+		owner(nullptr),
+		type(Static),
+		damage(0.0),
+		combatLayer(None) {}
 
-	Collider::Collider(const Vector2& position, double mass):
-		position(position),
-		mass(mass),
-		ownerType(Environment),
-		colType(Static),
-		combatType(Generic) {}
+	Collider::Collider(const Vector2& position, ColliderType type):
+		transform(),
+		mass(80.0),
+		owner(nullptr),
+		type(type),
+		damage(0.0),
+		combatLayer(None)
+	{
+		transform->position = position;
+	}
 
-	const Game::Vector2& Collider::GetPosition() const {
-		return position;
+	Collider::~Collider() {
+		// Make sure we don't have dangling pointers
+		Globals::Game().RemoveCollider(this);
+	}
+
+	Trackable<Transform>& Collider::GetTransform() {
+		return transform;
+	}
+
+	const Game::Vector2 Collider::GetPosition() const {
+		return transform->position;
 	}
 
 	void Collider::SetPosition(const Vector2& position) {
-		this->position = position;
+		transform->position = position;
 	}
 
 	void Collider::Move(const Vector2& amount) {
-		this->position += amount;
+		transform->position += amount;
 	}
 
-	void Collider::SetSelectivity(ColliderOwners owner, ColliderTypes type, ColliderCombatRole role) {
-		info.ownerType = owner;
-		info.colType = type;
-		info.combatType = role;
+	void Collider::RegisterToGame() {
+		Globals::Game().AddCollider(this);
 	}
 
-	Collider::ColliderInfo Collider::GetSelectivity() {
-		return info;
+	void Collider::UnregisterFromGame() {
+		Globals::Game().RemoveCollider(this);
 	}
-
-
 }

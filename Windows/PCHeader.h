@@ -53,10 +53,17 @@ using std::function;
 #include <list>
 using std::list;
 
+#include <set>
+using std::set;
+
 // SDL Libraries
 
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <SDL_image.h>
+
+// My own utilities
+
+#include "MiscUtility.h"
 
 #endif

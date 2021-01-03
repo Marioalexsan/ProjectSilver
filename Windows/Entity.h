@@ -3,30 +3,37 @@
 
 #include "PCHeader.h"
 #include "MiscUtility.h"
+#include "SphereCollider.h"
+
+
 
 namespace Game {
+	class AI;
+
 	class Entity {
 	public:
 		enum EntityType {
 			Unknown,
-			WorldActor,
-			StaticEnvironment
+			Actor,
+			Director
 		};
 	protected:
-		// Are sens oare de facut getter / setter daca nu fac nimic in ele?!
-
-		Vector2 position;
-		double direction;
+		Game::Transform transform; // Does not use center
 		EntityType type;
 	public:
 		Entity();
 		Entity(EntityType type);
+		~Entity();
+
 
 		void SetType(EntityType type);
 		EntityType GetType();
 
 		void SetPosition(Vector2 position);
-		Vector2 GetPosition(Vector2);
+		Vector2& GetPosition(); // The reference returned can be modified / mounted to
+
+
+		Transform& GetTransform();
 
 		virtual void Update() = 0;
 	};

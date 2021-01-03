@@ -50,11 +50,11 @@ namespace Game {
 
 					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
 
-					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform.position.x) + currentX + info.xoffset, int(transform.position.y) + info.yoffset, info.width, info.height);
+					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform->position.x) + currentX + info.xoffset, int(transform->position.y) + info.yoffset, info.width, info.height);
 
 					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
 
-					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform.direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
+					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform->direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 					wordPos++;
 					currentX += info.xadvance;
 				}

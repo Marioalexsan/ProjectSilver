@@ -22,6 +22,8 @@ namespace Game {
 		int		ClampValue(int val, int min, int max);
 		double	ClampValue(double val, double min, double max);
 
+		double ScrollValue(double val, double leftBorder, double rightBorder);
+
 		bool	InRange(int val, int min, int max);
 	}
 
@@ -78,5 +80,71 @@ namespace Game {
 
 		Transform();
 		Transform(const Vector2& position, const Vector2& center, double direction);
+	};
+
+	template<class T>
+	class Trackable {
+	private:
+		T* object;
+		bool ownsObject;
+	public:
+		Trackable():
+			object(new T),
+			ownsObject(true) {}
+
+		Trackable(T* target):
+			object(target),
+			ownsObject(false) {
+			if (target == nullptr) {
+				// Nullptr not allowed
+				object = new T;
+				ownsObject = true;
+				return;
+			}
+			object = target;
+			ownsObject = false;
+		}
+
+		~Trackable() {
+			if (ownsObject) {
+				delete object;
+			}
+		}
+
+		inline void Track(T* target) {
+			// Does not accept nullptr.
+			// Trackable<> should always point to an object. A dangling tracked pointer is, however, possible.
+			if (target == nullptr) {
+				return;
+			}
+			if (ownsObject) {
+				delete object;
+				ownsObject = false;
+			}
+			object = target;
+		}
+
+		inline void Untrack() {
+			if (!ownsObject) {
+				ownsObject = true;
+				object = new T;
+			}
+		}
+
+		inline bool IsTracking() {
+			return !ownsObject;
+		}
+
+		inline T* operator->() {
+			return object;
+		}
+
+		inline const T* operator->() const {
+			return object;
+		}
+
+		inline T* Get() {
+			return object;
+		}
 	};
 }

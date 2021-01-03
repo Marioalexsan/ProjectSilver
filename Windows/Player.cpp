@@ -4,7 +4,8 @@
 #include "Globals.h"
 
 namespace Game {
-	Player::Player() {
+	Player::Player():
+		Actor(nullptr) {
 		AssetManager* manager = &Globals::Assets();
 
 		weapons.push_back({});

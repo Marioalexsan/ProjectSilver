@@ -27,6 +27,7 @@ namespace Game {
 		static AudioEngine& Audio();
 		static GraphicsEngine& Graphics();
 		static AssetManager& Assets();
+		static Entity* ThePlayer();
 
 	};
 }

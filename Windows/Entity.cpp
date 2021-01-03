@@ -1,16 +1,18 @@
 #include "PCHeader.h"
+#include "AI.h"
 #include "Entity.h"
 
 namespace Game {
 	Entity::Entity():
 		type(Unknown),
-		position(Vector2::Zero),
-		direction(0.0) {}
+		transform() {}
 
 	Entity::Entity(EntityType type):
 		type(type),
-		position(Vector2::Zero),
-		direction(0.0) {}
+		transform() {}
+
+	Entity::~Entity() {
+	}
 
 	void Entity::SetType(EntityType type) {
 		this->type = type;
@@ -21,11 +23,15 @@ namespace Game {
 	}
 
 	void Entity::SetPosition(Vector2 position) {
-		this->position = position;
+		transform.position = position;
 	}
 
-	Vector2 Entity::GetPosition(Vector2) {
-		return position;
+	Vector2& Entity::GetPosition() {
+		return transform.position;
+	}
+
+	Transform& Entity::GetTransform() {
+		return transform;
 	}
 
 

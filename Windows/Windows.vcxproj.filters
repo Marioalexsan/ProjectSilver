@@ -88,6 +88,21 @@
     <Filter Include="Collision\CollisionMaster">
       <UniqueIdentifier>{f2f2884b-0740-4f81-a749-8a4b1ed0fb4c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComplexFeatures\AI Library">
+      <UniqueIdentifier>{f1b2e994-43c3-4108-8a51-698d63ad66ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\AI Library\AI">
+      <UniqueIdentifier>{42202d92-c22d-46fe-9cc7-ccd1972f0c0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\PathFinder">
+      <UniqueIdentifier>{d9a4e2d5-cccf-4e63-9a72-ae4a76bdd3e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\AI Library\Fighter">
+      <UniqueIdentifier>{9168688d-36f4-46a0-999f-49961ca1ae5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\AI Library\PlayerPseudoAI">
+      <UniqueIdentifier>{2d4058fa-5ab6-4322-b06f-c0613c34ec63}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -159,6 +174,18 @@
     <ClCompile Include="BoxCollider.cpp">
       <Filter>Collision\Box</Filter>
     </ClCompile>
+    <ClCompile Include="AI.cpp">
+      <Filter>ComplexFeatures\AI Library\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFinder.cpp">
+      <Filter>ComplexFeatures\PathFinder</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerPseudoAI.cpp">
+      <Filter>ComplexFeatures\AI Library\PlayerPseudoAI</Filter>
+    </ClCompile>
+    <ClCompile Include="FighterAI.cpp">
+      <Filter>ComplexFeatures\AI Library\Fighter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -226,6 +253,18 @@
     </ClInclude>
     <ClInclude Include="BoxCollider.h">
       <Filter>Collision\Box</Filter>
+    </ClInclude>
+    <ClInclude Include="AI.h">
+      <Filter>ComplexFeatures\AI Library\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>ComplexFeatures\PathFinder</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerPseudoAI.h">
+      <Filter>ComplexFeatures\AI Library\PlayerPseudoAI</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterAI.h">
+      <Filter>ComplexFeatures\AI Library\Fighter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

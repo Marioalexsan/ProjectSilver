@@ -52,6 +52,20 @@ namespace Game {
 		return val < min ? min : (val >= max ? max : val);
 	}
 
+	double Utility::ScrollValue(double val, double leftBorder, double rightBorder) {
+		double dist = rightBorder - leftBorder;
+		if (dist <= 0.0) {
+			return val;
+		}
+		while (val > rightBorder) {
+			val -= dist;
+		}
+		while (val < leftBorder) {
+			val += dist;
+		}
+		return val;
+	}
+
 	bool Utility::InRange(int val, int min, int max) {
 		return val >= min && val <= max;
 	}

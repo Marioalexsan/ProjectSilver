@@ -40,5 +40,10 @@ namespace Game {
 		return theGame->Assets;
 	}
 
-	
+	Entity* Globals::ThePlayer() {
+		if (theGame == nullptr) {
+			throw std::invalid_argument("Game was nullptr in Globals::ThePlayer()!");
+		}
+		return theGame->GetThePlayer();
+	}
 }

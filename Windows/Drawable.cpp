@@ -13,31 +13,31 @@ namespace Game {
 
 	Drawable::~Drawable() {
 		// Destroy existing pointers to this drawable
-		UnregisterDrawable();
+		UnregisterFromGame();
 	}
 
-	const Game::Transform& Drawable::GetTransform() {
+	Trackable<Game::Transform>& Drawable::GetTransform() {
 		return transform;
 	}
 
 	void Drawable::SetDirection(double direction) {
-		transform.direction = direction;
+		transform->direction = direction;
 	}
 
 	void Drawable::Rotate(double angle) {
-		transform.direction += angle;
+		transform->direction += angle;
 	}
 
 	void Drawable::SetPosition(const Vector2& position) {
-		transform.position = position;
+		transform->position = position;
 	}
 
 	void Drawable::Move(const Vector2& amount) {
-		transform.position += amount;
+		transform->position += amount;
 	}
 
 	void Drawable::SetCenter(const Vector2& center) {
-		transform.center = center;
+		transform->center = center;
 	}
 
 	int Drawable::GetLayer() {
@@ -53,13 +53,13 @@ namespace Game {
 	}
 
 
-	void Drawable::RegisterDrawable() {
+	void Drawable::RegisterToGame() {
 		if (drawableGraphicsID == 0) {
 			drawableGraphicsID = Globals::Graphics().AddDrawable(this);
 		}
 	}
 
-	void Drawable::UnregisterDrawable() {
+	void Drawable::UnregisterFromGame() {
 		Globals::Graphics().RemoveDrawable(drawableGraphicsID);
 		drawableGraphicsID = 0;
 	}
