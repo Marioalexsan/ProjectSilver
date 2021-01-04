@@ -10,7 +10,7 @@ namespace Game {
     {}
 
     void FighterAI::Update() {
-        if (entity == nullptr) {
+        if (entity == nullptr || entity->GetStatsReference().isDead == true) {
             return;
         }
         auto player = Globals::ThePlayer();
@@ -38,7 +38,12 @@ namespace Game {
     }
 
     void FighterAI::OnDeath() {
-
+        if (entity != nullptr) {
+            AI::OnDeath();
+            entity->GetComponent().SwitchAnimation("CharDead");
+            entity->GetCollider().UnregisterFromGame();
+            entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);
+        }
     }
 
     void FighterAI::OnAttackHit() {
@@ -46,6 +51,8 @@ namespace Game {
     }
 
     void FighterAI::OnHitByAttack(Actor* attacker, double damage) {
-
+        if (!EntityIsDeadAF()) {
+            AI::OnHitByAttack(attacker, damage);
+        }
     }
 }

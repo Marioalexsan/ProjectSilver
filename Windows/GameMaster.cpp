@@ -4,9 +4,11 @@
 #include "AI.h"
 #include "Actor.h"
 #include "PlayerPseudoAI.h"
+#include "FighterAI.h"
+#include "Actor.h"
 
 namespace Game {
-	GameMaster::GameMaster():
+	GameMaster::GameMaster() :
 		entityID(1),
 		gameRunning(true)
 	{
@@ -22,7 +24,7 @@ namespace Game {
 		player.GetComponent().AddAnimation("PlayerIdle");
 		player.GetComponent().SetDefaultAnimation("PlayerIdle");
 		player.GetComponent().SwitchAnimation("PlayerIdle");
-		player.GetComponent().SetCenter({ 48, 67 });
+		player.GetComponent().AddAnimation("PlayerShoot");
 	}
 
 	Entity* GameMaster::GetThePlayer() {
@@ -31,6 +33,31 @@ namespace Game {
 			return nullptr;
 		}
 		return entityMasterList[position].get();
+	}
+
+	uint64_t GameMaster::AddNewEnemy(ActorType type, Vector2 worldPos) {
+		uint64_t ID;
+		switch (type) {
+		case ActorType::Fighter: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new Actor(new FighterAI()));
+			Game::Actor& fighter = *(Actor*)entityMasterList[ID].get();
+			fighter.GetComponent().AddAnimation("PlayerIdle");
+			fighter.GetComponent().AddAnimation("CharDead");
+			fighter.GetComponent().SetDefaultAnimation("PlayerIdle");
+			fighter.GetComponent().SwitchAnimation("PlayerIdle");
+
+			auto& stats = fighter.GetStatsReference();
+			stats.maxHealth = stats.health = 100.0;
+
+
+			fighter.GetTransform().position = worldPos;
+		} break;
+		default:
+			std::cout << "Unknown enemy bro!" << endl;
+			return 0;
+		}
+		return ID;
 	}
 
 	uint64_t GameMaster::NextEntityID() {
@@ -43,6 +70,22 @@ namespace Game {
 		if (!gameRunning) {
 			return;
 		}
+
+		Input.Update();
+
+		for (auto& pair : entityMasterList) {
+			pair.second->Update();
+		}
+
+		BuildSpacialHashMap();
+		ResolveMovementCollisions();
+		ResolveCombatCollisions();
+
+		Graphics.CenterCameraOn(GetThePlayer()->GetTransform().position);
+		if (!skipGraphicsFrame) {
+			Graphics.RenderAll();
+		}
+		Audio.Update();
 	}
 
 	void GameMaster::BuildSpacialHashMap() {
@@ -72,8 +115,8 @@ namespace Game {
 				continue;
 			}
 
-			for(int X = startX; X <= endX; X++) {
-				for(int Y = startY; Y <= endY; Y++) {
+			for (int X = startX; X <= endX; X++) {
+				for (int Y = startY; Y <= endY; Y++) {
 					spacialHashMap[{X, Y}].push_back(alpha);
 				}
 			}
@@ -91,8 +134,8 @@ namespace Game {
 
 		#pragma warning(supress: 26451)
 		results.reserve(prediction + 1);
-		for(int X = startX; X <= endX; X++) {
-			for(int Y = startY; Y <= endY; Y++) {
+		for (int X = startX; X <= endX; X++) {
+			for (int Y = startY; Y <= endY; Y++) {
 				for (auto& elem : spacialHashMap[{X, Y}]) {
 					// This may generate duplicates
 					// If duplicates shouldn't happen, make sure to remove them in destination method
@@ -121,7 +164,9 @@ namespace Game {
 		Assets.LoadTexture("Test2", "Untitled3.png");
 		Assets.LoadTexture("Level", "Level.png");
 		Assets.LoadTexture("CharCircle", "CharCircle.png");
+		Assets.LoadTexture("CharDead", "CharDead.png");
 		Assets.LoadTexture("Target", "target.png");
+		Assets.LoadTexture("CharShoot", "CharShoot.png");
 
 		// Fonts
 		Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
@@ -132,6 +177,7 @@ namespace Game {
 
 		// Sound
 		Assets.LoadSound("Mooz", "Mooz.ogg");
+		Assets.LoadSound("PlayerShoot", "shot.ogg");
 
 		// Settings
 		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.w"));
@@ -146,6 +192,18 @@ namespace Game {
 
 		AddAnimation("PlayerIdle", Game::Animation("Char", {}));
 		SetAnimationInfo("PlayerIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("PlayerIdle", Vector2(48, 67));
+
+
+		AddAnimation("CharDead", Game::Animation("CharDead", {}));
+		SetAnimationInfo("CharDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("CharDead", Vector2(75, 100));
+
+		using Animation = Game::Animation;
+
+		AddAnimation("PlayerShoot", Animation("CharShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
+		SetAnimationInfo("PlayerShoot", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("PlayerShoot", Vector2(48, 67));
 	}
 
 	void GameMaster::AddAnimation(const string& ID, const Animation& animation) {
@@ -159,6 +217,13 @@ namespace Game {
 			return;
 		}
 		animationLibrary[ID].SetInfo(info);
+	}
+
+	void GameMaster::SetAnimationCenter(const string& ID, const Vector2& center) {
+		if (animationLibrary.find(ID) == animationLibrary.end()) {
+			return;
+		}
+		animationLibrary[ID].SetCustomCenter(center);
 	}
 
 	void GameMaster::AddCollider(Collider* collider) {

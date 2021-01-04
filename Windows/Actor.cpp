@@ -20,6 +20,7 @@ namespace Game {
 
 		collider.SetColliderType(Collider::ColliderType::CombatDynamic);
 		collider.SetRadius(50);
+		collider.SetOwner(this);
 
 		collider.RegisterToGame();
 		render.RegisterToGame();

@@ -129,11 +129,8 @@ int main(int argc, char* args[]) {
     player.GetComponent().SetCenter({ 48, 67});
     */
 
-    Game::Actor fighter(new Game::FighterAI());
-    fighter.GetComponent().AddAnimation("PlayerIdle");
-    fighter.GetComponent().SetDefaultAnimation("PlayerIdle");
-    fighter.GetComponent().SwitchAnimation("PlayerIdle");
-    fighter.GetComponent().SetCenter({ 48, 67 });
+    using ActorType = Game::ActorType;
+    ProjectSilver.AddNewEnemy(ActorType::Fighter, Game::Vector2(-100.0, -100.0));
 
     ProjectSilver.AddThePlayer();
 
@@ -144,7 +141,6 @@ int main(int argc, char* args[]) {
     Game::BoxCollider box2L(Game::Vector2(0, 0), 100, 600, Game::Collider::ColliderType::Static);
     Game::BoxCollider box3L(Game::Vector2(0, 500), 800, 100, Game::Collider::ColliderType::Static);
     Game::BoxCollider box4L(Game::Vector2(700, 0), 100, 600, Game::Collider::ColliderType::Static);
-
     ProjectSilver.AddCollider(&sphereL);
     ProjectSilver.AddCollider(&box1L);
     ProjectSilver.AddCollider(&box2L);
@@ -165,36 +161,24 @@ int main(int argc, char* args[]) {
             // Do a small delay
             SDL_Delay((uint32_t)(step - (double)delta));
             currentTime = SDL_GetTicks();
+            delta = step;
         }
+        angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
         int bonusUpdates = (int)round(delta / step) - 1;
 
         // Do code
 
-        if (delta > step) {
+        if (bonusUpdates > 0) {
             cout << "Lag: " << delta - step << " ";
+            for (int i = 0; i < bonusUpdates; i++) {
+                ProjectSilver.Update(true); // Skips rendering for all bonus updates
+            }
         }
-        
-        for (int i = 0; i < bonusUpdates; i++) {
-            ProjectSilver.Update(true);
-        }
 
-        ProjectSilver.Input.Update();
-
-
-        
-        double speed = 3;
-        ProjectSilver.GetThePlayer()->Update();
-        fighter.Update();
+        ProjectSilver.Update(false);
 
         //auto prevPos = sphere2.GetPosition();
-        ProjectSilver.BuildSpacialHashMap();
-        ProjectSilver.ResolveMovementCollisions();
-        ProjectSilver.ResolveCombatCollisions();
-
-        ProjectSilver.Graphics.CenterCameraOn(ProjectSilver.GetThePlayer()->GetTransform().position);
-
-
-
+        
         auto var = ProjectSilver.Input.GetMousePosition();
         auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
         auto angle = vect.Angle();
@@ -203,13 +187,11 @@ int main(int argc, char* args[]) {
         
 
         //cout << angle << endl;
-        angleDebug.SetText("Angle: " + std::to_string(angle));
         // Code end
 
 
         prevTime = currentTime;
 
-        ProjectSilver.Graphics.RenderAll();
     }
     
     #pragma endregion

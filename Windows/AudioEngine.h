@@ -23,7 +23,7 @@ namespace Game {
 	*/
 	class AudioEngine {
 	public:
-		static const int maxChannels = 32;
+		static const int maxChannels = 16;
 		static const int maxDistance = 1000;
 		static const int defaultFadeTime = 400;
 

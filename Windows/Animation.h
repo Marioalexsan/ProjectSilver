@@ -29,11 +29,23 @@ namespace Game {
 		struct Instruction {
 			AnimationInstruction what;
 			string param;
+
+			Instruction(AnimationInstruction what, string param) :
+				what(what),
+				param(param) {}
+
+			Instruction() = default;
 		};
 
 		struct Action {
 			Criteria criteria;
 			Instruction instruction;
+
+			Action(Criteria criteria, Instruction instruction):
+				criteria(criteria),
+				instruction(instruction) {}
+
+			Action() = default;
 		};
 
 		struct Info {
@@ -51,6 +63,8 @@ namespace Game {
 		vector<Action> actions;
 
 		Info info;
+
+		Vector2 customCenter;
 	public:
 		Animation(const string& textureID, const vector<Action>& actions);
 		Animation();
@@ -63,6 +77,14 @@ namespace Game {
 
 		void SetAnimationTexture(const string& textureID);
 		const string& GetAnimationTexture() const;
+
+		inline void SetCustomCenter(const Vector2& center) {
+			customCenter = center;
+		}
+
+		inline const Vector2& GetCustomCenter() const {
+			return customCenter;
+		}
 
 		void SetCallback(const function<void()>& callback);
 		void ExecCallback() const;

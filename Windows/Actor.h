@@ -8,6 +8,13 @@
 namespace Game {
 	class AI;
 	
+	enum ActorType {
+		Unknown,
+		Player,
+		Fighter,
+		NonSentient // Spells, projectiles, etc.
+	};
+
 	class Actor : public Entity {
 	public:
 		struct ActorStats {
@@ -26,13 +33,6 @@ namespace Game {
 
 			int currentInvincibilityFrames;
 			int onHitInvincibilityFrames;
-		};
-
-		enum ActorType {
-			Unknown,
-			Player,
-			Enemy,
-			NonSentient // Spells, projectiles, etc.
 		};
 	protected:
 		ActorStats baseStats;

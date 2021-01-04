@@ -38,6 +38,11 @@ namespace Game {
 			return;
 		}
 
+		if (text.length() == 0) {
+			// Nothing to draw
+			return;
+		}
+
 		int lineHeight = data.arbitraryValues["lineHeight"];
 
 		switch (type) {

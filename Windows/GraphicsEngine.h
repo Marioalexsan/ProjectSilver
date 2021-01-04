@@ -18,7 +18,14 @@ namespace Game {
 
 		enum CommonLayers {
 			WorldBase = 0,
-			GUI = 255,
+			Background = 64,
+			Floor = 65,
+			OnFloor = 66,
+			DefaultHeight = 67,
+			BelowCeiling = 68,
+			Ceiling = 69,
+			GUI = 192,
+			WorldTop = 255,
 		};
 
 		static const map<string, VideoMode> VideoModes;

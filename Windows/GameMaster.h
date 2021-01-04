@@ -11,6 +11,9 @@
 namespace Game {
 	class Entity;
 
+	class Actor;
+	enum ActorType;
+
 	class GameMaster {
 	public:
 		enum SpecialEntities {
@@ -18,6 +21,10 @@ namespace Game {
 		};
 
 	private:
+		#pragma region Temporary Stuff for testing
+
+		#pragma endregion
+
 		bool gameRunning;
 
 		map<string, Animation> animationLibrary;
@@ -35,6 +42,8 @@ namespace Game {
 	public:
 		Entity* GetThePlayer();
 		void AddThePlayer();
+
+		uint64_t AddNewEnemy(ActorType type, Vector2 worldPos);
 
 		void BuildSpacialHashMap();
 		vector<Collider*> GetCollisionCandidates(int startX, int startY, int endX, int endY);
@@ -58,6 +67,8 @@ namespace Game {
 		void AddAnimation(const string& ID, const Animation& animation);
 
 		void SetAnimationInfo(const string& ID, Animation::Info info);
+
+		void SetAnimationCenter(const string& ID, const Vector2& center);
 
 		inline const map<string, Animation>& GetAnimationLibrary() {
 			return animationLibrary;

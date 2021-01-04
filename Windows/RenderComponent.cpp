@@ -111,6 +111,7 @@ namespace Game {
 		mode = info.mode;
 
 		SetTexture(GetCurrentAnimation().GetAnimationTexture());
+		SetCenter(GetCurrentAnimation().GetCustomCenter());
 
 		Restart();
 	}

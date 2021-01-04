@@ -12,11 +12,15 @@ namespace Game {
 	AI::~AI() {
 	}
 
+	bool AI::EntityIsDeadAF() {
+		return entity == nullptr || entity->GetStatsReference().isDead;
+	}
+
 	void AI::OnAttackHit() {}
 
 	void AI::OnHitByAttack(Actor* attacker, double damage) {
 		if (entity != nullptr) {
-			auto stats = entity->GetStatsReference();
+			auto& stats = entity->GetStatsReference();
 			if (damage < 0.0) {
 				return;
 			}

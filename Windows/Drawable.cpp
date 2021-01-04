@@ -8,7 +8,7 @@ namespace Game {
 	Drawable::Drawable() :
 		transform(),
 		relativeToCamera(true),
-		layer(Game::GraphicsEngine::CommonLayers::WorldBase),
+		layer(Game::GraphicsEngine::CommonLayers::DefaultHeight),
 		drawableGraphicsID(0) {}
 
 	Drawable::~Drawable() {
