@@ -12,6 +12,7 @@ namespace Game {
 		Unknown,
 		Player,
 		Fighter,
+		FighterBulletProjectile,
 		NonSentient // Spells, projectiles, etc.
 	};
 

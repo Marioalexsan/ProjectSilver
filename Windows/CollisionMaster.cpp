@@ -178,5 +178,11 @@ namespace Game {
 				return { false, 0.0 };
 			}
 		}
+
+		bool PointCheckVSBox(const Vector2& point, const BoxCollider& Box) {
+			auto pos = Box.GetPosition();
+			auto size = Box.GetSize();
+			return (pos.x <= point.x && point.x <= pos.x + size.first) && (pos.y <= point.y && point.y <= pos.y + size.second);
+		}
 	}
 }

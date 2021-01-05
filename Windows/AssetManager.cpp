@@ -23,6 +23,16 @@ namespace Game {
 				string temp = it->first;
 				UnloadSound(temp);
 			}
+			while (textureLibrary.size() > 0) {
+				auto it = textureLibrary.begin();
+				string temp = it->first;
+				UnloadTexture(temp);
+			}
+			while (fontLibrary.size() > 0) {
+				auto it = fontLibrary.begin();
+				string temp = it->first;
+				UnloadSpriteFont(temp);
+			}
 		}
 	}
 
@@ -347,7 +357,7 @@ namespace Game {
 		}
 
 		SDL_DestroyTexture(fontLibrary[ID].second.texture);
-		textureLibrary.erase(ID);
+		fontLibrary.erase(ID);
 		return true;
 	}
 

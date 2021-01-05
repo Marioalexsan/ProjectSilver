@@ -6,6 +6,7 @@
 #include "PCHeader.h"
 
 #include <iostream>
+#include <chrono>
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -84,17 +85,15 @@ int main(int argc, char* args[]) {
         return -1;
     }
 
+    srand(time(0));
+
     int prevTime = SDL_GetTicks();
 
     Game::GameMaster ProjectSilver;
     Game::Globals::SetTheGame(ProjectSilver);
     ProjectSilver.UltimateMegaInitOfDestiny();
 
-    Game::Sprite levelSprite;
-    levelSprite.SetTexture("Level");
-    levelSprite.SetPosition({ 0, 0 });
-    levelSprite.SetCenter({ 0, 0 });
-    ProjectSilver.Graphics.AddDrawable(&levelSprite);
+    
 
     Game::Sprite targetSprite;
     targetSprite.SetTexture("Target");
@@ -102,54 +101,13 @@ int main(int argc, char* args[]) {
     targetSprite.SetCenter({ 21, 21 });
     targetSprite.SetRelativeToCamera(false);
     ProjectSilver.Graphics.AddDrawable(&targetSprite);
-    targetSprite.SetLayer(200);
-
-    Game::BasicText text;
-    text.SetText("yro\'ue mom gae xd");
-    text.SetFont(&ProjectSilver.Assets, "Big");
-    //ProjectSilver.Graphics.AddDrawable(&text);
-
-
-    Game::BasicText angleDebug;
-    angleDebug.SetFont(&ProjectSilver.Assets, "Huge");
-    angleDebug.SetRelativeToCamera(false);
-    ProjectSilver.Graphics.AddDrawable(&angleDebug);
-    
-    
-    ProjectSilver.Audio.PlayMusic("YourMom");
-
-    /*
-    Game::Actor player;
-    Game::PlayerPseudoAI playerLogic;
-    playerLogic.SetEntity(&player);
-    player.SetAI(&playerLogic);
-    player.GetComponent().AddAnimation("PlayerIdle");
-    player.GetComponent().SetDefaultAnimation("PlayerIdle");
-    player.GetComponent().SwitchAnimation("PlayerIdle");
-    player.GetComponent().SetCenter({ 48, 67});
-    */
-
-    using ActorType = Game::ActorType;
-    ProjectSilver.AddNewEnemy(ActorType::Fighter, Game::Vector2(-100.0, -100.0));
-
-    ProjectSilver.AddThePlayer();
-
-    //comp.SwitchToDefault();
-
-    Game::SphereCollider sphereL(Game::Vector2(473, 300), 50, Game::Collider::ColliderType::Static);
-    Game::BoxCollider box1L(Game::Vector2(0, 0), 300, 100, Game::Collider::ColliderType::Static);
-    Game::BoxCollider box2L(Game::Vector2(0, 0), 100, 600, Game::Collider::ColliderType::Static);
-    Game::BoxCollider box3L(Game::Vector2(0, 500), 800, 100, Game::Collider::ColliderType::Static);
-    Game::BoxCollider box4L(Game::Vector2(700, 0), 100, 600, Game::Collider::ColliderType::Static);
-    ProjectSilver.AddCollider(&sphereL);
-    ProjectSilver.AddCollider(&box1L);
-    ProjectSilver.AddCollider(&box2L);
-    ProjectSilver.AddCollider(&box3L);
-    ProjectSilver.AddCollider(&box4L);
+    targetSprite.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
 
     #pragma endregion
 
     #pragma region Game Loop
+
+    ProjectSilver.InitMenu();
 
     while (ProjectSilver.IsGameRunning()) 
     {
@@ -163,7 +121,7 @@ int main(int argc, char* args[]) {
             currentTime = SDL_GetTicks();
             delta = step;
         }
-        angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
+        //angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
         int bonusUpdates = (int)round(delta / step) - 1;
 
         // Do code
@@ -184,8 +142,6 @@ int main(int argc, char* args[]) {
         auto angle = vect.Angle();
         targetSprite.SetPosition({ var.first, var.second });
 
-        
-
         //cout << angle << endl;
         // Code end
 
@@ -193,6 +149,8 @@ int main(int argc, char* args[]) {
         prevTime = currentTime;
 
     }
+    ProjectSilver.UnloadLevel();
+    ProjectSilver.UnloadMenu();
     
     #pragma endregion
 

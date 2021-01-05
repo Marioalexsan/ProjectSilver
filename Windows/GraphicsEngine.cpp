@@ -26,7 +26,7 @@ namespace Game {
 	};
 
 	GraphicsEngine::GraphicsEngine() :
-		currentID(0)
+		currentID(1)
 	{
 		windowWidth = 1920;
 		windowHeight = 1080;
@@ -96,7 +96,7 @@ namespace Game {
 	}
 
 	void GraphicsEngine::RenderAll() {
-		SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
 		SDL_RenderClear(Renderer);
 
 		map<int, vector<Drawable*>> layeredDrawables;

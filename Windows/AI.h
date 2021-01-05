@@ -11,6 +11,7 @@ namespace Game {
 	protected:
 		int counter;
 		int disableUpdatesCounter;
+		int destroyDelay;
 
 		Actor* entity;
 
@@ -20,7 +21,7 @@ namespace Game {
 		AI(Actor* owner);
 		AI();
 
-		~AI();
+		virtual ~AI();
 
 		inline void SetEntity(Actor* entity) {
 			this->entity = entity;

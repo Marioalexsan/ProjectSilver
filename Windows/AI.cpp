@@ -4,9 +4,11 @@
 
 namespace Game {
 	AI::AI(Actor* owner):
+		counter(0),
 		entity(owner) {}
 
 	AI::AI():
+		counter(0),
 		entity(nullptr) {}
 
 	AI::~AI() {

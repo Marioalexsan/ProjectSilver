@@ -15,6 +15,8 @@ namespace Game {
 	
 		pair<bool, double> RaycastVSBox(const Vector2& A, const Vector2& B, const BoxCollider& Box);
 		pair<bool, double> RaycastVSSphere(const Vector2& A, const Vector2& B, const SphereCollider& Sphere);
+
+		bool PointCheckVSBox(const Vector2& point, const BoxCollider& Box);
 	}
 }
 

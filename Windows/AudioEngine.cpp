@@ -9,7 +9,7 @@ namespace Game {
 		channels{ 0 },
 		currentID(1),
 		soundCount(0),
-		musicVolume(75),
+		musicVolume(100),
 		soundVolume(75)
 	{
 		Mix_AllocateChannels(maxChannels);

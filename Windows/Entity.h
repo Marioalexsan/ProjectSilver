@@ -20,10 +20,12 @@ namespace Game {
 	protected:
 		Game::Transform transform; // Does not use center
 		EntityType type;
+
+		bool toBeDestroyed;
 	public:
 		Entity();
 		Entity(EntityType type);
-		~Entity();
+		virtual ~Entity();
 
 
 		void SetType(EntityType type);
@@ -36,6 +38,9 @@ namespace Game {
 		Transform& GetTransform();
 
 		virtual void Update() = 0;
+
+		inline void SignalDestruction() { toBeDestroyed = true; }
+		inline bool IsDestructionSignalled() { return toBeDestroyed; }
 	};
 }
 

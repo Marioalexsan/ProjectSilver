@@ -6,6 +6,7 @@
 
 namespace Game {
 	Drawable::Drawable() :
+		alpha(255),
 		transform(),
 		relativeToCamera(true),
 		layer(Game::GraphicsEngine::CommonLayers::DefaultHeight),

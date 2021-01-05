@@ -39,7 +39,9 @@ namespace Game {
 		ApplyKnockbackStep();
 		ApplyKnockback();
 		
-		brain->Update();
+		if (brain) {
+			brain->Update();
+		}
 		render.Update();
 	}
 

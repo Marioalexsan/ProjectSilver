@@ -2,11 +2,11 @@
 
 #include "BasicText.h"
 #include "GraphicsEngine.h"
+#include "Globals.h"
 
 namespace Game {
 	BasicText::BasicText():
 		texture(nullptr),
-		manager(nullptr),
 		fontID(""),
 		left(0),
 		right(100),
@@ -25,7 +25,7 @@ namespace Game {
 	}
 
 	void BasicText::Draw() {
-		auto lib = manager->GetFontLibrary();
+		auto lib = Globals::Assets().GetFontLibrary();
 
 		if (lib.find(fontID) == lib.end()) {
 			return;
@@ -50,7 +50,7 @@ namespace Game {
 			{
 				int currentX = 0;
 				int wordPos = 0;
-				while (wordPos < text.length() - 1) {
+				while (wordPos < text.length()) {
 					auto info = data.charLibrary[text[wordPos]];
 
 					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
@@ -59,6 +59,7 @@ namespace Game {
 
 					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
 
+					SDL_SetTextureAlphaMod(texture, alpha);
 					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform->direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 					wordPos++;
 					currentX += info.xadvance;
@@ -71,15 +72,15 @@ namespace Game {
 	}
 
 
-	void BasicText::SetFont(AssetManager* manager, const string& ID) {
-		auto lib = manager->GetFontLibrary();
+	void BasicText::SetFont(const string& ID) {
+		AssetManager& manager = Globals::Assets();
+		auto lib = manager.GetFontLibrary();
 		if (lib.find(ID) == lib.end()) {
 			//Error
 			return;
 		}
 		this->texture = lib.at(ID).second.texture;
 		this->fontID = ID;
-		this->manager = manager;
 	}
 
 	void BasicText::SetText(const string& text) {

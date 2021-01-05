@@ -6,6 +6,8 @@
 
 namespace Game {
 	class FighterAI : public AI {
+	private:
+		bool strafesLeft;
 	public:
 		FighterAI();
 

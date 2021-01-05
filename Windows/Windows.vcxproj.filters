@@ -103,6 +103,15 @@
     <Filter Include="ComplexFeatures\AI Library\PlayerPseudoAI">
       <UniqueIdentifier>{2d4058fa-5ab6-4322-b06f-c0613c34ec63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Entity Library\FighterBullet">
+      <UniqueIdentifier>{60f5ec84-7807-4c2d-a469-04da556031b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\LevelDIrector">
+      <UniqueIdentifier>{6d37e266-f281-4f4d-84a9-b84e7a3ecf35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\MenuDirector">
+      <UniqueIdentifier>{4a72feb6-bc38-4759-8d4e-c6c03af33f34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -186,6 +195,15 @@
     <ClCompile Include="FighterAI.cpp">
       <Filter>ComplexFeatures\AI Library\Fighter</Filter>
     </ClCompile>
+    <ClCompile Include="FighterBullet.cpp">
+      <Filter>Entity Library\FighterBullet</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelDirector.cpp">
+      <Filter>Entity Library\LevelDIrector</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuDirector.cpp">
+      <Filter>Entity Library\MenuDirector</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -265,6 +283,15 @@
     </ClInclude>
     <ClInclude Include="FighterAI.h">
       <Filter>ComplexFeatures\AI Library\Fighter</Filter>
+    </ClInclude>
+    <ClInclude Include="FighterBullet.h">
+      <Filter>Entity Library\FighterBullet</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelDirector.h">
+      <Filter>Entity Library\LevelDIrector</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuDirector.h">
+      <Filter>Entity Library\MenuDirector</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

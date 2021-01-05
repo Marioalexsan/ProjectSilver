@@ -17,7 +17,6 @@ namespace Game {
 		};
 	protected:
 		SDL_Texture* texture;
-		AssetManager* manager;
 		string fontID;
 		string text;
 		int left;
@@ -28,7 +27,7 @@ namespace Game {
 	public:
 		BasicText();
 		virtual void Draw();
-		void SetFont(AssetManager* manager, const string& ID);
+		void SetFont(const string& ID);
 		void SetConstraints(int left, int right, int top, int bottom);
 		void SetText(const string& text);
 	};

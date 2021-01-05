@@ -5,11 +5,13 @@
 namespace Game {
 	Entity::Entity():
 		type(Unknown),
-		transform() {}
+		transform(),
+		toBeDestroyed(false) {}
 
 	Entity::Entity(EntityType type):
 		type(type),
-		transform() {}
+		transform(),
+		toBeDestroyed(false) {}
 
 	Entity::~Entity() {
 	}

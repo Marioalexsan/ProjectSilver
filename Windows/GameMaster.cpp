@@ -6,12 +6,23 @@
 #include "PlayerPseudoAI.h"
 #include "FighterAI.h"
 #include "Actor.h"
+#include "FighterBullet.h"
+#include "LevelDirector.h"
+#include "MenuDirector.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
 		entityID(1),
 		gameRunning(true)
 	{
+	}
+
+	GameMaster::~GameMaster() {
+		//Cleanup
+		while (entityMasterList.size() > 0) {
+			entityMasterList.erase(entityMasterList.begin());
+		}
+
 	}
 
 	void GameMaster::AddThePlayer() {
@@ -25,6 +36,19 @@ namespace Game {
 		player.GetComponent().SetDefaultAnimation("PlayerIdle");
 		player.GetComponent().SwitchAnimation("PlayerIdle");
 		player.GetComponent().AddAnimation("PlayerShoot");
+		player.GetComponent().AddAnimation("CharDead");
+		player.GetComponent().AddAnimation("PlayerReload");
+		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
+
+		auto& stats = player.GetStatsReference();
+		stats.maxHealth = stats.health = 100.0;
+	}
+
+	void GameMaster::RemoveThePlayer() {
+		if (GetThePlayer() == nullptr) {
+			return;
+		}
+		entityMasterList.erase(maxAutoEntityID + SpecialEntities::Player);
 	}
 
 	Entity* GameMaster::GetThePlayer() {
@@ -43,9 +67,11 @@ namespace Game {
 			entityMasterList[ID].reset(new Actor(new FighterAI()));
 			Game::Actor& fighter = *(Actor*)entityMasterList[ID].get();
 			fighter.GetComponent().AddAnimation("PlayerIdle");
+			fighter.GetComponent().AddAnimation("PlayerShoot");
 			fighter.GetComponent().AddAnimation("CharDead");
 			fighter.GetComponent().SetDefaultAnimation("PlayerIdle");
 			fighter.GetComponent().SwitchAnimation("PlayerIdle");
+			fighter.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
 			auto& stats = fighter.GetStatsReference();
 			stats.maxHealth = stats.health = 100.0;
@@ -53,11 +79,42 @@ namespace Game {
 
 			fighter.GetTransform().position = worldPos;
 		} break;
+		case ActorType::FighterBulletProjectile: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new FighterBullet());
+			Game::FighterBullet& bullet = *(FighterBullet*)entityMasterList[ID].get();
+			bullet.GetComponent().AddAnimation("BulletTravel");
+			bullet.GetComponent().SetDefaultAnimation("BulletTravel");
+			bullet.GetComponent().SwitchAnimation("BulletTravel");
+			bullet.GetCollider().SetEntityDestructionSignalling(true);
+
+			bullet.GetTransform().position = worldPos;
+		} break;
 		default:
 			std::cout << "Unknown enemy bro!" << endl;
 			return 0;
 		}
 		return ID;
+	}
+
+	Entity* GameMaster::GetEntity(uint64_t ID) {
+		if (entityMasterList.find(ID) == entityMasterList.end()) {
+			return nullptr;
+		}
+		return entityMasterList[ID].get();
+	}
+
+	void GameMaster::RemoveNonSpecialEntities() {
+		vector<uint64_t> entitiesToDelete;
+		for (auto& pair : entityMasterList) {
+			if (pair.first < maxAutoEntityID) {
+				entitiesToDelete.push_back(pair.first);
+			}
+		}
+
+		for (auto& entity : entitiesToDelete) {
+			entityMasterList.erase(entity);
+		}
 	}
 
 	uint64_t GameMaster::NextEntityID() {
@@ -81,7 +138,24 @@ namespace Game {
 		ResolveMovementCollisions();
 		ResolveCombatCollisions();
 
-		Graphics.CenterCameraOn(GetThePlayer()->GetTransform().position);
+		vector<uint64_t> entitiesToDelete;
+		for (auto& pair : entityMasterList) {
+			if (pair.second->IsDestructionSignalled()) {
+				entitiesToDelete.push_back(pair.first);
+			}
+		}
+
+		for (auto& entity : entitiesToDelete) {
+			entityMasterList.erase(entity);
+		}
+
+		while (colliderUnregisterQueue.size() > 0) {
+			RemoveCollider(colliderUnregisterQueue.front());
+			colliderUnregisterQueue.pop();
+		}
+		if (GetThePlayer() != nullptr) {
+			Graphics.CenterCameraOn(GetThePlayer()->GetTransform().position);
+		}
 		if (!skipGraphicsFrame) {
 			Graphics.RenderAll();
 		}
@@ -123,6 +197,8 @@ namespace Game {
 		}
 	}
 
+    #pragma warning(push)
+    #pragma warning(disable: 26451)
 	vector<Collider*> GameMaster::GetCollisionCandidates(int startX, int startY, int endX, int endY) {
 		vector<Collider*> results;
 		int prediction = 0;
@@ -132,7 +208,7 @@ namespace Game {
 			}
 		}
 
-		#pragma warning(supress: 26451)
+		
 		results.reserve(prediction + 1);
 		for (int X = startX; X <= endX; X++) {
 			for (int Y = startY; Y <= endY; Y++) {
@@ -145,6 +221,7 @@ namespace Game {
 		}
 		return results;
 	}
+	#pragma warning(pop)
 
 	void GameMaster::Stop() {
 		gameRunning = false;
@@ -162,11 +239,15 @@ namespace Game {
 		Assets.LoadTexture("Test", "Untitled2.png");
 		Assets.LoadTexture("Char", "Char.png");
 		Assets.LoadTexture("Test2", "Untitled3.png");
-		Assets.LoadTexture("Level", "Level.png");
+		Assets.LoadTexture("LevelFloor", "Floor.png");
+		Assets.LoadTexture("LevelWall", "Walls.png");
 		Assets.LoadTexture("CharCircle", "CharCircle.png");
 		Assets.LoadTexture("CharDead", "CharDead.png");
 		Assets.LoadTexture("Target", "target.png");
 		Assets.LoadTexture("CharShoot", "CharShoot.png");
+		Assets.LoadTexture("Bullet", "Bullet.png");
+		Assets.LoadTexture("Button", "Button.png");
+		Assets.LoadTexture("PlayerReload", "CharReload.png");
 
 		// Fonts
 		Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
@@ -178,9 +259,13 @@ namespace Game {
 		// Sound
 		Assets.LoadSound("Mooz", "Mooz.ogg");
 		Assets.LoadSound("PlayerShoot", "shot.ogg");
+		Assets.LoadSound("PlayerReload1", "magout.ogg");
+		Assets.LoadSound("PlayerReload2", "magin.ogg");
+		Assets.LoadSound("PlayerReload3", "receiverpull.ogg");
+		Assets.LoadSound("GunClick", "gunclick.ogg");
 
 		// Settings
-		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.w"));
+		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
 		Input.SetMouseGrab(true);
 
 		// Animation info
@@ -199,11 +284,51 @@ namespace Game {
 		SetAnimationInfo("CharDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
 		SetAnimationCenter("CharDead", Vector2(75, 100));
 
+		AddAnimation("BulletTravel", Game::Animation("Bullet", {}));
+		SetAnimationInfo("BulletTravel", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("BulletTravel", Vector2(3, 5));
+
+		AddAnimation("PlayerReload", Game::Animation("PlayerReload", {
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "3"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload1"} },
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "8"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "10"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
+			}));
+		SetAnimationInfo("PlayerReload", { 9, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("PlayerReload", Vector2(48, 67));
+
 		using Animation = Game::Animation;
 
 		AddAnimation("PlayerShoot", Animation("CharShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
 		SetAnimationInfo("PlayerShoot", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("PlayerShoot", Vector2(48, 67));
+	}
+
+	void GameMaster::InitLevel() {
+		if (entityMasterList.find(maxAutoEntityID + SpecialEntities::TheLevelDirector) != entityMasterList.end()) {
+			return;
+		}
+		entityMasterList[maxAutoEntityID + SpecialEntities::TheLevelDirector].reset(new LevelDirector());
+	}
+
+	void GameMaster::UnloadLevel() {
+		if (entityMasterList.find(maxAutoEntityID + SpecialEntities::TheLevelDirector) == entityMasterList.end()) {
+			return;
+		}
+		entityMasterList.erase(maxAutoEntityID + SpecialEntities::TheLevelDirector);
+	}
+
+	void GameMaster::InitMenu() {
+		if (entityMasterList.find(maxAutoEntityID + SpecialEntities::TheMenuDirector) != entityMasterList.end()) {
+			return;
+		}
+		entityMasterList[maxAutoEntityID + SpecialEntities::TheMenuDirector].reset(new MenuDirector());
+	}
+
+	void GameMaster::UnloadMenu() {
+		if (entityMasterList.find(maxAutoEntityID + SpecialEntities::TheMenuDirector) == entityMasterList.end()) {
+			return;
+		}
+		entityMasterList.erase(maxAutoEntityID + SpecialEntities::TheMenuDirector);
 	}
 
 	void GameMaster::AddAnimation(const string& ID, const Animation& animation) {
@@ -234,6 +359,10 @@ namespace Game {
 
 	void GameMaster::RemoveCollider(Collider* collider) {
 		colliderLibrary.erase(collider);
+	}
+
+	void GameMaster::AddColliderToRemovalQueue(Collider* collider) {
+		colliderUnregisterQueue.push(collider);
 	}
 
 	void GameMaster::ResolveMovementCollisions() {
@@ -270,7 +399,7 @@ namespace Game {
 				continue;
 			}
 
-			auto candidates = GetCollisionCandidates(startX, startY, endX, endY);
+			auto candidates = GetCollisionCandidates(int(startX), int(startY), int(endX), int(endY));
 
 			// Reduce second loop to pairs not yet checked by previous loops
 			for (auto beta: candidates) {
@@ -459,15 +588,23 @@ namespace Game {
 					auto EntityA = dynamic_cast<Game::Actor*>(alpha->GetEntity());
 					auto EntityB = dynamic_cast<Game::Actor*>(beta->GetEntity());
 					if (HurtA) {
-						if (EntityA != nullptr && EntityA->GetAI() != nullptr) EntityA->GetAI()->OnHitByAttack(EntityB, alpha->GetCombatDamage());
+						if (EntityA != nullptr && EntityA->GetAI() != nullptr) EntityA->GetAI()->OnHitByAttack(EntityB, beta->GetCombatDamage());
 						if (EntityB != nullptr && EntityB->GetAI() != nullptr) EntityB->GetAI()->OnAttackHit();
 
 						//std::cout << "HurtA ";
 					}
 					if (HurtB) {
-						if (EntityB != nullptr && EntityA->GetAI() != nullptr) EntityB->GetAI()->OnHitByAttack(EntityA, beta->GetCombatDamage());
-						if (EntityA != nullptr && EntityB->GetAI() != nullptr) EntityA->GetAI()->OnAttackHit();
+						if (EntityB != nullptr && EntityB->GetAI() != nullptr) EntityB->GetAI()->OnHitByAttack(EntityA, alpha->GetCombatDamage());
+						if (EntityA != nullptr && EntityA->GetAI() != nullptr) EntityA->GetAI()->OnAttackHit();
 						//std::cout << "HurtB ";
+					}
+
+					if (alpha->GetCollisionOptions().find(Collider::CollisionOptions::DestroyAfterCombatHit) != alpha->GetCollisionOptions().end()) {
+						alpha->SignalDestruction();
+					}
+
+					if (beta->GetCollisionOptions().find(Collider::CollisionOptions::DestroyAfterCombatHit) != beta->GetCollisionOptions().end()) {
+						beta->SignalDestruction();
 					}
 
 					//std::cout << "COL" << alpha->GetCombatDamage() << " " << beta->GetCombatDamage() << endl;
@@ -475,6 +612,113 @@ namespace Game {
 				collidedPairs.insert({ alpha, beta });
 			}
 		}
+
+		
+
+		// Additional collider checks
+
+		// Destroy combat colliders on contact with Statics
+		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
+			auto alpha = *firstIt;
+
+			// Discard anything which isn't a combat collider
+			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic)) {
+				continue;
+			}
+
+			// Discard if already destroyed from previous steps
+			if (alpha->IsDestructionSignalled()) {
+				continue;
+			}
+
+			auto info = alpha->GetCollisionOptions();
+
+			// Discard anything which doesn't get destroyed on contact with Statics
+			if (info.find(Collider::CollisionOptions::DestroyCombatColliderAgainstStatic) == info.end()) {
+				continue;
+			}
+
+			auto AasAttacker = alpha->GetLayersToAttack();
+			auto AasDefender = alpha->GetCombatLayer();
+
+			// Get alpha true type
+			BoxCollider* ABox = dynamic_cast<BoxCollider*>(alpha);
+			SphereCollider* ASphere = nullptr;
+			if (ABox == nullptr) {
+				ASphere = dynamic_cast<SphereCollider*>(alpha);
+			}
+
+			// TO DO IF NEEDED: Space Hashmap optimization will go after this
+
+			double startX, startY, endX, endY;
+
+			if (ABox != nullptr || ASphere != nullptr) {
+				auto result = alpha->GetBoundingBox();
+				startX = floor(result.first.x / cellSize);
+				endX = floor(result.second.x / cellSize);
+				startY = floor(result.first.y / cellSize);
+				endY = floor(result.second.y / cellSize);
+			}
+			else {
+				// ABANDON SHIP
+				cerr << "Whoop de doo, borkeroo!";
+				continue;
+			}
+
+			auto candidates = GetCollisionCandidates(startX, startY, endX, endY);
+
+			bool toDestroy = false;
+
+			for (auto beta : candidates) {
+				// Check prerequisites
+
+				// This part only checks for static colliders
+				if (beta->GetColliderType() != Collider::ColliderType::Static) {
+					continue;
+				}
+
+				// Check collision
+
+				BoxCollider* BBox = dynamic_cast<BoxCollider*>(beta);
+				SphereCollider* BSphere = nullptr;
+				if (BBox == nullptr) {
+					BSphere = dynamic_cast<SphereCollider*>(beta);
+				}
+
+				pair<bool, Vector2> result = { false, {} };
+
+				// Questionable code here
+				// Check for collisions without caculating push vectors
+				if (ABox != nullptr) {
+					if (BBox != nullptr) {
+						result = CollisionMaster::CheckCollision(*ABox, *BBox, true);
+					}
+					else if (BSphere != nullptr) {
+						result = CollisionMaster::CheckCollision(*ABox, *BSphere, true);
+					}
+				}
+				else if (ASphere != nullptr) {
+					if (BBox != nullptr) {
+						result = CollisionMaster::CheckCollision(*ASphere, *BBox, true);
+					}
+					else if (BSphere != nullptr) {
+						result = CollisionMaster::CheckCollision(*ASphere, *BSphere, true);
+					}
+				}
+
+				if (result.first) {
+					// Collision happened. Stop further checks, mark collider for destruction
+					toDestroy = true;
+					break;
+				}
+			}
+
+			if (toDestroy) {
+				// Collision happened. Destroy the collider
+				alpha->SignalDestruction();
+			}
+		}
+
 	}
 
 	// This function will be extremely slow, unless Spacial Hasmap optimization is implemented

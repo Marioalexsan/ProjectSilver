@@ -17,7 +17,9 @@ namespace Game {
 	class GameMaster {
 	public:
 		enum SpecialEntities {
-			Player = 1
+			Player = 1,
+			TheLevelDirector = 2,
+			TheMenuDirector = 3
 		};
 
 	private:
@@ -29,6 +31,7 @@ namespace Game {
 
 		map<string, Animation> animationLibrary;
 		set<Collider*> colliderLibrary;
+		queue<Collider*> colliderUnregisterQueue;
 
 		double cellSize = 100.0;
 		map<pair<int, int>, vector<Collider*>> spacialHashMap;
@@ -42,8 +45,12 @@ namespace Game {
 	public:
 		Entity* GetThePlayer();
 		void AddThePlayer();
+		void RemoveThePlayer();
 
 		uint64_t AddNewEnemy(ActorType type, Vector2 worldPos);
+		Entity* GetEntity(uint64_t ID);
+
+		void RemoveNonSpecialEntities();
 
 		void BuildSpacialHashMap();
 		vector<Collider*> GetCollisionCandidates(int startX, int startY, int endX, int endY);
@@ -57,8 +64,15 @@ namespace Game {
 		Game::InputHandler Input;
 
 		GameMaster();
+		~GameMaster();
 
 		void UltimateMegaInitOfDestiny();
+
+		void InitLevel();
+		void UnloadLevel();
+
+		void InitMenu();
+		void UnloadMenu();
 
 		void Update(bool skipGraphicsFrame);
 		void Stop();
@@ -76,6 +90,7 @@ namespace Game {
 
 		void AddCollider(Collider* collider);
 		void RemoveCollider(Collider* collider);
+		void AddColliderToRemovalQueue(Collider* collider);
 
 		void ResolveMovementCollisions();
 		void ResolveCombatCollisions();

@@ -15,6 +15,8 @@ namespace Game {
 		int layer;
 		bool relativeToCamera;
 
+		uint8_t alpha;
+
 		uint64_t drawableGraphicsID = 0;
 	public:
 		Drawable();
@@ -25,6 +27,10 @@ namespace Game {
 
 		void SetDirection(double direction);
 		void Rotate(double angle);
+
+		inline void SetAlpha(uint8_t alpha) { this->alpha = alpha; }
+
+		inline uint8_t GetAlpha() { return alpha; }
 
 		void SetPosition(const Vector2& position);
 		void Move(const Vector2& amount);

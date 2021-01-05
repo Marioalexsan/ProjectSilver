@@ -24,6 +24,11 @@ namespace Game {
 			Enemies
 		};
 
+		enum CollisionOptions {
+			DestroyCombatColliderAgainstStatic,
+			DestroyAfterCombatHit
+		};
+
 	protected:
 		Trackable<Game::Transform> transform; // Does not use the center and rotation, but I've opted for easier tracking of Entity transform
 		double mass; // Mass of 0.0 means that it cannot be moved in generic conditions
@@ -31,10 +36,14 @@ namespace Game {
 		ColliderType type;
 		CombatLayer combatLayer;
 		set<CombatLayer> attackerLayers;
-		
+		set<CollisionOptions> info;
+
 		Entity* owner;
 
 		double damage;
+
+		bool destructionSignalled;
+		bool alsoSignalEntityDestruction;
 	public:
 		Collider();
 		Collider(const Vector2& position, ColliderType type);
@@ -46,6 +55,14 @@ namespace Game {
 		virtual const Vector2 GetPosition() const;
 		void SetPosition(const Vector2& position);
 		void Move(const Vector2& amount);
+
+		inline void SetEntityDestructionSignalling(bool mode) {
+			alsoSignalEntityDestruction = mode;
+		}
+
+		void SignalDestruction();
+
+		inline bool IsDestructionSignalled() { return destructionSignalled; }
 
 		inline void SetOwner(Entity* en) { owner = en; }
 
@@ -61,7 +78,11 @@ namespace Game {
 
 		inline void SetLayersToAttack(set<CombatLayer> setLayers) { attackerLayers = setLayers; }
 
-		inline set<CombatLayer> GetLayersToAttack() { return attackerLayers; }
+		inline const set<CombatLayer>& GetLayersToAttack() { return attackerLayers; }
+
+		inline void SetCollisionOptions(set<CollisionOptions> setInfo) { info = setInfo; }
+
+		inline const set<CollisionOptions>& GetCollisionOptions() { return info; }
 
 		inline void SetColliderType(ColliderType type) { this->type = type; }
 
@@ -72,6 +93,8 @@ namespace Game {
 		void RegisterToGame();
 
 		void UnregisterFromGame();
+
+		void QueueUnregisterFromGame();
 	};
 }
 
