@@ -32,8 +32,8 @@ namespace Game {
 			return;
 		}
 		for (auto& elem : GetCurrentAnimation().GetActions()) {
+			string lastID = currentAnimation;
 			switch (elem.criteria.what) {
-
 			case Animation::AnimationCriteria::TriggerAtFrameX: {
 				int frame;
 				try {
@@ -61,6 +61,12 @@ namespace Game {
 					parsedEnd = true;
 				}
 			} break;
+			}
+			if (currentAnimation != lastID) {
+				parsedStart = false;
+				parsedEnd = false;
+				finished = false;
+				break;
 			}
 		}
 	}
@@ -131,6 +137,7 @@ namespace Game {
 			mode = info.mode;
 
 			SetTexture(GetCurrentAnimation().GetAnimationTexture());
+			SetCenter(GetCurrentAnimation().GetCustomCenter());
 
 			Restart();
 		}
@@ -147,10 +154,13 @@ namespace Game {
 			ParseActions(lastFrame + 1, currentFrame);
 		}
 		else if (finished) {
+			string lastID = currentAnimation;
 			if (!parsedEnd) {
 				ParseActions(totalFrames - 1, totalFrames - 1);
 			}
-			SwitchToDefault();
+			if (currentAnimation == lastID) {
+				SwitchToDefault();
+			}
 			AnimatedSprite::Update(1);
 		}
 	}

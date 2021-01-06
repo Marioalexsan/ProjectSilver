@@ -8,27 +8,40 @@
 
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
-        currentPistolAmmo(8),
-        maxPistolAmmo(8),
+        shieldFadeOutDelay(0),
+        shieldRegenCounter(0),
+        perfectGuardCounter(0),
+        currentPistolAmmo(15),
+        maxPistolAmmo(15),
+        regenCounter(0),
         wasReloadingPistol(false),
+        hasShield(true),
+        inShield(false),
         AI()
     {
         playerHealth.SetFont("Huge");
         playerHealth.SetRelativeToCamera(false);
         playerHealth.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        playerHealth.SetPosition(Vector2(0, 0));
+        playerHealth.SetPosition(Vector2(10, 20));
         playerHealth.RegisterToGame();
+
+        shieldHealth.SetFont("Big");
+        shieldHealth.SetRelativeToCamera(false);
+        shieldHealth.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
+        shieldHealth.SetPosition(Vector2(20, 155));
+        shieldHealth.RegisterToGame();
 
         gunAmmo.SetFont("Big");
         gunAmmo.SetRelativeToCamera(false);
         gunAmmo.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        gunAmmo.SetPosition(Vector2(10, 75));
+        gunAmmo.SetPosition(Vector2(20, 95));
         gunAmmo.RegisterToGame();
     }
 
     PlayerPseudoAI::~PlayerPseudoAI() {
         playerHealth.UnregisterFromGame();
         gunAmmo.UnregisterFromGame();
+        shieldHealth.UnregisterFromGame();
     }
 
 	void PlayerPseudoAI::Update() {
@@ -36,11 +49,61 @@ namespace Game {
 			return;
 		}
 
+        if(shieldFadeOutDelay > 0) {
+            shieldFadeOutDelay--;
+        }
+
+        if (perfectGuardCounter > 0) {
+            perfectGuardCounter--;
+        }
+
         if (entity->GetStatsReference().isDead) {
             playerHealth.SetText("Dead!");
         }
         else {
-            playerHealth.SetText("Health: " + std::to_string(int(entity->GetStatsReference().health)));
+            regenCounter++;
+            if (regenCounter >= 60 + (Globals::Difficulty() > 1 ? 30 : 0)) {
+                regenCounter = 0;
+                if (entity->GetStatsReference().health < entity->GetStatsReference().maxHealth) {
+                    double healing = 3.0 - Globals::Difficulty();
+
+                    entity->GetStatsReference().health += healing;
+                    if (entity->GetStatsReference().health > entity->GetStatsReference().maxHealth) {
+                        entity->GetStatsReference().health = entity->GetStatsReference().maxHealth;
+                    }
+                }
+            }
+
+            shieldRegenCounter++;
+
+            if (shieldRegenCounter >= 150) {
+                shieldRegenCounter = 120;
+                if (entity->GetStatsReference().shieldHealth < entity->GetStatsReference().maxShieldHealth) {
+                    double healing = 8.0 - Globals::Difficulty() * 2;
+
+                    entity->GetStatsReference().shieldHealth += healing;
+                    if (entity->GetStatsReference().shieldHealth > entity->GetStatsReference().maxShieldHealth) {
+                        entity->GetStatsReference().shieldHealth = entity->GetStatsReference().maxShieldHealth;
+                    }
+                    shieldFadeOutDelay = 40;
+                }
+            }
+
+            if (inShield || entity->GetStatsReference().shieldHealth < entity->GetStatsReference().maxShieldHealth && shieldRegenCounter >= 0) {
+                shieldHealth.SetAlpha(255);
+                shieldHealth.SetText("Shield: " + std::to_string(int(entity->GetStatsReference().shieldHealth)) + " / " + std::to_string(int(entity->GetStatsReference().maxShieldHealth)));
+            }
+            else if (shieldRegenCounter < 0) {
+                shieldHealth.SetAlpha(255);
+                shieldHealth.SetText("Shield broken!");
+            }
+            else {
+                if (shieldFadeOutDelay <= 30) {
+                    shieldHealth.SetAlpha(shieldFadeOutDelay * 255 / 30);
+                }
+            }
+
+            playerHealth.SetText("Health: " + std::to_string(int(entity->GetStatsReference().health)) + " / " + std::to_string(int(entity->GetStatsReference().maxHealth)));
         }
 
         gunAmmo.SetText("Ammo: " + std::to_string(currentPistolAmmo) + " / " + std::to_string(maxPistolAmmo));
@@ -55,16 +118,19 @@ namespace Game {
         using ButtonCode = Game::InputHandler::ButtonCode;
 
         if (game.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || game.Input.WasQuitCalled()) {
-            game.Stop();
+            //game.Stop();
         }
 
         if (entity->GetStatsReference().isDead) {
             return;
         }
 
-        double moveSpeed = 10.0;
+        double moveSpeed = 9.0;
         if (entity->GetComponent().GetCurrentAnimationID() == "PlayerReload") {
             moveSpeed /= 3.0;
+        }
+        else if (inShield) {
+            moveSpeed /= 2.5;
         }
 
 
@@ -79,6 +145,22 @@ namespace Game {
         }
         if (game.Input.IsKeyDown(KeyCode::D)) {
             entity->Move({ moveSpeed, 0.0 });
+        }
+
+
+        auto currentAnimation = entity->GetComponent().GetCurrentAnimationID();
+        if (shieldRegenCounter >= 0 && game.Input.IsButtonPressedThisFrame(ButtonCode::Right) && currentAnimation != "CharShieldUp" && currentAnimation != "CharShieldWalk" && currentAnimation != "CharShieldDown") {
+            wasReloadingPistol = false;
+            inShield = true;
+            perfectGuardCounter = 16;
+            entity->GetComponent().SwitchAnimation("CharShieldUp");
+        }
+
+        if ((!game.Input.IsButtonDown(ButtonCode::Right) || shieldRegenCounter < 0) && currentAnimation == "CharShieldWalk") {
+            entity->GetComponent().SwitchAnimation("CharShieldDown");
+            perfectGuardCounter = 0;
+            inShield = false;
+            shieldFadeOutDelay = 30;
         }
 
         if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
@@ -131,10 +213,6 @@ namespace Game {
             wasReloadingPistol = true;
         }
 
-        if (game.Input.IsButtonPressedThisFrame(ButtonCode::Right)) {
-            game.AddNewEnemy(ActorType::Fighter, Game::Vector2(200.0, 200.0));
-        }
-
         auto var = game.Input.GetMousePosition();
         auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
         auto angle = vect.Angle();
@@ -156,6 +234,7 @@ namespace Game {
     }
 
     void PlayerPseudoAI::OnHitByAttack(Actor* attacker, double damage) {
+        regenCounter = -120;
         if (entity != nullptr) {
             auto& stats = entity->GetStatsReference();
             if (damage < 0.0) {
@@ -165,7 +244,33 @@ namespace Game {
                 return;
             }
             stats.currentInvincibilityFrames = stats.onHitInvincibilityFrames;
-            stats.health -= damage;
+
+
+            bool shieldBlock = false;
+            if (inShield) {
+                auto attackAngle = (attacker->GetTransform().position - entity->GetTransform().position).Angle();
+                auto angleDelta = abs(attackAngle - entity->GetTransform().direction);
+                angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
+                if (angleDelta < 60.0) {
+                    shieldBlock = true;
+                    Globals::Audio().PlaySound("ShieldImpact");
+                }
+            }
+            if (shieldBlock) {
+                if (perfectGuardCounter > 0) {
+                    damage *= 0.5;
+                }
+                stats.shieldHealth -= damage;
+                shieldRegenCounter = 0;
+                if (stats.shieldHealth <= 0.0) {
+                    stats.shieldHealth = 0.0;
+                    shieldRegenCounter = -240;
+                    stats.currentInvincibilityFrames = 40;
+                }
+            }
+            else {
+                stats.health -= damage;
+            }
             if (stats.health <= 0.0) {
                 OnDeath();
                 std::cout << "Your guy is DEAD!" << endl;

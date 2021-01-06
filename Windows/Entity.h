@@ -10,13 +10,17 @@
 namespace Game {
 	class AI;
 
+	enum EntityType {
+		Unknown,
+		Player,
+		Fighter,
+		FighterBulletProjectile,
+		Knight,
+		NonSentient // Spells, projectiles, etc.
+	};
+
 	class Entity {
 	public:
-		enum EntityType {
-			Unknown,
-			Actor,
-			Director
-		};
 	protected:
 		Game::Transform transform; // Does not use center
 		EntityType type;

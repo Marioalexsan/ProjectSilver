@@ -31,6 +31,8 @@ namespace Game {
 		void SetAnimationInfo(int updatesPerFrame, int framesPerRow, int framesPerCollumn, LoopMode mode = LoopMode::NormalLoop);
 		void SetFrame(int frame);
 
+		inline int GetFrame() { return this->currentFrame; }
+
 		void Restart();
 
 		virtual void Update(int frameUpdates = 1);

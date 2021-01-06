@@ -1,20 +1,24 @@
-#ifndef FIGHTERAI_HEADER
-#define FIGHTERAI_HEADER
+#ifndef KNIGHTAI_HEADER
+#define KNIGHTAI_HEADER
 
 #include "PCHeader.h"
 #include "AI.h"
 
 namespace Game {
-	class FighterAI : public AI {
+	class KnightAI : public AI {
 	private:
 		bool strafesLeft;
 		int nextStrafeChange;
-		int nextShot;
-		int previousShot;
+		bool doingSwing;
+
+		int postSwingDelay;
+
+		SphereCollider sword;
 
 		Vector2 lastFramePlayerPos;
+
 	public:
-		FighterAI();
+		KnightAI();
 
 		virtual void OnAttackHit();
 		virtual void OnHitByAttack(Actor* attacker, double damage);

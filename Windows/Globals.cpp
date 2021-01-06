@@ -46,4 +46,19 @@ namespace Game {
 		}
 		return theGame->GetThePlayer();
 	}
+
+
+	GameMaster::DifficultyLevel Globals::Difficulty() {
+		if (theGame == nullptr) {
+			throw std::invalid_argument("Game was nullptr in Globals::Difficulty()!");
+		}
+		return theGame->GetDifficulty();
+	}
+
+	void Globals::ChangeDifficulty(GameMaster::DifficultyLevel difficulty) {
+		if (theGame == nullptr) {
+			throw std::invalid_argument("Game was nullptr in Globals::ChangeDifficulty()!");
+		}
+		theGame->SetDifficulty(difficulty);
+	}
 }

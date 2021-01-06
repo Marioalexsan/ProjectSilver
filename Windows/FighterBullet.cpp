@@ -4,7 +4,7 @@
 namespace Game {
 	FighterBullet::FighterBullet() :
 		Actor(nullptr),
-		distancePerFrame(8.0),
+		distancePerFrame(8.0 + Globals::Difficulty() * 2.5),
 		currentDistance(0.0),
 		maxDistance(1800.0)
 	{

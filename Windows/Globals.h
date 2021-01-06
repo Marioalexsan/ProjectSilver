@@ -28,6 +28,8 @@ namespace Game {
 		static GraphicsEngine& Graphics();
 		static AssetManager& Assets();
 		static Entity* ThePlayer();
+		static GameMaster::DifficultyLevel Difficulty();
+		static void ChangeDifficulty(GameMaster::DifficultyLevel difficulty);
 
 	};
 }

@@ -12,7 +12,7 @@ namespace Game {
 	class Entity;
 
 	class Actor;
-	enum ActorType;
+	enum EntityType;
 
 	class GameMaster {
 	public:
@@ -20,6 +20,12 @@ namespace Game {
 			Player = 1,
 			TheLevelDirector = 2,
 			TheMenuDirector = 3
+		};
+
+		enum DifficultyLevel {
+			Normal = 0,
+			Hard = 1,
+			Insane = 2
 		};
 
 	private:
@@ -42,13 +48,20 @@ namespace Game {
 
 		uint64_t NextEntityID();
 
+		DifficultyLevel difficulty;
+
 	public:
+		inline void SetDifficulty(DifficultyLevel difficulty) { this->difficulty = difficulty; }
+
+		inline DifficultyLevel GetDifficulty() { return this->difficulty; }
+
 		Entity* GetThePlayer();
 		void AddThePlayer();
 		void RemoveThePlayer();
 
-		uint64_t AddNewEnemy(ActorType type, Vector2 worldPos);
+		uint64_t AddNewEnemy(EntityType type, Vector2 worldPos);
 		Entity* GetEntity(uint64_t ID);
+		int GetAliveEnemyCount();
 
 		void RemoveNonSpecialEntities();
 

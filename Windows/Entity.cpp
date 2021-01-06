@@ -20,7 +20,7 @@ namespace Game {
 		this->type = type;
 	}
 
-	Entity::EntityType Entity::GetType() {
+	EntityType Entity::GetType() {
 		return type;
 	}
 

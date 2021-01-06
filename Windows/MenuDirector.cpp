@@ -5,8 +5,9 @@
 
 namespace Game {
 	MenuDirector::MenuDirector():
-		button1Col(Game::Vector2(200, 400), 400, 150, Game::Collider::ColliderType::Static),
-		button2Col(Game::Vector2(200, 700), 400, 150, Game::Collider::ColliderType::Static)
+		button1Col(Game::Vector2(200, 400), 460, 150, Game::Collider::ColliderType::Static),
+		button2Col(Game::Vector2(200, 600), 460, 150, Game::Collider::ColliderType::Static),
+		button3Col(Game::Vector2(200, 800), 460, 150, Game::Collider::ColliderType::Static)
 	{
 		Globals::Graphics().CenterCameraOn(Vector2(960.0, 540.0));
 		button1BG.SetTexture("Button");
@@ -21,15 +22,42 @@ namespace Game {
 		button1Text.RegisterToGame();
 
 		button2BG.SetTexture("Button");
-		button2BG.SetPosition({ 200, 700 });
+		button2BG.SetPosition({ 200, 600 });
 		button2BG.SetCenter({ 0, 0 });
 		button2BG.SetLayer(Game::GraphicsEngine::CommonLayers::Background);
 		button2BG.RegisterToGame();
 
 		button2Text.SetFont("Huge");
-		button2Text.SetText("Quit");
-		button2Text.SetPosition(Vector2(250, 750));
+		button2Text.SetText("Difficulty");
+		button2Text.SetPosition(Vector2(220, 650));
 		button2Text.RegisterToGame();
+
+		button2Diff.SetFont("Huge");
+		button2Diff.SetPosition(Vector2(760, 650));
+		button2Diff.RegisterToGame();
+
+		switch (Globals::Difficulty()) {
+		case 0: {
+			button2Diff.SetText("Normal");
+		} break;
+		case 1: {
+			button2Diff.SetText("Hard");
+		} break;
+		case 2: {
+			button2Diff.SetText("Insane");
+		} break;
+		}
+
+		button3BG.SetTexture("Button");
+		button3BG.SetPosition({ 200, 800 });
+		button3BG.SetCenter({ 0, 0 });
+		button3BG.SetLayer(Game::GraphicsEngine::CommonLayers::Background);
+		button3BG.RegisterToGame();
+
+		button3Text.SetFont("Huge");
+		button3Text.SetText("Quit");
+		button3Text.SetPosition(Vector2(250, 850));
+		button3Text.RegisterToGame();
 
 		gameTitle.SetFont("Huge");
 		gameTitle.SetText("Project Silver");
@@ -41,9 +69,13 @@ namespace Game {
 	{
 		button1BG.UnregisterFromGame();
 		button2BG.UnregisterFromGame();
+		button3BG.UnregisterFromGame();
 
 		button1Text.UnregisterFromGame();
 		button2Text.UnregisterFromGame();
+		button3Text.UnregisterFromGame();
+
+		button2Diff.UnregisterFromGame();
 		gameTitle.UnregisterFromGame();
 	}
 
@@ -56,6 +88,21 @@ namespace Game {
 				toBeDestroyed = true;
 			}
 			else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), button2Col)) {
+				int difficulty = (Globals::Difficulty() + 1) % 3;
+				Globals::ChangeDifficulty((GameMaster::DifficultyLevel)difficulty);
+				switch (difficulty) {
+				case 0: {
+					button2Diff.SetText("Normal");
+				} break;
+				case 1: {
+					button2Diff.SetText("Hard");
+				} break;
+				case 2: {
+					button2Diff.SetText("Insane");
+				} break;
+				}
+			}
+			else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), button3Col)) {
 				Globals::Game().Stop();
 			}
 		}

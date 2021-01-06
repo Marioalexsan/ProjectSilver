@@ -31,6 +31,8 @@ namespace Game {
 			return entity;
 		}
 
+		bool DelayedSpawningLogic();
+
 		virtual void OnAttackHit() = 0;
 		virtual void OnHitByAttack(Actor* attacker, double damage) = 0;
 		virtual void OnDeath();

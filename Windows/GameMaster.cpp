@@ -9,11 +9,13 @@
 #include "FighterBullet.h"
 #include "LevelDirector.h"
 #include "MenuDirector.h"
+#include "KnightAI.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
 		entityID(1),
-		gameRunning(true)
+		gameRunning(true),
+		difficulty(DifficultyLevel::Normal)
 	{
 	}
 
@@ -38,10 +40,18 @@ namespace Game {
 		player.GetComponent().AddAnimation("PlayerShoot");
 		player.GetComponent().AddAnimation("CharDead");
 		player.GetComponent().AddAnimation("PlayerReload");
+		player.GetComponent().AddAnimation("CharShieldUp");
+		player.GetComponent().AddAnimation("CharShieldDown");
+		player.GetComponent().AddAnimation("CharShieldWalk");
 		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
+		player.GetCollider().SetRadius(40.0);
+
+		player.SetType(EntityType::Player);
 
 		auto& stats = player.GetStatsReference();
 		stats.maxHealth = stats.health = 100.0;
+		stats.shieldHealth = stats.maxShieldHealth = 50.0;
+		stats.onHitInvincibilityFrames = 5;
 	}
 
 	void GameMaster::RemoveThePlayer() {
@@ -59,10 +69,10 @@ namespace Game {
 		return entityMasterList[position].get();
 	}
 
-	uint64_t GameMaster::AddNewEnemy(ActorType type, Vector2 worldPos) {
+	uint64_t GameMaster::AddNewEnemy(EntityType type, Vector2 worldPos) {
 		uint64_t ID;
 		switch (type) {
-		case ActorType::Fighter: {
+		case EntityType::Fighter: {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new Actor(new FighterAI()));
 			Game::Actor& fighter = *(Actor*)entityMasterList[ID].get();
@@ -73,13 +83,17 @@ namespace Game {
 			fighter.GetComponent().SwitchAnimation("PlayerIdle");
 			fighter.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
+			fighter.SetType(EntityType::Fighter);
+
 			auto& stats = fighter.GetStatsReference();
-			stats.maxHealth = stats.health = 100.0;
+			double HP = 60.0;
+			HP += GetDifficulty() > 0 ? 20.0 : 0.0;
+			stats.maxHealth = stats.health = HP;
 
 
 			fighter.GetTransform().position = worldPos;
 		} break;
-		case ActorType::FighterBulletProjectile: {
+		case EntityType::FighterBulletProjectile: {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new FighterBullet());
 			Game::FighterBullet& bullet = *(FighterBullet*)entityMasterList[ID].get();
@@ -88,7 +102,28 @@ namespace Game {
 			bullet.GetComponent().SwitchAnimation("BulletTravel");
 			bullet.GetCollider().SetEntityDestructionSignalling(true);
 
+			bullet.SetType(EntityType::FighterBulletProjectile);
+
 			bullet.GetTransform().position = worldPos;
+		} break;
+		case EntityType::Knight: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new Actor(new KnightAI()));
+			Game::Actor& knight = *(Actor*)entityMasterList[ID].get();
+			knight.GetComponent().AddAnimation("KnightWalk");
+			knight.GetComponent().SetDefaultAnimation("KnightWalk");
+			knight.GetComponent().SwitchAnimation("KnightWalk");
+			knight.GetComponent().AddAnimation("KnightSwing");
+			knight.GetComponent().AddAnimation("KnightDead");
+
+			knight.SetType(EntityType::Knight);
+
+			auto& stats = knight.GetStatsReference();
+			double HP = 100.0;
+			HP += GetDifficulty() > 0 ? 40.0 : 0.0;
+			stats.maxHealth = stats.health = HP;
+
+			knight.GetTransform().position = worldPos;
 		} break;
 		default:
 			std::cout << "Unknown enemy bro!" << endl;
@@ -102,6 +137,18 @@ namespace Game {
 			return nullptr;
 		}
 		return entityMasterList[ID].get();
+	}
+
+	int GameMaster::GetAliveEnemyCount() {
+		int count = 0;
+		for (auto& entity : entityMasterList) {
+			if (entity.second->GetType() == EntityType::Fighter || entity.second->GetType() == EntityType::Knight) {
+				if (((Actor*)entity.second.get())->GetStatsReference().isDead == false) {
+					count++;
+				}
+			}
+		}
+		return count;
 	}
 
 	void GameMaster::RemoveNonSpecialEntities() {
@@ -235,34 +282,46 @@ namespace Game {
 		// Initializes the assets and stuff
 
 		// Textures
-		Assets.LoadTexture("Checks", "Untitled.png");
-		Assets.LoadTexture("Test", "Untitled2.png");
-		Assets.LoadTexture("Char", "Char.png");
-		Assets.LoadTexture("Test2", "Untitled3.png");
-		Assets.LoadTexture("LevelFloor", "Floor.png");
-		Assets.LoadTexture("LevelWall", "Walls.png");
-		Assets.LoadTexture("CharCircle", "CharCircle.png");
-		Assets.LoadTexture("CharDead", "CharDead.png");
-		Assets.LoadTexture("Target", "target.png");
-		Assets.LoadTexture("CharShoot", "CharShoot.png");
-		Assets.LoadTexture("Bullet", "Bullet.png");
-		Assets.LoadTexture("Button", "Button.png");
-		Assets.LoadTexture("PlayerReload", "CharReload.png");
+		const string texturePath = "Textures\\";
+		Assets.LoadTexture("Checks", texturePath + "Untitled.png");
+		Assets.LoadTexture("Test", texturePath + "Untitled2.png");
+		Assets.LoadTexture("Char", texturePath + "Char.png");
+		Assets.LoadTexture("Test2", texturePath + "Untitled3.png");
+		Assets.LoadTexture("LevelFloor", texturePath + "Floor.png");
+		Assets.LoadTexture("LevelWall", texturePath + "Walls.png");
+		Assets.LoadTexture("CharCircle", texturePath + "CharCircle.png");
+		Assets.LoadTexture("CharDead", texturePath + "CharDead.png");
+		Assets.LoadTexture("Target", texturePath + "target.png");
+		Assets.LoadTexture("CharShoot", texturePath + "CharShoot.png");
+		Assets.LoadTexture("Bullet", texturePath + "Bullet.png");
+		Assets.LoadTexture("Button", texturePath + "Button.png");
+		Assets.LoadTexture("PlayerReload", texturePath + "CharReload.png");
+		Assets.LoadTexture("KnightWalk", texturePath + "KnightWalk.png");
+		Assets.LoadTexture("KnightSwing", texturePath + "KnightSwing.png");
+		Assets.LoadTexture("KnightDead", texturePath + "KnightDead.png");
+		Assets.LoadTexture("CharShieldUp", texturePath + "CharShieldUp.png");
+		Assets.LoadTexture("CharShieldDown", texturePath + "CharShieldDown.png");
+		Assets.LoadTexture("CharShieldWalk", texturePath + "CharShieldWalk.png");
 
 		// Fonts
-		Assets.LoadSpriteFont("Huge", "Fonts/CourierNewHuge_0.png", "Fonts/CourierNewHuge.fnt");
-		Assets.LoadSpriteFont("Big", "Fonts/CourierNewBig_0.png", "Fonts/CourierNewBig.fnt");
+		const string fontPath = "Fonts\\";
+		Assets.LoadSpriteFont("Huge", fontPath + "CourierNewHuge_0.png", fontPath + "CourierNewHuge.fnt");
+		Assets.LoadSpriteFont("Big", fontPath + "CourierNewBig_0.png", fontPath + "CourierNewBig.fnt");
 
+
+		const string audioPath = "Audio\\";
 		// Music
-		Assets.LoadMusic("YourMom", "digi.ogg");
+		Assets.LoadMusic("YourMom", audioPath + "digi.ogg");
 
 		// Sound
-		Assets.LoadSound("Mooz", "Mooz.ogg");
-		Assets.LoadSound("PlayerShoot", "shot.ogg");
-		Assets.LoadSound("PlayerReload1", "magout.ogg");
-		Assets.LoadSound("PlayerReload2", "magin.ogg");
-		Assets.LoadSound("PlayerReload3", "receiverpull.ogg");
-		Assets.LoadSound("GunClick", "gunclick.ogg");
+		Assets.LoadSound("Mooz", audioPath + "Mooz.ogg");
+		Assets.LoadSound("PlayerShoot", audioPath + "shot.ogg");
+		Assets.LoadSound("PlayerReload1", audioPath + "magout.ogg");
+		Assets.LoadSound("PlayerReload2", audioPath + "magin.ogg");
+		Assets.LoadSound("PlayerReload3", audioPath + "receiverpull.ogg");
+		Assets.LoadSound("GunClick", audioPath + "gunclick.ogg");
+		Assets.LoadSound("SwordSwing", audioPath + "swordswing.ogg");
+		Assets.LoadSound("ShieldImpact", audioPath + "shieldimpact.ogg");
 
 		// Settings
 		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
@@ -286,14 +345,14 @@ namespace Game {
 
 		AddAnimation("BulletTravel", Game::Animation("Bullet", {}));
 		SetAnimationInfo("BulletTravel", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("BulletTravel", Vector2(3, 5));
+		SetAnimationCenter("BulletTravel", Vector2(4, 6));
 
 		AddAnimation("PlayerReload", Game::Animation("PlayerReload", {
 			{ {Animation::AnimationCriteria::TriggerAtFrameX, "3"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload1"} },
 			{ {Animation::AnimationCriteria::TriggerAtFrameX, "8"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
 			{ {Animation::AnimationCriteria::TriggerAtFrameX, "10"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("PlayerReload", { 9, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationInfo("PlayerReload", { 11, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("PlayerReload", Vector2(48, 67));
 
 		using Animation = Game::Animation;
@@ -301,6 +360,34 @@ namespace Game {
 		AddAnimation("PlayerShoot", Animation("CharShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
 		SetAnimationInfo("PlayerShoot", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("PlayerShoot", Vector2(48, 67));
+
+		AddAnimation("KnightDead", Game::Animation("KnightDead", {}));
+		SetAnimationInfo("KnightDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("KnightDead", Vector2(75, 100));
+
+		AddAnimation("KnightWalk", Animation("KnightWalk", {}));
+		SetAnimationInfo("KnightWalk", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
+		SetAnimationCenter("KnightWalk", Vector2(73, 66));
+
+		AddAnimation("KnightSwing", Game::Animation("KnightSwing", {
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "5"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("KnightSwing", { 6, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("KnightSwing", Vector2(73, 116));
+
+		AddAnimation("CharShieldUp", Animation("CharShieldUp", {
+			{ {Animation::AnimationCriteria::TriggerAtEnd, ""}, {Animation::AnimationInstruction::SwitchAnimation, "CharShieldWalk"} }
+			}));
+		SetAnimationInfo("CharShieldUp", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("CharShieldUp", Vector2(73, 66));
+
+		AddAnimation("CharShieldDown", Animation("CharShieldDown", {}));
+		SetAnimationInfo("CharShieldDown", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("CharShieldDown", Vector2(73, 66));
+
+		AddAnimation("CharShieldWalk", Animation("CharShieldWalk", {}));
+		SetAnimationInfo("CharShieldWalk", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
+		SetAnimationCenter("CharShieldWalk", Vector2(73, 66));
 	}
 
 	void GameMaster::InitLevel() {

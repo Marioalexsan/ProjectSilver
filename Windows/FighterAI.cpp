@@ -6,14 +6,29 @@
 namespace Game {
 
     FighterAI::FighterAI() :
+        strafesLeft(false),
+        nextStrafeChange(300),
+        nextShot(120),
+        previousShot(-100),
+        lastFramePlayerPos(Vector2::Zero),
         AI()
-    {}
+    {
+    }
 
     void FighterAI::Update() {
-        counter++;
+        bool skipLogic = DelayedSpawningLogic();
 
-        if (counter % 375 == 0) {
+        counter++;
+        
+        if (skipLogic) {
+            return;
+        }
+
+        // Combat logic
+
+        if (counter > nextStrafeChange) {
             strafesLeft = rand() % 2;
+            nextStrafeChange += 200 - 20 * Globals::Difficulty() + rand() % 200;
         }
 
         if (entity == nullptr) {
@@ -32,31 +47,42 @@ namespace Game {
         }
 
         auto player = Globals::ThePlayer();
+
         auto targetVector = player->GetTransform().position - this->entity->GetTransform().position;
+
         auto targetDirection = targetVector.Angle();
         auto entityDirection = this->entity->GetTransform().direction;
 
         auto angleDelta = abs(targetDirection - entityDirection);
         angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
 
-        auto turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
-        if (abs(targetDirection - entityDirection) > 180.0) {
-            if (targetDirection > 180.0) {
-                entity->GetTransform().direction -= turnStrength;
+        int aimTime = (24 + (2 - Globals::Difficulty()) * 6);
+
+        if (counter + aimTime < nextShot) {
+            auto turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
+            if (counter < previousShot + 10) {
+                turnStrength /= 5;
+            }
+            if (abs(targetDirection - entityDirection) > 180.0) {
+                if (targetDirection > 180.0) {
+                    entity->GetTransform().direction -= turnStrength;
+                }
+                else {
+                    entity->GetTransform().direction += turnStrength;
+                }
             }
             else {
-                entity->GetTransform().direction += turnStrength;
+                if (targetDirection - entityDirection > 0) {
+                    entity->GetTransform().direction += turnStrength;
+                }
+                else {
+                    entity->GetTransform().direction -= turnStrength;
+                }
             }
+            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
         }
-        else {
-            if (targetDirection - entityDirection > 0) {
-                entity->GetTransform().direction += turnStrength;
-            }
-            else {
-                entity->GetTransform().direction -= turnStrength;
-            }
-        }
-        entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+
+        
 
         auto distance = targetVector.Length();
         int forwardStrength = 4.0;
@@ -77,20 +103,70 @@ namespace Game {
         else {
             strafeAngle = Utility::ScrollValue(entity->GetTransform().direction + 90.0, 0.0, 360.0);
         }
+
+        double predictionStrength = 0.0;
+        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
+            predictionStrength = 0.15;
+        }
+        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Insane) {
+            predictionStrength = 0.30;
+        }
+
+        bool playerOutOfAim = (abs(targetDirection - entityDirection) > 30.0 || distance > 600.0);
+
+        double shootDirection = 0.0;
+        
+        if (counter + aimTime > nextShot) {
+            shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrength * 60.0).Angle();
+            
+            double shootAngleDelta = abs(shootDirection - entityDirection);
+
+            if (shootAngleDelta > 180.0) {
+                if (shootDirection > 180.0) {
+                    shootAngleDelta = -shootAngleDelta;
+                }
+            }
+            else {
+                if (shootDirection - entityDirection < 0.0) {
+                    shootAngleDelta = -shootAngleDelta;
+                }
+            }
+
+            if (!playerOutOfAim) {
+                double amplifiedRatio = (double(nextShot) - counter) / aimTime;
+                amplifiedRatio *= amplifiedRatio;
+
+                forwardStrength *= (0.1 + 0.9 * amplifiedRatio);
+                strafeStrength *= (0.1 + 0.9 * amplifiedRatio);
+            }
+
+            shootAngleDelta = Utility::ClampValue(shootAngleDelta, -18.0, 18.0);
+            
+            entity->GetTransform().direction += shootAngleDelta * 0.3;
+            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+        }
+
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength);
 
         entity->MoveForward(forwardStrength);
 
-        if (counter % 120 == 0) {
-            if (abs(targetDirection - entityDirection) > 30.0) {
-                counter -= 30;
+        if (counter > nextShot) {
+            if (playerOutOfAim) {
+                nextShot += 6;
                 return;
             }
+
             entity->GetComponent().SwitchAnimation("PlayerShoot");
-            auto bulletID = Globals::Game().AddNewEnemy(ActorType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
+            auto bulletID = Globals::Game().AddNewEnemy(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
             auto theBullet = Globals::Game().GetEntity(bulletID);
-            theBullet->GetTransform().direction = entity->GetTransform().direction;
+            theBullet->GetTransform().direction = shootDirection;
+            previousShot = nextShot;
+            nextShot += 110 - 15 * Globals::Difficulty() + rand() % 20;
         }
+
+        
+
+        lastFramePlayerPos = player->GetTransform().position;
     }
 
     void FighterAI::OnDeath() {

@@ -11,7 +11,8 @@
 namespace Game {
 	class LevelDirector : public Entity {
     private:
-
+        int counter;
+        int nextSpawns;
         int resetCounter;
         Game::BoxCollider box1L;
         Game::BoxCollider box2L;
@@ -30,7 +31,13 @@ namespace Game {
         Game::Sprite levelSpriteFloor;
         Game::Sprite levelSpriteWall;
 
-        
+        Game::BasicText waveText;
+
+        int currentWave;
+
+        int currentCredits;
+
+        vector<pair<Vector2, double>> spawnPoints;
     public:
         LevelDirector();
         ~LevelDirector();

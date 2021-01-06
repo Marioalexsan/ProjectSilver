@@ -112,6 +112,9 @@
     <Filter Include="Entity Library\MenuDirector">
       <UniqueIdentifier>{4a72feb6-bc38-4759-8d4e-c6c03af33f34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComplexFeatures\AI Library\KnightAI">
+      <UniqueIdentifier>{96ee90c6-9eb9-4db1-baac-574179872e4b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -204,6 +207,9 @@
     <ClCompile Include="MenuDirector.cpp">
       <Filter>Entity Library\MenuDirector</Filter>
     </ClCompile>
+    <ClCompile Include="KnightAI.cpp">
+      <Filter>ComplexFeatures\AI Library\KnightAI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -292,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="MenuDirector.h">
       <Filter>Entity Library\MenuDirector</Filter>
+    </ClInclude>
+    <ClInclude Include="KnightAI.h">
+      <Filter>ComplexFeatures\AI Library\KnightAI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

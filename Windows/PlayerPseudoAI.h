@@ -10,8 +10,17 @@ namespace Game {
 		int currentPistolAmmo;
 		int maxPistolAmmo;
 		bool wasReloadingPistol;
+		bool hasShield;
+		bool inShield;
+
+		int regenCounter;
+		int shieldRegenCounter;
+		int shieldFadeOutDelay;
+
+		int perfectGuardCounter;
 
 		Game::BasicText playerHealth;
+		Game::BasicText shieldHealth;
 		Game::BasicText gunAmmo;
 	public:
 		PlayerPseudoAI();

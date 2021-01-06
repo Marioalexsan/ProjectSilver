@@ -7,14 +7,6 @@
 
 namespace Game {
 	class AI;
-	
-	enum ActorType {
-		Unknown,
-		Player,
-		Fighter,
-		FighterBulletProjectile,
-		NonSentient // Spells, projectiles, etc.
-	};
 
 	class Actor : public Entity {
 	public:
@@ -23,11 +15,11 @@ namespace Game {
 			double maxHealth;
 			double stamina;
 			double maxStamina;
-			double baseDamage;
+			
+			double shieldHealth;
+			double maxShieldHealth;
 
 			double knockbackResistance; // 0-100%
-
-			double movementSpeed; // units moved per second
 
 			bool invulnerable;
 			bool isDead;
