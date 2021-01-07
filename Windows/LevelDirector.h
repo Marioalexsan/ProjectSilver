@@ -32,8 +32,10 @@ namespace Game {
         Game::Sprite levelSpriteWall;
 
         Game::BasicText waveText;
+        Game::BasicText difficultyText;
 
         int currentWave;
+        int delayedAudioStart;
 
         int currentCredits;
 

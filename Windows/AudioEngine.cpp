@@ -10,7 +10,7 @@ namespace Game {
 		currentID(1),
 		soundCount(0),
 		musicVolume(100),
-		soundVolume(75)
+		soundVolume(80)
 	{
 		Mix_AllocateChannels(maxChannels);
 	}
@@ -206,7 +206,14 @@ namespace Game {
 					music.loopEnd = SearchMusicLib(music.dataID).sectionList.at(action.param).end;
 					actionQueue.pop();
 					doNextAction = true;
-				}
+				} break;
+			case MusicAction::Type::ChangeVolume:
+				if (Mix_PlayingMusic() != 0) {
+					Mix_VolumeMusic(musicVolume / 100.0 * 128);
+				} 
+				actionQueue.pop();
+				doNextAction = true;
+				break;
 			default:
 				// Lmao
 				break;

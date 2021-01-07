@@ -15,7 +15,7 @@ namespace Game {
 	GameMaster::GameMaster() :
 		entityID(1),
 		gameRunning(true),
-		difficulty(DifficultyLevel::Normal)
+		difficulty(DifficultyLevel::Easy)
 	{
 	}
 
@@ -43,6 +43,7 @@ namespace Game {
 		player.GetComponent().AddAnimation("CharShieldUp");
 		player.GetComponent().AddAnimation("CharShieldDown");
 		player.GetComponent().AddAnimation("CharShieldWalk");
+		player.GetComponent().AddAnimation("CharAxeSwing");
 		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
 		player.GetCollider().SetRadius(40.0);
 
@@ -50,8 +51,9 @@ namespace Game {
 
 		auto& stats = player.GetStatsReference();
 		stats.maxHealth = stats.health = 100.0;
-		stats.shieldHealth = stats.maxShieldHealth = 50.0;
-		stats.onHitInvincibilityFrames = 5;
+		stats.shieldHealth = stats.maxShieldHealth = 35.0;
+		stats.stamina = stats.maxStamina = 90.0;
+		stats.onHitInvincibilityFrames = 7;
 	}
 
 	void GameMaster::RemoveThePlayer() {
@@ -87,7 +89,7 @@ namespace Game {
 
 			auto& stats = fighter.GetStatsReference();
 			double HP = 60.0;
-			HP += GetDifficulty() > 0 ? 20.0 : 0.0;
+			HP += GetDifficulty() * 15.0;
 			stats.maxHealth = stats.health = HP;
 
 
@@ -115,12 +117,13 @@ namespace Game {
 			knight.GetComponent().SwitchAnimation("KnightWalk");
 			knight.GetComponent().AddAnimation("KnightSwing");
 			knight.GetComponent().AddAnimation("KnightDead");
+			knight.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
 			knight.SetType(EntityType::Knight);
 
 			auto& stats = knight.GetStatsReference();
 			double HP = 100.0;
-			HP += GetDifficulty() > 0 ? 40.0 : 0.0;
+			HP += GetDifficulty() * 30.0;
 			stats.maxHealth = stats.health = HP;
 
 			knight.GetTransform().position = worldPos;
@@ -149,6 +152,23 @@ namespace Game {
 			}
 		}
 		return count;
+	}
+
+	int GameMaster::GetActiveThreat() {
+		int threat = 0;
+		for (auto& entity : entityMasterList) {
+			if (((Actor*)entity.second.get())->GetStatsReference().isDead == false) {
+				switch (entity.second->GetType()) {
+				case EntityType::Fighter:
+					threat += 15;
+					break;
+				case EntityType::Knight:
+					threat += 40;
+					break;
+				}
+			}
+		}
+		return threat;
 	}
 
 	void GameMaster::RemoveNonSpecialEntities() {
@@ -302,6 +322,8 @@ namespace Game {
 		Assets.LoadTexture("CharShieldUp", texturePath + "CharShieldUp.png");
 		Assets.LoadTexture("CharShieldDown", texturePath + "CharShieldDown.png");
 		Assets.LoadTexture("CharShieldWalk", texturePath + "CharShieldWalk.png");
+		Assets.LoadTexture("CharAxeSwing", texturePath + "CharAxeSwing.png");
+		Assets.LoadTexture("LowHP", texturePath + "LowHP.png");
 
 		// Fonts
 		const string fontPath = "Fonts\\";
@@ -311,7 +333,12 @@ namespace Game {
 
 		const string audioPath = "Audio\\";
 		// Music
-		Assets.LoadMusic("YourMom", audioPath + "digi.ogg");
+		Assets.LoadMusic("DigitalGhost", audioPath + "digi.ogg");
+		Assets.LoadMusicSections("DigitalGhost", {
+			{"Loop", {(1 * 60 + 48) * 1000 + 199, (3 * 60 + 1) * 1000 + 566 }}
+			});
+
+		Assets.LoadMusic("Menu", audioPath + "menu.ogg");
 
 		// Sound
 		Assets.LoadSound("Mooz", audioPath + "Mooz.ogg");
@@ -322,6 +349,14 @@ namespace Game {
 		Assets.LoadSound("GunClick", audioPath + "gunclick.ogg");
 		Assets.LoadSound("SwordSwing", audioPath + "swordswing.ogg");
 		Assets.LoadSound("ShieldImpact", audioPath + "shieldimpact.ogg");
+		Assets.LoadSound("ButtonClick", audioPath + "buttonclick.ogg");
+		Assets.LoadSound("Death", audioPath + "death.ogg");
+		Assets.LoadSound("PlayerDeath", audioPath + "playerdeath.ogg");
+		Assets.LoadSound("PlayerHurt", audioPath + "playerhurt.ogg");
+		Assets.LoadSound("HurtBeta", audioPath + "hurt2.ogg");
+		Assets.LoadSound("NextWave", audioPath + "nextwave.ogg");
+		Assets.LoadSound("Heartbeat", audioPath + "heartbeat.ogg");
+		Assets.LoadSound("Boost", audioPath + "boost.ogg");
 
 		// Settings
 		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
@@ -352,7 +387,7 @@ namespace Game {
 			{ {Animation::AnimationCriteria::TriggerAtFrameX, "8"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
 			{ {Animation::AnimationCriteria::TriggerAtFrameX, "10"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("PlayerReload", { 11, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationInfo("PlayerReload", { 8, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("PlayerReload", Vector2(48, 67));
 
 		using Animation = Game::Animation;
@@ -378,16 +413,22 @@ namespace Game {
 		AddAnimation("CharShieldUp", Animation("CharShieldUp", {
 			{ {Animation::AnimationCriteria::TriggerAtEnd, ""}, {Animation::AnimationInstruction::SwitchAnimation, "CharShieldWalk"} }
 			}));
-		SetAnimationInfo("CharShieldUp", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationInfo("CharShieldUp", { 3, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("CharShieldUp", Vector2(73, 66));
 
 		AddAnimation("CharShieldDown", Animation("CharShieldDown", {}));
-		SetAnimationInfo("CharShieldDown", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationInfo("CharShieldDown", { 3, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("CharShieldDown", Vector2(73, 66));
 
 		AddAnimation("CharShieldWalk", Animation("CharShieldWalk", {}));
 		SetAnimationInfo("CharShieldWalk", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
 		SetAnimationCenter("CharShieldWalk", Vector2(73, 66));
+
+		AddAnimation("CharAxeSwing", Animation("CharAxeSwing", {
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "4"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("CharAxeSwing", { 5, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("CharAxeSwing", Vector2(73, 116));
 	}
 
 	void GameMaster::InitLevel() {
@@ -674,6 +715,35 @@ namespace Game {
 					// Collision - only Actors can do callbacks
 					auto EntityA = dynamic_cast<Game::Actor*>(alpha->GetEntity());
 					auto EntityB = dynamic_cast<Game::Actor*>(beta->GetEntity());
+
+					// Disable hurt if a collider's owner entity has been hit before, and the attacker doesn't double hit
+					
+					if (alpha->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEnemies) != alpha->GetCollisionOptions().end()) {
+						auto& AList = alpha->GetHitList();
+						auto BEntity = beta->GetEntity();
+						if (BEntity != nullptr) {
+							if (std::find(AList.begin(), AList.end(), BEntity) != AList.end()) {
+								HurtB = false;
+							}
+							else {
+								AList.push_back(BEntity);
+							}
+						}
+					}
+
+					if (beta->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEnemies) != beta->GetCollisionOptions().end()) {
+						auto& BList = beta->GetHitList();
+						auto AEntity = alpha->GetEntity();
+						if (AEntity != nullptr) {
+							if (std::find(BList.begin(), BList.end(), AEntity) != BList.end()) {
+								HurtA = false;
+							}
+							else {
+								BList.push_back(AEntity);
+							}
+						}
+					}
+
 					if (HurtA) {
 						if (EntityA != nullptr && EntityA->GetAI() != nullptr) EntityA->GetAI()->OnHitByAttack(EntityB, beta->GetCombatDamage());
 						if (EntityB != nullptr && EntityB->GetAI() != nullptr) EntityB->GetAI()->OnAttackHit();

@@ -88,7 +88,7 @@ namespace Game {
         int forwardStrength = 4.0;
         int strafeStrength = 0.3;
         if (distance < 400.0) {
-            forwardStrength = 0.0;
+            forwardStrength = Utility::ClampValue(400.0 - distance, 0.0, 200.0) / 200.0 * (-2.4 - 0.8 * Globals::Difficulty());
             strafeStrength = 3.3;
         }
         else if (distance < 600.0) {
@@ -104,20 +104,27 @@ namespace Game {
             strafeAngle = Utility::ScrollValue(entity->GetTransform().direction + 90.0, 0.0, 360.0);
         }
 
-        double predictionStrength = 0.0;
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
-            predictionStrength = 0.15;
-        }
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Insane) {
-            predictionStrength = 0.30;
-        }
+        
 
         bool playerOutOfAim = (abs(targetDirection - entityDirection) > 30.0 || distance > 600.0);
 
         double shootDirection = 0.0;
+
+        if (counter + aimTime == nextShot) {
+            if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
+                predictionStrengthToUse = 0.10 + rand() % 15 / 100.0;
+            }
+            if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
+                predictionStrengthToUse = 0.25 + rand() % 20 / 100.0;
+            }
+        }
+
+        if (distance <= 350) {
+            predictionStrengthToUse *= distance / 350;
+        }
         
         if (counter + aimTime > nextShot) {
-            shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrength * 60.0).Angle();
+            shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0).Angle();
             
             double shootAngleDelta = abs(shootDirection - entityDirection);
 
@@ -172,6 +179,7 @@ namespace Game {
     void FighterAI::OnDeath() {
         if (!EntityIsDeadAF()) {
             AI::OnDeath();
+            Globals::Audio().PlaySound("Death");
             entity->GetComponent().SwitchAnimation("CharDead");
             entity->GetCollider().QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);
@@ -185,6 +193,7 @@ namespace Game {
 
     void FighterAI::OnHitByAttack(Actor* attacker, double damage) {
         if (!EntityIsDeadAF()) {
+            Globals::Audio().PlaySound("HurtBeta");
             AI::OnHitByAttack(attacker, damage);
         }
     }

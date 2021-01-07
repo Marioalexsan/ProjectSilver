@@ -23,9 +23,9 @@ namespace Game {
 		};
 
 		enum DifficultyLevel {
-			Normal = 0,
-			Hard = 1,
-			Insane = 2
+			Easy = 0,
+			Normal = 1,
+			Hard = 2
 		};
 
 	private:
@@ -62,6 +62,8 @@ namespace Game {
 		uint64_t AddNewEnemy(EntityType type, Vector2 worldPos);
 		Entity* GetEntity(uint64_t ID);
 		int GetAliveEnemyCount();
+
+		int GetActiveThreat();
 
 		void RemoveNonSpecialEntities();
 

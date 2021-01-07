@@ -60,6 +60,7 @@ namespace Game {
 					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
 
 					SDL_SetTextureAlphaMod(texture, alpha);
+					SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
 					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform->direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
 					wordPos++;
 					currentX += info.xadvance;

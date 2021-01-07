@@ -5,6 +5,21 @@
 
 namespace Game {
 
+	struct Color {
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+
+		static const Color White;
+		static const Color Black;
+		static const Color Red;
+		static const Color Green;
+		static const Color Blue;
+		static const Color Yellow;
+		static const Color Orange;
+		static const Color Purple;
+	};
+
 	// Base interface for drawable
 	// Angle is from OY+ axis, clockwise
 
@@ -16,6 +31,7 @@ namespace Game {
 		bool relativeToCamera;
 
 		uint8_t alpha;
+		Color color;
 
 		uint64_t drawableGraphicsID = 0;
 	public:
@@ -31,6 +47,10 @@ namespace Game {
 		inline void SetAlpha(uint8_t alpha) { this->alpha = alpha; }
 
 		inline uint8_t GetAlpha() { return alpha; }
+
+		inline void SetColor(Color color) { this->color = color; }
+
+		inline Color GetColor() { return color; }
 
 		void SetPosition(const Vector2& position);
 		void Move(const Vector2& amount);

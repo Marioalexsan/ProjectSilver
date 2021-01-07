@@ -16,6 +16,8 @@ namespace Game {
 			bool fullscreen;
 		};
 
+		
+
 		enum CommonLayers {
 			WorldBase = 0,
 			Background = 64,
@@ -25,6 +27,7 @@ namespace Game {
 			BelowCeiling = 68,
 			Ceiling = 69,
 			GUI = 192,
+			AboveGUI = 193,
 			WorldTop = 255,
 		};
 

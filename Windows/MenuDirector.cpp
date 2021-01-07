@@ -9,6 +9,9 @@ namespace Game {
 		button2Col(Game::Vector2(200, 600), 460, 150, Game::Collider::ColliderType::Static),
 		button3Col(Game::Vector2(200, 800), 460, 150, Game::Collider::ColliderType::Static)
 	{
+		Globals::Game().Audio.SetMusicVolume(100.0);
+		Globals::Game().Audio.PlayMusic("Menu");
+
 		Globals::Graphics().CenterCameraOn(Vector2(960.0, 540.0));
 		button1BG.SetTexture("Button");
 		button1BG.SetPosition({ 200, 400 });
@@ -38,13 +41,16 @@ namespace Game {
 
 		switch (Globals::Difficulty()) {
 		case 0: {
-			button2Diff.SetText("Normal");
+			button2Diff.SetText("Easy");
+			button2Diff.SetColor(Color::White);
 		} break;
 		case 1: {
-			button2Diff.SetText("Hard");
+			button2Diff.SetText("Normal");
+			button2Diff.SetColor(Color::Orange);
 		} break;
 		case 2: {
-			button2Diff.SetText("Insane");
+			button2Diff.SetText("Hard");
+			button2Diff.SetColor(Color::Red);
 		} break;
 		}
 
@@ -86,24 +92,30 @@ namespace Game {
 			if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), button1Col)) {
 				Globals::Game().InitLevel();
 				toBeDestroyed = true;
+				Globals::Game().Audio.PlaySound("ButtonClick");
 			}
 			else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), button2Col)) {
 				int difficulty = (Globals::Difficulty() + 1) % 3;
 				Globals::ChangeDifficulty((GameMaster::DifficultyLevel)difficulty);
 				switch (difficulty) {
 				case 0: {
-					button2Diff.SetText("Normal");
+					button2Diff.SetText("Easy");
+					button2Diff.SetColor(Color::White);
 				} break;
 				case 1: {
-					button2Diff.SetText("Hard");
+					button2Diff.SetText("Normal");
+					button2Diff.SetColor(Color::Orange);
 				} break;
 				case 2: {
-					button2Diff.SetText("Insane");
+					button2Diff.SetText("Hard");
+					button2Diff.SetColor(Color::Red);
 				} break;
 				}
+				Globals::Game().Audio.PlaySound("ButtonClick");
 			}
 			else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), button3Col)) {
 				Globals::Game().Stop();
+				Globals::Game().Audio.PlaySound("ButtonClick");
 			}
 		}
 	}

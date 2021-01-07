@@ -13,7 +13,7 @@ namespace Game {
         doingSwing(false),
         AI()
     {
-        sword.SetCombatDamage(40.0 + Globals::Difficulty() * 5.0);
+        sword.SetCombatDamage(28.0 + Globals::Difficulty() * 5.0);
         sword.SetCombatLayer(Collider::CombatLayer::None);
         sword.SetLayersToAttack({ Collider::CombatLayer::Players });
     }
@@ -55,10 +55,10 @@ namespace Game {
         auto player = Globals::ThePlayer();
 
         double predictionStrength = 0.0;
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
+        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
             predictionStrength = 0.1;
         }
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Insane) {
+        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
             predictionStrength = 0.2;
         }
 
@@ -74,8 +74,9 @@ namespace Game {
         if (postSwingDelay > 0) {
             turnStrength /= 4;
         }
-        if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing" && turnStrength > 1) {
-            turnStrength = 1;
+        double maxSwingStrength = Globals::Difficulty() + 1.0;
+        if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing" && turnStrength > maxSwingStrength) {
+            turnStrength = maxSwingStrength;
         }
         if (abs(targetDirection - entityDirection) > 180.0) {
             if (targetDirection > 180.0) {
@@ -119,10 +120,19 @@ namespace Game {
         }
 
         if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing") {
-            double delay = 4.0 + Globals::Difficulty() * 2.0;
-            double factor = (delay - Utility::ClampValue((double)entity->GetComponent().GetFrame(), 0.0, delay)) / delay;
-            strafeStrength *= factor;
-            forwardStrength *= factor;
+            int currentFrame = entity->GetComponent().GetFrame();
+            double factor;
+            if (currentFrame <= 3) {
+                factor = Utility::ClampValue(6 - currentFrame, 0, 6) / 6;
+            }
+            else if (currentFrame <= 8) {
+                factor = Utility::ClampValue(currentFrame - 1, 0, 6) / 4;
+            }
+            else {
+                factor = 1;
+            }
+            strafeStrength *= 0.7 * factor + 0.3;
+            forwardStrength *= 0.7 * factor + 0.3;
         }
         else if (postSwingDelay > 60) {
             strafeStrength /= 4;
@@ -137,7 +147,7 @@ namespace Game {
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength);
         entity->MoveForward(forwardStrength);
 
-        if (entity->GetComponent().GetCurrentAnimationID() != "KnightSwing" && distance < 150 && angleDelta < 40.0 && postSwingDelay < 120) {
+        if (entity->GetComponent().GetCurrentAnimationID() != "KnightSwing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 100) {
             entity->GetComponent().SwitchAnimation("KnightSwing");
         }
 
@@ -153,7 +163,7 @@ namespace Game {
             if (entity->GetComponent().GetFrame() == 10) {
                 doingSwing = false;
                 sword.UnregisterFromGame();
-                postSwingDelay = 180 - Globals::Difficulty() * 30;
+                postSwingDelay = 180 - Globals::Difficulty() * 20;
             }
         }
 
@@ -163,6 +173,7 @@ namespace Game {
     void KnightAI::OnDeath() {
         if (!EntityIsDeadAF()) {
             AI::OnDeath();
+            Globals::Audio().PlaySound("Death");
             entity->GetComponent().SwitchAnimation("KnightDead");
             entity->GetCollider().QueueUnregisterFromGame();
             sword.QueueUnregisterFromGame();
@@ -180,10 +191,11 @@ namespace Game {
             auto attackAngle = (attacker->GetTransform().position - entity->GetTransform().position).Angle();
             auto angleDelta = abs(attackAngle - entity->GetTransform().direction);
             angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
-            if (angleDelta < 80.0) {
+            if (angleDelta < 90.0) {
                 damage *= 0.2;
                 Globals::Audio().PlaySound("ShieldImpact");
             }
+            Globals::Audio().PlaySound("HurtBeta");
             AI::OnHitByAttack(attacker, damage);
         }
     }

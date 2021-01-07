@@ -58,6 +58,14 @@ namespace Game {
 			return *this;
 		}
 
+		inline bool operator==(const Vector2& other) {
+			return x == other.x && y == other.y;
+		}
+
+		inline bool operator!=(const Vector2& other) {
+			return x != other.x || y != other.y;
+		}
+
 		inline Vector2 operator*(double scale) const {
 			return Vector2(x * scale, y * scale);
 		}
@@ -65,6 +73,16 @@ namespace Game {
 		inline Vector2& operator*=(double scale) {
 			x *= scale;
 			y *= scale;
+			return *this;
+		}
+
+		inline Vector2 operator/(double scale) const {
+			return Vector2(x / scale, y / scale);
+		}
+
+		inline Vector2& operator/=(double scale) {
+			x /= scale;
+			y /= scale;
 			return *this;
 		}
 

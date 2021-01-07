@@ -23,7 +23,7 @@ namespace Game {
 		keyArray(SDL_GetKeyboardState(&keyCount))
 	{
 		ButtonCode arr[] = { Left, Middle, Right };
-		KeyCode morearr[] = { A, D, S, W };
+		KeyCode morearr[] = { A, D, S, W, E, LShift };
 		for (auto elem : arr) {
 			for (int i = 0; i < framesToRemember; i++) {
 				ButtonFrames[i][elem] = false;
@@ -68,6 +68,7 @@ namespace Game {
 		for (auto& elem : keyTranslation) {
 			KeyFrames[0][elem.second] = keyArray[elem.first];
 		}
+		KeyFrames[0][KeyCode::LShift] = SDL_GetModState() & KMOD_LSHIFT;
 		auto mouseState = SDL_GetMouseState(nullptr, nullptr);
 		ButtonFrames[0][ButtonCode::Left] = bool(mouseState & SDL_BUTTON(SDL_BUTTON_LEFT));
 		ButtonFrames[0][ButtonCode::Middle] = bool(mouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE));

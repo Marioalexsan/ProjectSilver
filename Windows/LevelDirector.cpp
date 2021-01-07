@@ -7,7 +7,8 @@ namespace Game {
     LevelDirector::LevelDirector() :
         currentCredits(0),
         currentWave(0),
-        nextSpawns(180),
+        nextSpawns(0),
+        delayedAudioStart(60),
         counter(0),
         resetCounter(0),
         box1L(Game::Vector2(0, 0), 2400, 100, Game::Collider::ColliderType::Static),
@@ -24,7 +25,8 @@ namespace Game {
     {
         auto& ProjectSilver = Globals::Game();
 
-        ProjectSilver.Audio.PlayMusic("YourMom");
+        ProjectSilver.Audio.StopMusic();
+
         ProjectSilver.AddThePlayer();
         ProjectSilver.GetThePlayer()->GetTransform().position = Game::Vector2(800, 200);
 
@@ -44,7 +46,7 @@ namespace Game {
         waveText.SetFont("Big");
         waveText.SetRelativeToCamera(false);
         waveText.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        waveText.SetPosition(Vector2(10, 980));
+        waveText.SetPosition(Vector2(10, 1020));
         waveText.RegisterToGame();
         waveText.SetText("They're coming...");
 
@@ -69,6 +71,26 @@ namespace Game {
             {Vector2(2250, 1650), 315.0},
             {Vector2(150, 1850), 45.0}
         };
+
+        difficultyText.SetFont("Big");
+        difficultyText.SetRelativeToCamera(false);
+        difficultyText.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
+        difficultyText.SetPosition(Vector2(1720, 1020));
+        difficultyText.RegisterToGame();
+        switch (Globals::Difficulty()) {
+        case 0: {
+            difficultyText.SetText("Easy");
+            difficultyText.SetColor(Color::White);
+        } break;
+        case 1: {
+            difficultyText.SetText("Normal");
+            difficultyText.SetColor(Color::Orange);
+        } break;
+        case 2: {
+            difficultyText.SetText("Hard");
+            difficultyText.SetColor(Color::Red);
+        } break;
+        }
     }
 
     LevelDirector::~LevelDirector() 
@@ -92,9 +114,10 @@ namespace Game {
 
         waveText.UnregisterFromGame();
 
+        difficultyText.UnregisterFromGame();
+
         ProjectSilver.RemoveThePlayer();
         Globals::Game().RemoveNonSpecialEntities();
-        Globals::Audio().HaltEngine();
     }
 
     void LevelDirector::Update() {
@@ -111,9 +134,17 @@ namespace Game {
             }
         }
 
-        int mercyFactor = Globals::Game().GetAliveEnemyCount();
+        if (delayedAudioStart > 0) {
+            delayedAudioStart--;
+            if (delayedAudioStart == 0) {
+                Globals::Audio().PlayMusic("DigitalGhost");
+                Globals::Audio().SetLoopSection("Loop");
+            }
+        }
 
-        if (mercyFactor < 2 + Globals::Difficulty() || rand() % 100 > 100.0 * 6.0 / (mercyFactor + 5.0 - Globals::Difficulty())) {
+        int mercyFactor = Globals::Game().GetActiveThreat() / (45 + Globals::Difficulty() * 5 + currentWave * 5);
+
+        if (rand() % 100 < 100.0 * 3.0 / (mercyFactor + 2.0)) {
             counter++;
         }
 
@@ -121,25 +152,30 @@ namespace Game {
             return;
         }
 
+        if (Globals::Game().GetAliveEnemyCount() <= 0) {
+            counter++;
+        }
+
         if (currentCredits <= 0) {
             if (Globals::Game().GetAliveEnemyCount() > 0) {
                 return;
             }
             currentWave++;
-            currentCredits += 1000 + (currentWave / 2) * 300;
+            currentCredits = 1000 + (currentWave / 2) * 300;
             if (currentWave != 1) {
                 waveText.SetText("Wave cleared!");
+                Globals::Audio().PlaySound("NextWave");
             }
             counter = 0;
-            nextSpawns = 180;
+            nextSpawns = 360;
             return;
         }
         waveText.SetText("Wave " + std::to_string(currentWave));
 
-        int spawns = 2 + rand() % 2 + currentWave / 2 + (Globals::Difficulty() > 0 ? 1 : 0);
+        int spawns = 2 + rand() % 2 + currentWave / 2 + Globals::Difficulty();
         spawns = spawns > spawnPoints.size() ? spawnPoints.size() : spawns;
 
-        nextSpawns = std::max(360 + rand() % 20 - currentWave * (5 + Globals::Difficulty()), 180);
+        nextSpawns = std::max(360 + rand() % 20 - currentWave * (5 + 2 * Globals::Difficulty()), 140);
 
         set<int> availableSpawnPoints;
         for (int i = 0; i < spawnPoints.size(); i++) {
@@ -148,7 +184,7 @@ namespace Game {
         int currentSpawns = 0;
 
         int threatLevel = 0;
-        int maxThreat = 100 + currentWave * (3 + Globals::Difficulty());
+        int maxThreat = 100 + currentWave * (5 + 3 * Globals::Difficulty());
 
         while (currentCredits > 0 && availableSpawnPoints.size() > 0 && currentSpawns < spawns) {
             vector<int> enemies = { 0 };
@@ -170,15 +206,15 @@ namespace Game {
                 auto entity = Globals::Game().GetEntity(ID);
                 entity->GetTransform().direction = spawnPoints[spawnPoint].second;
                 currentCredits -= 120;
-                nextSpawns += 80;
-                threatLevel += 10;
+                nextSpawns += 40;
+                threatLevel += 5;
             } break;
             case 1: {
                 auto ID = Globals::Game().AddNewEnemy(EntityType::Knight, spawnPoints[spawnPoint].first);
                 auto entity = Globals::Game().GetEntity(ID);
                 entity->GetTransform().direction = spawnPoints[spawnPoint].second;
                 currentCredits -= 340;
-                nextSpawns += 200;
+                nextSpawns += 170;
                 threatLevel += 40;
             } break;
             default:

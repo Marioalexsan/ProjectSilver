@@ -60,7 +60,8 @@ namespace Game {
 				Stop,
 				Start,
 				Seek,
-				SetLoopSection
+				SetLoopSection,
+				ChangeVolume
 			};
 			enum class SubType {
 				None,
@@ -131,7 +132,17 @@ namespace Game {
 		void Update();
 		int GetSoundCount();
 
+		inline double GetMusicVolume() { return musicVolume; }
+		inline double GetSoundVolume() { return soundVolume; }
 
+		inline void SetMusicVolume(double volume) { 
+			musicVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			AddAction(MusicAction::Type::ChangeVolume, "");
+		}
+		inline void SetSoundVolume(double volume) { 
+			soundVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			Mix_Volume(-1, soundVolume / 100.0 * 128);
+		}
 
 		uint64_t GetMusicPosition();
 		bool IsMusicPlaying();

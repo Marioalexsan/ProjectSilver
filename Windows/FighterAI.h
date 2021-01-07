@@ -12,6 +12,8 @@ namespace Game {
 		int nextShot;
 		int previousShot;
 
+		double predictionStrengthToUse;
+
 		Vector2 lastFramePlayerPos;
 	public:
 		FighterAI();

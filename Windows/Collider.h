@@ -26,7 +26,8 @@ namespace Game {
 
 		enum CollisionOptions {
 			DestroyCombatColliderAgainstStatic,
-			DestroyAfterCombatHit
+			DestroyAfterCombatHit,
+			DoNotHitRememberedEnemies
 		};
 
 	protected:
@@ -41,6 +42,8 @@ namespace Game {
 		Entity* owner;
 
 		double damage;
+
+		vector<Entity*> hitEntities;
 
 		bool destructionSignalled;
 		bool alsoSignalEntityDestruction;
@@ -59,6 +62,8 @@ namespace Game {
 		inline void SetEntityDestructionSignalling(bool mode) {
 			alsoSignalEntityDestruction = mode;
 		}
+
+		inline vector<Entity*>& GetHitList() { return hitEntities; }
 
 		void SignalDestruction();
 

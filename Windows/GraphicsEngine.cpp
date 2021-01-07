@@ -11,7 +11,6 @@ namespace Game {
 	int GraphicsEngine::renderWidth = 0;
 	int GraphicsEngine::renderHeight = 0;
 
-
 	Vector2	GraphicsEngine::cameraPosition = { 0.0, 0.0 };
 
 	const map<string, GraphicsEngine::VideoMode> GraphicsEngine::VideoModes = {

@@ -10,9 +10,9 @@ namespace Game {
 	{
 		collider.SetCollisionOptions({Collider::CollisionOptions::DestroyCombatColliderAgainstStatic, Collider::CollisionOptions::DestroyAfterCombatHit });
 		collider.SetColliderType(Collider::Combat);
-		collider.SetCombatLayer(Collider::CombatLayer::Enemies);
+		collider.SetCombatLayer(Collider::CombatLayer::None);
 		collider.SetLayersToAttack({ Collider::CombatLayer::Players });
-		collider.SetCombatDamage(20.0);
+		collider.SetCombatDamage(15.0 + Globals::Difficulty());
 		collider.SetRadius(6);
 	}
 
