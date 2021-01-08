@@ -152,6 +152,7 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="AnimatedSprite.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
+    <ClCompile Include="ChaserAI.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CollisionMaster.cpp" />
     <ClCompile Include="FighterAI.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="AI.h" />
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="BoxCollider.h" />
+    <ClInclude Include="ChaserAI.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="CollisionMaster.h" />
     <ClInclude Include="FighterAI.h" />

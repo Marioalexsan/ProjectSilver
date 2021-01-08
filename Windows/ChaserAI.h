@@ -1,25 +1,29 @@
-#ifndef KNIGHTAI_HEADER
-#define KNIGHTAI_HEADER
+#ifndef CHASERAI_HEADER
+#define CHASERAI_HEADER
 
 #include "PCHeader.h"
 #include "SphereCollider.h"
 #include "AI.h"
 
 namespace Game {
-	class KnightAI : public AI {
+	class ChaserAI : public AI {
 	private:
 		bool strafesLeft;
 		int nextStrafeChange;
 		bool doingSwing;
 
 		int postSwingDelay;
+		int painCounter;
 
-		SphereCollider sword;
+		double currentSpeed;
+		int fastSwingCounter;
+
+		SphereCollider axe;
 
 		Vector2 lastFramePlayerPos;
 
 	public:
-		KnightAI();
+		ChaserAI();
 
 		virtual void OnAttackHit();
 		virtual void OnHitByAttack(Actor* attacker, double damage);

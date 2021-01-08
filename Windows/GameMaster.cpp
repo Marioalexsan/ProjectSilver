@@ -10,6 +10,7 @@
 #include "LevelDirector.h"
 #include "MenuDirector.h"
 #include "KnightAI.h"
+#include "ChaserAI.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
@@ -44,6 +45,16 @@ namespace Game {
 		player.GetComponent().AddAnimation("CharShieldDown");
 		player.GetComponent().AddAnimation("CharShieldWalk");
 		player.GetComponent().AddAnimation("CharAxeSwing");
+
+		player.GetComponent().AddAnimation("CharRifleIdle");
+		player.GetComponent().AddAnimation("RifleShoot");
+		player.GetComponent().AddAnimation("RifleReload");
+
+		player.GetComponent().AddAnimation("TakeOutRifle");
+		player.GetComponent().AddAnimation("TakeOutPistol");
+		player.GetComponent().AddAnimation("PutAwayRifle");
+		player.GetComponent().AddAnimation("PutAwayPistol");
+
 		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
 		player.GetCollider().SetRadius(40.0);
 
@@ -128,6 +139,26 @@ namespace Game {
 
 			knight.GetTransform().position = worldPos;
 		} break;
+		case EntityType::Chaser: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new Actor(new ChaserAI()));
+			Game::Actor& axeman = *(Actor*)entityMasterList[ID].get();
+			axeman.GetComponent().AddAnimation("ChaserIdle");
+			axeman.GetComponent().SetDefaultAnimation("ChaserIdle");
+			axeman.GetComponent().SwitchAnimation("ChaserIdle");
+			axeman.GetComponent().AddAnimation("ChaserAxeSwing");
+			axeman.GetComponent().AddAnimation("ChaserDead");
+			axeman.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+
+			axeman.SetType(EntityType::Chaser);
+
+			auto& stats = axeman.GetStatsReference();
+			double HP = 130.0;
+			HP += GetDifficulty() * 40.0;
+			stats.maxHealth = stats.health = HP;
+
+			axeman.GetTransform().position = worldPos;
+		} break;
 		default:
 			std::cout << "Unknown enemy bro!" << endl;
 			return 0;
@@ -145,7 +176,8 @@ namespace Game {
 	int GameMaster::GetAliveEnemyCount() {
 		int count = 0;
 		for (auto& entity : entityMasterList) {
-			if (entity.second->GetType() == EntityType::Fighter || entity.second->GetType() == EntityType::Knight) {
+			auto type = entity.second->GetType();
+			if (type == EntityType::Fighter || type == EntityType::Knight || type == EntityType::Chaser) {
 				if (((Actor*)entity.second.get())->GetStatsReference().isDead == false) {
 					count++;
 				}
@@ -164,6 +196,9 @@ namespace Game {
 					break;
 				case EntityType::Knight:
 					threat += 40;
+					break;
+				case EntityType::Chaser:
+					threat += 75;
 					break;
 				}
 			}
@@ -323,7 +358,17 @@ namespace Game {
 		Assets.LoadTexture("CharShieldDown", texturePath + "CharShieldDown.png");
 		Assets.LoadTexture("CharShieldWalk", texturePath + "CharShieldWalk.png");
 		Assets.LoadTexture("CharAxeSwing", texturePath + "CharAxeSwing.png");
+		Assets.LoadTexture("ChaserAxeSwing", texturePath + "ChaserAxeSwing.png");
+		Assets.LoadTexture("ChaserIdleNew", texturePath + "ChaserIdleNew.png");
+		Assets.LoadTexture("ChaserDead", texturePath + "ChaserDead.png");
 		Assets.LoadTexture("LowHP", texturePath + "LowHP.png");
+		Assets.LoadTexture("RifleReload", texturePath + "RifleReload.png");
+		Assets.LoadTexture("RifleShoot", texturePath + "RifleShoot.png");
+		Assets.LoadTexture("TakeOutRifle", texturePath + "TakeOutRifle.png");
+		Assets.LoadTexture("TakeOutPistol", texturePath + "TakeOutPistol.png");
+		Assets.LoadTexture("PutAwayRifle", texturePath + "PutAwayRifle.png");
+		Assets.LoadTexture("PutAwayPistol", texturePath + "PutAwayPistol.png");
+		Assets.LoadTexture("CharRifleIdle", texturePath + "CharRifleIdle.png");
 
 		// Fonts
 		const string fontPath = "Fonts\\";
@@ -357,6 +402,7 @@ namespace Game {
 		Assets.LoadSound("NextWave", audioPath + "nextwave.ogg");
 		Assets.LoadSound("Heartbeat", audioPath + "heartbeat.ogg");
 		Assets.LoadSound("Boost", audioPath + "boost.ogg");
+		Assets.LoadSound("ZerkHurt", audioPath + "zerkhurt.ogg");
 
 		// Settings
 		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
@@ -429,6 +475,52 @@ namespace Game {
 			}));
 		SetAnimationInfo("CharAxeSwing", { 5, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("CharAxeSwing", Vector2(73, 116));
+
+		AddAnimation("ChaserAxeSwing", Animation("ChaserAxeSwing", {
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "4"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("ChaserAxeSwing", { 3, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("ChaserAxeSwing", Vector2(73, 116));
+
+		AddAnimation("ChaserIdle", Animation("ChaserIdleNew", {}));
+		SetAnimationInfo("ChaserIdle", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
+		SetAnimationCenter("ChaserIdle", Vector2(73, 116));
+
+		AddAnimation("ChaserDead", Game::Animation("ChaserDead", {}));
+		SetAnimationInfo("ChaserDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("ChaserDead", Vector2(75, 100));
+
+		AddAnimation("TakeOutRifle", Game::Animation("TakeOutRifle", {}));
+		SetAnimationInfo("TakeOutRifle", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("TakeOutRifle", Vector2(48, 67));
+
+		AddAnimation("TakeOutPistol", Game::Animation("TakeOutPistol", {}));
+		SetAnimationInfo("TakeOutPistol", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("TakeOutPistol", Vector2(48, 67));
+
+		AddAnimation("PutAwayRifle", Game::Animation("PutAwayRifle", {}));
+		SetAnimationInfo("PutAwayRifle", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("PutAwayRifle", Vector2(48, 67));
+
+		AddAnimation("PutAwayPistol", Game::Animation("PutAwayPistol", {}));
+		SetAnimationInfo("PutAwayPistol", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("PutAwayPistol", Vector2(48, 67));
+
+		AddAnimation("RifleReload", Game::Animation("RifleReload", {
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "5"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload1"} },
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "16"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
+			{ {Animation::AnimationCriteria::TriggerAtFrameX, "19"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
+			}));
+		SetAnimationInfo("RifleReload", { 7, 21, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("RifleReload", Vector2(48, 67));
+
+		AddAnimation("CharRifleIdle", Game::Animation("CharRifleIdle", {}));
+		SetAnimationInfo("CharRifleIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("CharRifleIdle", Vector2(48, 67));
+
+		AddAnimation("RifleShoot", Animation("RifleShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
+		SetAnimationInfo("RifleShoot", { 2, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("RifleShoot", Vector2(48, 87));
 	}
 
 	void GameMaster::InitLevel() {

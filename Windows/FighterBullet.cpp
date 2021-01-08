@@ -12,7 +12,7 @@ namespace Game {
 		collider.SetColliderType(Collider::Combat);
 		collider.SetCombatLayer(Collider::CombatLayer::None);
 		collider.SetLayersToAttack({ Collider::CombatLayer::Players });
-		collider.SetCombatDamage(15.0 + Globals::Difficulty());
+		collider.SetCombatDamage(16.0 + 2.0 * Globals::Difficulty());
 		collider.SetRadius(6);
 	}
 

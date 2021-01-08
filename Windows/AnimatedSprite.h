@@ -33,6 +33,14 @@ namespace Game {
 
 		inline int GetFrame() { return this->currentFrame; }
 
+		inline int GetFrameCount() { return this->totalFrames; }
+
+		inline int GetAccumulatedUpdates() { return this->accumulatedUpdates; }
+
+		inline int GetUpdatesPerFrame() { return this->updatesPerFrame; }
+
+		inline int GetUpdatesCount() { return this->totalFrames * this->updatesPerFrame; }
+
 		void Restart();
 
 		virtual void Update(int frameUpdates = 1);

@@ -115,6 +115,9 @@
     <Filter Include="ComplexFeatures\AI Library\KnightAI">
       <UniqueIdentifier>{96ee90c6-9eb9-4db1-baac-574179872e4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComplexFeatures\AI Library\ChaserAI">
+      <UniqueIdentifier>{9f04b6ec-fa03-4d13-a201-0e453659c589}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -210,6 +213,9 @@
     <ClCompile Include="KnightAI.cpp">
       <Filter>ComplexFeatures\AI Library\KnightAI</Filter>
     </ClCompile>
+    <ClCompile Include="ChaserAI.cpp">
+      <Filter>ComplexFeatures\AI Library\ChaserAI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -301,6 +307,9 @@
     </ClInclude>
     <ClInclude Include="KnightAI.h">
       <Filter>ComplexFeatures\AI Library\KnightAI</Filter>
+    </ClInclude>
+    <ClInclude Include="ChaserAI.h">
+      <Filter>ComplexFeatures\AI Library\ChaserAI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

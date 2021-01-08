@@ -8,6 +8,12 @@
 
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
+        wasInWeaponSwitch(false),
+        currentRifleAmmo(30),
+        maxRifleAmmo(30),
+        rifleAmmoPool(90),
+        equippedWeapon(0),
+        targetWeaponEquip(-1),
         boostCooldown(0),
         staminaFadeOutDelay(0),
         heartbeatCounter(0),
@@ -81,8 +87,19 @@ namespace Game {
             "CharAxeSwing"
         };
 
+        static const vector<string> switchAnimations = {
+            "TakeOutRifle",
+            "TakeOutPistol",
+            "PutAwayRifle",
+            "PutAwayPistol"
+        };
+
         auto IsUninterruptible = [](const string & animation) {
             return std::find(uninterruptibleAnimations.begin(), uninterruptibleAnimations.end(), animation) != uninterruptibleAnimations.end();
+        };
+
+        auto IsWeaponSwitch = [](const string& animation) {
+            return std::find(switchAnimations.begin(), switchAnimations.end(), animation) != switchAnimations.end();
         };
 
 
@@ -100,7 +117,7 @@ namespace Game {
             heartbeatTime = 120;
         }
         else {
-            if (vignetteCounter % 10 == 0) {
+            if (vignetteCounter % 8 == 0) {
                 lowHPVignette.SetAlpha(vignetteAlpha + (0 - vignetteAlpha) * 0.04);
             }
         }
@@ -248,19 +265,45 @@ namespace Game {
                 Globals::Audio().SetMusicVolume(Utility::ClampValue(vol + 1.0, 35.0, 100.0));
             }
         }
-
-        gunAmmo.SetText("Ammo: " + std::to_string(currentPistolAmmo) + " / " + std::to_string(maxPistolAmmo));
-        if (currentPistolAmmo == 0) {
-            gunAmmo.SetColor(Color::Orange);
+        if (equippedWeapon == 0) {
+            gunAmmo.SetText("Ammo: " + std::to_string(currentPistolAmmo) + " / " + std::to_string(maxPistolAmmo));
+            if (currentPistolAmmo == 0) {
+                gunAmmo.SetColor(Color::Orange);
+            }
+            else {
+                gunAmmo.SetColor(Color::White);
+            }
         }
         else {
-            gunAmmo.SetColor(Color::White);
+            gunAmmo.SetText("Ammo: " + std::to_string(currentRifleAmmo) + " / " + std::to_string(maxRifleAmmo) + " (" + std::to_string(rifleAmmoPool) + ")");
+            if (currentRifleAmmo == 0) {
+                if (rifleAmmoPool == 0) {
+                    gunAmmo.SetColor(Color::Orange);
+                }
+                else {
+                    gunAmmo.SetColor(Color::Yellow);
+                }
+            }
+            else {
+                gunAmmo.SetColor(Color::White);
+            }
         }
+        
 
 
         if (wasReloadingPistol == true && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
             currentPistolAmmo = maxPistolAmmo;
             wasReloadingPistol = false;
+        }
+
+        if (wasReloadingRifle == true && entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle") {
+            int reloadAmount = maxRifleAmmo - currentRifleAmmo;
+            if (reloadAmount > rifleAmmoPool) {
+                reloadAmount = rifleAmmoPool;
+            }
+            currentRifleAmmo += reloadAmount;
+            rifleAmmoPool -= reloadAmount;
+            wasReloadingRifle = false;
         }
 
         auto& game = Globals::Game();
@@ -276,11 +319,14 @@ namespace Game {
         }
 
         double moveSpeed = 9.0;
-        if (entity->GetComponent().GetCurrentAnimationID() == "PlayerReload") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "PlayerReload" || entity->GetComponent().GetCurrentAnimationID() == "RifleReload") {
             moveSpeed /= 3.0;
         }
+        else if (entity->GetComponent().GetCurrentAnimationID() == "RifleShoot") {
+            moveSpeed /= 1.5;
+        }
         else if (inShield) {
-            moveSpeed /= 1.3;
+            moveSpeed /= 1.25;
         }
         else if (entity->GetComponent().GetCurrentAnimationID() == "CharAxeSwing") {
             int currentFrame = entity->GetComponent().GetFrame();
@@ -316,14 +362,15 @@ namespace Game {
         }
         
         Vector2 targetSpeed = Vector2(0.0, 0.0);
+        Vector2 targetSpeedNormal = Vector2::NormalVector(Vector2(horizontalDir, verticalDir).Angle());
         if (horizontalDir != 0 || verticalDir != 0) {
-            targetSpeed = Vector2::NormalVector(Vector2(horizontalDir, verticalDir).Angle()) * moveSpeed;
+            targetSpeed = targetSpeedNormal * moveSpeed;
         }
 
-        if (boostCooldown == 0 && stats.stamina >= 45.0 && targetSpeed != Vector2::Zero && Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift) && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
+        if (boostCooldown == 0 && stats.stamina >= 45.0 && targetSpeed != Vector2::Zero && Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift)) {
             stats.stamina -= 45.0;
             staminaRegenCounter = 0;
-            boostVector = targetSpeed * 18.0;
+            boostVector = targetSpeedNormal * 130.0;
             boostCooldown = 18;
             Globals::Audio().PlaySound("Boost");
         }
@@ -339,7 +386,7 @@ namespace Game {
             }
         }
         
-        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(entity->GetComponent().GetCurrentAnimationID())) {
+        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(entity->GetComponent().GetCurrentAnimationID()) && !IsWeaponSwitch(entity->GetComponent().GetCurrentAnimationID())) {
             wasReloadingPistol = false;
             inShield = true;
             perfectGuardCounter = 12;
@@ -352,53 +399,102 @@ namespace Game {
             shieldFadeOutDelay = 30;
         }
 
-        if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
-            if (currentPistolAmmo > 0) {
-                auto mouse = game.Input.GetMousePosition();
-                auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
-                auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
-                std::cout << "Hit list: " << endl;
-                for (auto& elem : results) {
-                    std::cout << "Distance: " << elem.first << " ";
-                    using Game::BoxCollider;
-                    using Game::SphereCollider;
-                    BoxCollider* ABox = dynamic_cast<BoxCollider*>(elem.second);
-                    SphereCollider* ASphere = nullptr;
-                    if (ABox == nullptr) {
-                        ASphere = dynamic_cast<SphereCollider*>(elem.second);
-                    }
-                    if (ABox) {
-                        std::cout << "Box" << endl;
-                    }
-                    else if (ASphere) {
-                        std::cout << "Sphere" << endl;
-                    }
-                    else {
-                        std::cout << "Apache Attack Helicopter, or something" << endl;
-                    }
-                }
-                if (results.size() > 1) {
-                    // First collider is usually the player's own, which is crappy, but c'est la vie
-                    auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
-                    auto entity = firstElem.second->GetEntity();
-                    if (dynamic_cast<Actor*>(entity) != nullptr) {
-                        auto actor = (Actor*)entity;
-                        auto actorAI = actor->GetAI();
-                        if (actorAI != nullptr) {
-                            actorAI->OnHitByAttack(this->entity, 35.0);
+        if (game.Input.IsButtonDown(ButtonCode::Left)) {
+            if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && equippedWeapon == 0 && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
+                if (currentPistolAmmo > 0) {
+                    auto mouse = game.Input.GetMousePosition();
+                    auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
+                    auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
+                    std::cout << "Hit list: " << endl;
+                    for (auto& elem : results) {
+                        std::cout << "Distance: " << elem.first << " ";
+                        using Game::BoxCollider;
+                        using Game::SphereCollider;
+                        BoxCollider* ABox = dynamic_cast<BoxCollider*>(elem.second);
+                        SphereCollider* ASphere = nullptr;
+                        if (ABox == nullptr) {
+                            ASphere = dynamic_cast<SphereCollider*>(elem.second);
+                        }
+                        if (ABox) {
+                            std::cout << "Box" << endl;
+                        }
+                        else if (ASphere) {
+                            std::cout << "Sphere" << endl;
+                        }
+                        else {
+                            std::cout << "Apache Attack Helicopter, or something" << endl;
                         }
                     }
+                    if (results.size() > 1) {
+                        // First collider is usually the player's own, which is crappy, but c'est la vie
+                        auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
+                        auto entity = firstElem.second->GetEntity();
+                        if (dynamic_cast<Actor*>(entity) != nullptr) {
+                            auto actor = (Actor*)entity;
+                            auto actorAI = actor->GetAI();
+                            if (actorAI != nullptr) {
+                                actorAI->OnHitByAttack(this->entity, 35.0);
+                            }
+                        }
+                    }
+                    entity->GetComponent().SwitchAnimation("PlayerShoot");
+                    currentPistolAmmo--;
                 }
-                entity->GetComponent().SwitchAnimation("PlayerShoot");
-                currentPistolAmmo--;
+                else {
+                    Globals::Audio().PlaySound("GunClick");
+                }
             }
-            else {
-                Globals::Audio().PlaySound("GunClick");
+            else if(equippedWeapon == 1 && (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle" || entity->GetComponent().GetCurrentAnimationID() == "RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
+                if (currentRifleAmmo > 0) {
+                    auto mouse = game.Input.GetMousePosition();
+                    auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
+                    auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
+                    std::cout << "Hit list: " << endl;
+                    for (auto& elem : results) {
+                        std::cout << "Distance: " << elem.first << " ";
+                        using Game::BoxCollider;
+                        using Game::SphereCollider;
+                        BoxCollider* ABox = dynamic_cast<BoxCollider*>(elem.second);
+                        SphereCollider* ASphere = nullptr;
+                        if (ABox == nullptr) {
+                            ASphere = dynamic_cast<SphereCollider*>(elem.second);
+                        }
+                        if (ABox) {
+                            std::cout << "Box" << endl;
+                        }
+                        else if (ASphere) {
+                            std::cout << "Sphere" << endl;
+                        }
+                        else {
+                            std::cout << "Apache Attack Helicopter, or something" << endl;
+                        }
+                    }
+                    if (results.size() > 1) {
+                        // First collider is usually the player's own, which is crappy, but c'est la vie
+                        auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
+                        auto entity = firstElem.second->GetEntity();
+                        if (dynamic_cast<Actor*>(entity) != nullptr) {
+                            auto actor = (Actor*)entity;
+                            auto actorAI = actor->GetAI();
+                            if (actorAI != nullptr) {
+                                actorAI->OnHitByAttack(this->entity, 20.0);
+                            }
+                        }
+                    }
+                    entity->GetComponent().SwitchAnimation("RifleShoot");
+                    currentRifleAmmo--;
+                }
+                else {
+                    if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left)) {
+                        Globals::Audio().PlaySound("GunClick");
+                    }
+                }
             }
         }
 
-        if (game.Input.IsKeyDown(KeyCode::E) && (entity->GetComponent().GetCurrentAnimationID() != "CharAxeSwing")) {
+        if (game.Input.IsKeyDown(KeyCode::E) && (entity->GetComponent().GetCurrentAnimationID() != "CharAxeSwing") && !IsWeaponSwitch(entity->GetComponent().GetCurrentAnimationID())) {
             wasReloadingPistol = false;
+            wasReloadingRifle = false;
             entity->GetComponent().SwitchAnimation("CharAxeSwing");
             axe.GetHitList().clear();
         }
@@ -428,9 +524,51 @@ namespace Game {
             axe.UnregisterFromGame();
         }
 
-        if (game.Input.IsKeyPressedThisFrame(KeyCode::R) && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
-            entity->GetComponent().SwitchAnimation("PlayerReload");
-            wasReloadingPistol = true;
+        if (wasInWeaponSwitch) {
+            auto animationID = entity->GetComponent().GetCurrentAnimationID();
+            auto& component = entity->GetComponent();
+            bool switchCondition = component.GetFrame() == component.GetFrameCount() - 1 && component.GetAccumulatedUpdates() >= component.GetUpdatesPerFrame() - 2;
+            if (targetWeaponEquip == 0 && (animationID == "PlayerIdle" || animationID == "PutAwayRifle" && switchCondition)) {
+                entity->GetComponent().SwitchAnimation("TakeOutPistol");
+                equippedWeapon = 0;
+                wasInWeaponSwitch = false;
+            }
+            if (targetWeaponEquip == 1 && (animationID == "CharRifleIdle" || animationID == "PutAwayPistol" && switchCondition)) {
+                entity->GetComponent().SwitchAnimation("TakeOutRifle");
+                equippedWeapon = 1;
+                wasInWeaponSwitch = false;
+            }
+        }
+
+        if (game.Input.IsKeyPressedThisFrame(KeyCode::NumOne) && equippedWeapon != 0) {
+            if (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle") {
+                entity->GetComponent().SwitchAnimation("PutAwayRifle");
+                entity->GetComponent().Update();
+                entity->GetComponent().SetDefaultAnimation("PlayerIdle");
+                targetWeaponEquip = 0;
+                wasInWeaponSwitch = true;
+            }
+        }
+
+        if (game.Input.IsKeyPressedThisFrame(KeyCode::NumTwo) && equippedWeapon != 1) {
+            if (entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
+                entity->GetComponent().SwitchAnimation("PutAwayPistol");
+                entity->GetComponent().Update();
+                entity->GetComponent().SetDefaultAnimation("CharRifleIdle");
+                targetWeaponEquip = 1;
+                wasInWeaponSwitch = true;
+            }
+        }
+
+        if (game.Input.IsKeyPressedThisFrame(KeyCode::R)) {
+            if (entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle" && currentPistolAmmo < maxPistolAmmo) {
+                entity->GetComponent().SwitchAnimation("PlayerReload");
+                wasReloadingPistol = true;
+            }
+            else if (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle" && currentRifleAmmo < maxRifleAmmo && rifleAmmoPool > 0) {
+                entity->GetComponent().SwitchAnimation("RifleReload");
+                wasReloadingRifle = true;
+            }
         }
 
         auto var = game.Input.GetMousePosition();
@@ -444,6 +582,7 @@ namespace Game {
         if (entity != nullptr) {
             AI::OnDeath();
             Globals::Audio().PlaySound("PlayerDeath");
+            axe.QueueUnregisterFromGame();
             entity->GetComponent().SwitchAnimation("CharDead");
             entity->GetCollider().QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);

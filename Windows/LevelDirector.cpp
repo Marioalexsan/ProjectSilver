@@ -21,7 +21,8 @@ namespace Game {
         sphere4L(Game::Vector2(859, 1522), 50, Game::Collider::ColliderType::Static),
         sphere5L(Game::Vector2(1612, 1512), 50, Game::Collider::ColliderType::Static),
         sphere6L(Game::Vector2(1835, 957), 50, Game::Collider::ColliderType::Static),
-        sphere7L(Game::Vector2(1181, 961), 100, Game::Collider::ColliderType::Static) 
+        sphere7L(Game::Vector2(1181, 961), 100, Game::Collider::ColliderType::Static),
+        currentSpawnCount(3, 0)
     {
         auto& ProjectSilver = Globals::Game();
 
@@ -161,6 +162,7 @@ namespace Game {
                 return;
             }
             currentWave++;
+            currentSpawnCount = std::vector<int>(3, 0);
             currentCredits = 1000 + (currentWave / 2) * 300;
             if (currentWave != 1) {
                 waveText.SetText("Wave cleared!");
@@ -186,11 +188,22 @@ namespace Game {
         int threatLevel = 0;
         int maxThreat = 100 + currentWave * (5 + 3 * Globals::Difficulty());
 
+        vector<int> spawnLimits = {
+            1337,
+            2 + (currentWave > 3 ? 1 : 0) + (currentWave > 6 ? 1 : 0),
+            2 + (currentWave > 5 ? 1 : 0) + (currentWave > 8 ? 1 : 0)
+        };
+
+        vector<int>& currentCount = currentSpawnCount;
+
         while (currentCredits > 0 && availableSpawnPoints.size() > 0 && currentSpawns < spawns) {
             vector<int> enemies = { 0 };
             int allowedThreat = maxThreat - threatLevel;
-            if (currentWave > 2 && allowedThreat > 40) {
+            if (currentWave > 2 && allowedThreat > 40 && currentCount[1] < spawnLimits[1]) {
                 enemies.push_back(1);
+            }
+            if (currentWave > 4 && allowedThreat > 62 && currentCount[2] < spawnLimits[2]) {
+                enemies.push_back(2);
             }
             int enemy = enemies[rand() % enemies.size()];
 
@@ -200,6 +213,15 @@ namespace Game {
                 tries--;
                 spawnPoint = rand() % spawnPoints.size();
             }
+
+            if (enemy == 1 && rand() % 100 < 25) {
+                enemy == 0;
+            }
+
+            if (enemy == 2 && rand() % 100 < 25) {
+                enemy == 0;
+            }
+
             switch (enemy) {
             case 0: {
                 auto ID = Globals::Game().AddNewEnemy(EntityType::Fighter, spawnPoints[spawnPoint].first);
@@ -208,14 +230,25 @@ namespace Game {
                 currentCredits -= 120;
                 nextSpawns += 40;
                 threatLevel += 5;
+                currentCount[0]++;
             } break;
             case 1: {
                 auto ID = Globals::Game().AddNewEnemy(EntityType::Knight, spawnPoints[spawnPoint].first);
                 auto entity = Globals::Game().GetEntity(ID);
                 entity->GetTransform().direction = spawnPoints[spawnPoint].second;
-                currentCredits -= 340;
+                currentCredits -= 240;
                 nextSpawns += 170;
                 threatLevel += 40;
+                currentCount[1]++;
+            } break;
+            case 2: {
+                auto ID = Globals::Game().AddNewEnemy(EntityType::Chaser, spawnPoints[spawnPoint].first);
+                auto entity = Globals::Game().GetEntity(ID);
+                entity->GetTransform().direction = spawnPoints[spawnPoint].second;
+                currentCredits -= 320;
+                nextSpawns += 140;
+                threatLevel += 62;
+                currentCount[2]++;
             } break;
             default:
                 std::cout << "Failed a spawn!" << endl;

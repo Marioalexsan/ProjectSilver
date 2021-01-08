@@ -25,13 +25,13 @@ namespace Game {
 	}
 
 	void BasicText::Draw() {
-		auto lib = Globals::Assets().GetFontLibrary();
+		auto& lib = Globals::Assets().GetFontLibrary();
 
 		if (lib.find(fontID) == lib.end()) {
 			return;
 		}
 
-		auto data = lib.at(fontID).first;
+		auto& data = lib.at(fontID).first;
 
 		if (texture == nullptr) {
 			// Bad draw
@@ -43,7 +43,7 @@ namespace Game {
 			return;
 		}
 
-		int lineHeight = data.arbitraryValues["lineHeight"];
+		int lineHeight = data.arbitraryValues.at("lineHeight");
 
 		switch (type) {
 			case TextRenderType::Continuous: 
@@ -51,7 +51,7 @@ namespace Game {
 				int currentX = 0;
 				int wordPos = 0;
 				while (wordPos < text.length()) {
-					auto info = data.charLibrary[text[wordPos]];
+					auto info = data.charLibrary.at(text[wordPos]);
 
 					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
 

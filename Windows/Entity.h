@@ -16,7 +16,10 @@ namespace Game {
 		Fighter,
 		FighterBulletProjectile,
 		Knight,
-		NonSentient // Spells, projectiles, etc.
+		Chaser,
+		ElectricTurret,
+		AssaultRifleTurret,
+		SpawnerTurret
 	};
 
 	class Entity {

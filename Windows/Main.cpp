@@ -127,6 +127,9 @@ int main(int argc, char* args[]) {
         // Do code
 
         if (bonusUpdates > 0) {
+            if (bonusUpdates > 2) {
+                bonusUpdates = 2;
+            }
             cout << "Lag: " << delta - step << " ";
             for (int i = 0; i < bonusUpdates; i++) {
                 ProjectSilver.Update(true); // Skips rendering for all bonus updates

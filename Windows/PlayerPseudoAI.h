@@ -12,9 +12,18 @@ namespace Game {
 		int currentPistolAmmo;
 		int maxPistolAmmo;
 		bool wasReloadingPistol;
+
+		int currentRifleAmmo;
+		int maxRifleAmmo;
+		int rifleAmmoPool;
+		double rifleRecoil;
+		bool wasReloadingRifle;
+
 		bool hasShield;
 		bool inShield;
 		bool doingSwing;
+
+		bool wasInWeaponSwitch;
 
 		int regenCounter;
 		int shieldRegenCounter;
@@ -28,6 +37,9 @@ namespace Game {
 		int heartbeatTime;
 		int heartbeatCounter;
 		int vignetteCounter;
+
+		int equippedWeapon;
+		int targetWeaponEquip;
 		
 		Vector2 smoothSpeed;
 		Vector2 boostVector;

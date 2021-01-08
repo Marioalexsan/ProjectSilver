@@ -34,6 +34,8 @@ namespace Game {
         Game::BasicText waveText;
         Game::BasicText difficultyText;
 
+        vector<int> currentSpawnCount;
+
         int currentWave;
         int delayedAudioStart;
 

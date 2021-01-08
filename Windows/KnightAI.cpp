@@ -6,6 +6,7 @@
 namespace Game {
 
     KnightAI::KnightAI() :
+        postSwingDelay(0),
         strafesLeft(false),
         sword(Game::Vector2(0, 0), 50, Game::Collider::ColliderType::Combat),
         nextStrafeChange(300),
@@ -73,6 +74,7 @@ namespace Game {
         auto turnStrength = angleDelta > 8.0 ? 5.0 : 0.5;
         if (postSwingDelay > 0) {
             turnStrength /= 4;
+            turnStrength /= 2.0 - Utility::ClampValue(60.0 - postSwingDelay, 0.0, 60.0) / 60.0 + 1.0;
         }
         double maxSwingStrength = Globals::Difficulty() + 1.0;
         if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing" && turnStrength > maxSwingStrength) {
@@ -163,7 +165,7 @@ namespace Game {
             if (entity->GetComponent().GetFrame() == 10) {
                 doingSwing = false;
                 sword.UnregisterFromGame();
-                postSwingDelay = 180 - Globals::Difficulty() * 20;
+                postSwingDelay = 150 - Globals::Difficulty() * 20;
             }
         }
 
