@@ -11,6 +11,8 @@
 #include "MenuDirector.h"
 #include "KnightAI.h"
 #include "ChaserAI.h"
+#include "GunTurretAI.h"
+#include "RifleAmmoPack.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
@@ -62,7 +64,7 @@ namespace Game {
 
 		auto& stats = player.GetStatsReference();
 		stats.maxHealth = stats.health = 100.0;
-		stats.shieldHealth = stats.maxShieldHealth = 35.0;
+		stats.shieldHealth = stats.maxShieldHealth = 60.0;
 		stats.stamina = stats.maxStamina = 90.0;
 		stats.onHitInvincibilityFrames = 7;
 	}
@@ -159,6 +161,39 @@ namespace Game {
 
 			axeman.GetTransform().position = worldPos;
 		} break;
+		case EntityType::GunTurret: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new Actor(new GunTurretAI()));
+			Game::Actor& turret = *(Actor*)entityMasterList[ID].get();
+			turret.GetComponent().AddAnimation("GunTurretIdle");
+			turret.GetComponent().SetDefaultAnimation("GunTurretIdle");
+			turret.GetComponent().SwitchAnimation("GunTurretIdle");
+			turret.GetComponent().AddAnimation("GunTurretShoot");
+			turret.GetComponent().AddAnimation("GunTurretBroken");
+			turret.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+			turret.GetCollider().SetColliderType(Collider::ColliderType::CombatStatic);
+			turret.GetCollider().SetRadius(35.0);
+
+			turret.SetType(EntityType::GunTurret);
+
+			auto& stats = turret.GetStatsReference();
+			double HP = 195;
+			HP += GetDifficulty() * 70.0;
+			stats.maxHealth = stats.health = HP;
+
+			turret.GetTransform().position = worldPos;
+		} break;
+		case EntityType::RifleAmmoPackThing: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new RifleAmmoPack());
+			Game::Actor& turret = *(Actor*)entityMasterList[ID].get();
+			turret.GetComponent().AddAnimation("AmmoPack");
+			turret.GetComponent().SwitchAnimation("AmmoPack");
+			turret.GetComponent().SetDefaultAnimation("AmmoPack");
+
+			turret.SetType(EntityType::RifleAmmoPackThing);
+			turret.GetTransform().position = worldPos;
+		} break;
 		default:
 			std::cout << "Unknown enemy bro!" << endl;
 			return 0;
@@ -192,13 +227,16 @@ namespace Game {
 			if (((Actor*)entity.second.get())->GetStatsReference().isDead == false) {
 				switch (entity.second->GetType()) {
 				case EntityType::Fighter:
-					threat += 15;
+					threat += 25;
 					break;
 				case EntityType::Knight:
 					threat += 40;
 					break;
 				case EntityType::Chaser:
 					threat += 75;
+					break;
+				case EntityType::GunTurret:
+					threat += 20;
 					break;
 				}
 			}
@@ -369,6 +407,10 @@ namespace Game {
 		Assets.LoadTexture("PutAwayRifle", texturePath + "PutAwayRifle.png");
 		Assets.LoadTexture("PutAwayPistol", texturePath + "PutAwayPistol.png");
 		Assets.LoadTexture("CharRifleIdle", texturePath + "CharRifleIdle.png");
+		Assets.LoadTexture("GunTurretIdle", texturePath + "GunTurretIdle.png");
+		Assets.LoadTexture("GunTurretBroken", texturePath + "GunTurretBroken.png");
+		Assets.LoadTexture("GunTurretShoot", texturePath + "GunTurretShoot.png");
+		Assets.LoadTexture("Ammo", texturePath + "Ammo.png");
 
 		// Fonts
 		const string fontPath = "Fonts\\";
@@ -403,6 +445,10 @@ namespace Game {
 		Assets.LoadSound("Heartbeat", audioPath + "heartbeat.ogg");
 		Assets.LoadSound("Boost", audioPath + "boost.ogg");
 		Assets.LoadSound("ZerkHurt", audioPath + "zerkhurt.ogg");
+		Assets.LoadSound("TurretHurt", audioPath + "turrethurt.ogg");
+		Assets.LoadSound("TurretBreak", audioPath + "turretbreak.ogg");
+		Assets.LoadSound("TurretDown", audioPath + "turretdown.ogg");
+		Assets.LoadSound("TurretCharge", audioPath + "turretcharge.ogg");
 
 		// Settings
 		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
@@ -521,6 +567,22 @@ namespace Game {
 		AddAnimation("RifleShoot", Animation("RifleShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
 		SetAnimationInfo("RifleShoot", { 2, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
 		SetAnimationCenter("RifleShoot", Vector2(48, 87));
+
+		AddAnimation("GunTurretIdle", Game::Animation("GunTurretIdle", {}));
+		SetAnimationInfo("GunTurretIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("GunTurretIdle", Vector2(50, 64));
+
+		AddAnimation("GunTurretShoot", Animation("GunTurretShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
+		SetAnimationInfo("GunTurretShoot", { 2, 8, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
+		SetAnimationCenter("GunTurretShoot", Vector2(50, 64));
+
+		AddAnimation("GunTurretBroken", Game::Animation("GunTurretBroken", {}));
+		SetAnimationInfo("GunTurretBroken", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("GunTurretBroken", Vector2(50, 64));
+
+		AddAnimation("AmmoPack", Game::Animation("Ammo", {}));
+		SetAnimationInfo("AmmoPack", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
+		SetAnimationCenter("AmmoPack", Vector2(20, 15));
 	}
 
 	void GameMaster::InitLevel() {
@@ -633,7 +695,7 @@ namespace Game {
 				}
 
 				// Discard if both colliders are static
-				if (alpha->GetColliderType() == CType::Static && beta->GetColliderType() == CType::Static) {
+				if ((alpha->GetColliderType() == CType::Static || alpha->GetColliderType() == CType::CombatStatic) && (beta->GetColliderType() == CType::Static || beta->GetColliderType() == CType::CombatStatic)) {
 					continue;
 				}
 
@@ -661,11 +723,11 @@ namespace Game {
 				double APushStr = 0.5;
 				double BPushStr = 0.5;
 
-				if (alpha->GetColliderType() == CType::Static) {
+				if (alpha->GetColliderType() == CType::Static || alpha->GetColliderType() == CType::CombatStatic) {
 					APushStr = 0.0;
 					BPushStr = 1.0;
 				}
-				else if (beta->GetColliderType() == CType::Static) {
+				else if (beta->GetColliderType() == CType::Static || beta->GetColliderType() == CType::CombatStatic) {
 					APushStr = 1.0;
 					BPushStr = 0.0;
 				}
@@ -710,7 +772,7 @@ namespace Game {
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
 			auto alpha = *firstIt;
 			// Discard anything which isn't a combat collider
-			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic)) {
+			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
 				continue;
 			}
 
@@ -752,7 +814,7 @@ namespace Game {
 				}
 
 				// Discard anything which isn't a combat collider
-				if (!(beta->GetColliderType() == CType::Combat || beta->GetColliderType() == CType::CombatDynamic)) {
+				if (!(beta->GetColliderType() == CType::Combat || beta->GetColliderType() == CType::CombatDynamic || beta->GetColliderType() == CType::CombatStatic)) {
 					continue;
 				}
 
@@ -871,7 +933,7 @@ namespace Game {
 			auto alpha = *firstIt;
 
 			// Discard anything which isn't a combat collider
-			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic)) {
+			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
 				continue;
 			}
 
@@ -922,7 +984,7 @@ namespace Game {
 				// Check prerequisites
 
 				// This part only checks for static colliders
-				if (beta->GetColliderType() != Collider::ColliderType::Static) {
+				if (beta->GetColliderType() != Collider::ColliderType::Static && beta->GetColliderType() != CType::CombatStatic) {
 					continue;
 				}
 

@@ -2,6 +2,7 @@
 #include "LevelDirector.h"
 #include "Globals.h"
 #include "Actor.h"
+#include "GunTurretAI.h"
 
 namespace Game {
     LevelDirector::LevelDirector() :
@@ -22,7 +23,8 @@ namespace Game {
         sphere5L(Game::Vector2(1612, 1512), 50, Game::Collider::ColliderType::Static),
         sphere6L(Game::Vector2(1835, 957), 50, Game::Collider::ColliderType::Static),
         sphere7L(Game::Vector2(1181, 961), 100, Game::Collider::ColliderType::Static),
-        currentSpawnCount(3, 0)
+        currentSpawnCount(3, 0),
+        didTurretSpawns(false)
     {
         auto& ProjectSilver = Globals::Game();
 
@@ -47,7 +49,7 @@ namespace Game {
         waveText.SetFont("Big");
         waveText.SetRelativeToCamera(false);
         waveText.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        waveText.SetPosition(Vector2(10, 1020));
+        waveText.SetPosition(Vector2(1460, 1020));
         waveText.RegisterToGame();
         waveText.SetText("They're coming...");
 
@@ -73,10 +75,17 @@ namespace Game {
             {Vector2(150, 1850), 45.0}
         };
 
+        staticSpawnPoints = {
+            {Vector2(500, 1500), 45.0},
+            {Vector2(2000, 1500), 315.0},
+            {Vector2(500, 500), 135.0},
+            {Vector2(2000, 500), 225.0},
+        };
+
         difficultyText.SetFont("Big");
         difficultyText.SetRelativeToCamera(false);
         difficultyText.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        difficultyText.SetPosition(Vector2(1720, 1020));
+        difficultyText.SetPosition(Vector2(1720, 970));
         difficultyText.RegisterToGame();
         switch (Globals::Difficulty()) {
         case 0: {
@@ -143,7 +152,7 @@ namespace Game {
             }
         }
 
-        int mercyFactor = Globals::Game().GetActiveThreat() / (45 + Globals::Difficulty() * 5 + currentWave * 5);
+        int mercyFactor = Globals::Game().GetActiveThreat() / (35 + Globals::Difficulty() * 5 + currentWave * 5);
 
         if (rand() % 100 < 100.0 * 3.0 / (mercyFactor + 2.0)) {
             counter++;
@@ -166,13 +175,30 @@ namespace Game {
             currentCredits = 1000 + (currentWave / 2) * 300;
             if (currentWave != 1) {
                 waveText.SetText("Wave cleared!");
+                waveText.SetPosition(Vector2(1480, 1020));
                 Globals::Audio().PlaySound("NextWave");
             }
+            didTurretSpawns = false;
             counter = 0;
             nextSpawns = 360;
+
+            if (entitiesToKill.size() > 0) {
+                for (auto ID : entitiesToKill) {
+                    auto entity = Globals::Game().GetEntity(ID);
+                    if (entity != nullptr) {
+                        if (entity->GetType() == EntityType::GunTurret) {
+                            auto theAI = ((GunTurretAI*)(((Actor*)entity)->GetAI()));
+                            theAI->ApplyWaveEndBonus();
+                            theAI->OnDeath();
+                        }
+                    }
+                }
+                entitiesToKill.clear();
+            }
             return;
         }
         waveText.SetText("Wave " + std::to_string(currentWave));
+        waveText.SetPosition(Vector2(1720, 1020));
 
         int spawns = 2 + rand() % 2 + currentWave / 2 + Globals::Difficulty();
         spawns = spawns > spawnPoints.size() ? spawnPoints.size() : spawns;
@@ -188,13 +214,64 @@ namespace Game {
         int threatLevel = 0;
         int maxThreat = 100 + currentWave * (5 + 3 * Globals::Difficulty());
 
+        // Fighter, Swordsman, Zerk, Turrets
         vector<int> spawnLimits = {
             1337,
             2 + (currentWave > 3 ? 1 : 0) + (currentWave > 6 ? 1 : 0),
             2 + (currentWave > 5 ? 1 : 0) + (currentWave > 8 ? 1 : 0)
         };
 
+        vector<int> turretLimits = {
+            1 + (currentWave > 5 ? 1 : 0) + (currentWave > 7 ? 1 : 0) + (Globals::Difficulty() > 0 ? 1 : 0) + (Globals::Difficulty() > 0 && currentWave > 8 ? 1 : 0)
+        };
+
         vector<int>& currentCount = currentSpawnCount;
+
+        if (!didTurretSpawns) {
+            didTurretSpawns = true;
+            int turretCount = 1 + (currentWave > 5 ? 1 : 0) + (currentWave > 7 ? 1 : 0);
+            int currentTurretCount = 0;
+
+            // Turrets spawn at start of a wave
+            set<int> availableStaticSpawnPoints;
+            for (int i = 0; i < staticSpawnPoints.size(); i++) {
+                availableStaticSpawnPoints.insert(i);
+            }
+            
+
+            vector<int> currentTurrets = vector<int>(1, 0);
+            while (currentTurretCount < turretCount) {
+                vector<int> turretEnemies;
+                if (true || currentWave > 1 && currentTurrets[0] < turretLimits[0]) {
+                    turretEnemies.push_back(0);
+                }
+                if (turretEnemies.size() > 0) {
+                    int enemy = turretEnemies[rand() % turretEnemies.size()];
+
+                    int spawnPoint = rand() % staticSpawnPoints.size();
+                    int tries = 50;
+                    while (availableStaticSpawnPoints.find(spawnPoint) == availableStaticSpawnPoints.end() && tries > 0) {
+                        tries--;
+                        spawnPoint = rand() % staticSpawnPoints.size();
+                    }
+
+                    switch (enemy) {
+                    case 0: {
+                        auto ID = Globals::Game().AddNewEnemy(EntityType::GunTurret, staticSpawnPoints[spawnPoint].first);
+                        auto entity = Globals::Game().GetEntity(ID);
+                        entity->GetTransform().direction = staticSpawnPoints[spawnPoint].second;
+                        currentTurrets[0]++;
+                        entitiesToKill.push_back(ID);
+                    } break;
+                    default:
+                        std::cout << "Failed a turret spawn!" << endl;
+                        break;
+                    }
+                    availableStaticSpawnPoints.erase(spawnPoint);
+                }
+                currentTurretCount++;
+            }
+        }
 
         while (currentCredits > 0 && availableSpawnPoints.size() > 0 && currentSpawns < spawns) {
             vector<int> enemies = { 0 };
@@ -228,8 +305,8 @@ namespace Game {
                 auto entity = Globals::Game().GetEntity(ID);
                 entity->GetTransform().direction = spawnPoints[spawnPoint].second;
                 currentCredits -= 120;
-                nextSpawns += 40;
-                threatLevel += 5;
+                nextSpawns += 60;
+                threatLevel += 10;
                 currentCount[0]++;
             } break;
             case 1: {

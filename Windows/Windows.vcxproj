@@ -182,8 +182,10 @@
     <ClCompile Include="PlayerPseudoAI.cpp" />
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="AI.cpp" />
+    <ClCompile Include="RifleAmmoPack.cpp" />
     <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="GunTurretAI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -213,10 +215,12 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerPseudoAI.h" />
     <ClInclude Include="RenderComponent.h" />
+    <ClInclude Include="RifleAmmoPack.h" />
     <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="PCHeader.h" />
     <ClInclude Include="Drawable.h" />
+    <ClInclude Include="GunTurretAI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

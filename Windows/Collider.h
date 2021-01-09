@@ -16,6 +16,7 @@ namespace Game {
 			Dynamic,
 			CombatDynamic,
 			Combat,
+			CombatStatic
 		};
 
 		enum CombatLayer {

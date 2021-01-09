@@ -17,9 +17,8 @@ namespace Game {
 		FighterBulletProjectile,
 		Knight,
 		Chaser,
-		ElectricTurret,
-		AssaultRifleTurret,
-		SpawnerTurret
+		RifleAmmoPackThing,
+		GunTurret
 	};
 
 	class Entity {

@@ -9,9 +9,9 @@
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
         wasInWeaponSwitch(false),
-        currentRifleAmmo(30),
+        currentRifleAmmo(15),
         maxRifleAmmo(30),
-        rifleAmmoPool(90),
+        rifleAmmoPool(0),
         equippedWeapon(0),
         targetWeaponEquip(-1),
         boostCooldown(0),
@@ -29,13 +29,14 @@ namespace Game {
         maxPistolAmmo(12),
         regenCounter(0),
         wasReloadingPistol(false),
+        wasReloadingRifle(false),
         hasShield(true),
         inShield(false),
         axe(Game::Vector2(0, 0), 60, Game::Collider::ColliderType::Combat),
         AI()
     {
 
-        axe.SetCombatDamage(90.0);
+        axe.SetCombatDamage(100.0);
         axe.SetCombatLayer(Collider::CombatLayer::None);
         axe.SetLayersToAttack({ Collider::CombatLayer::Enemies });
         axe.SetCollisionOptions({ Collider::CollisionOptions::DoNotHitRememberedEnemies });
@@ -49,13 +50,13 @@ namespace Game {
         shieldHealth.SetFont("Big");
         shieldHealth.SetRelativeToCamera(false);
         shieldHealth.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        shieldHealth.SetPosition(Vector2(20, 155));
+        shieldHealth.SetPosition(Vector2(20, 95));
         shieldHealth.RegisterToGame();
 
         stamina.SetFont("Big");
         stamina.SetRelativeToCamera(false);
         stamina.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        stamina.SetPosition(Vector2(20, 215));
+        stamina.SetPosition(Vector2(20, 155));
         stamina.RegisterToGame();
 
         lowHPVignette.SetTexture("LowHP");
@@ -67,7 +68,7 @@ namespace Game {
         gunAmmo.SetFont("Big");
         gunAmmo.SetRelativeToCamera(false);
         gunAmmo.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
-        gunAmmo.SetPosition(Vector2(20, 95));
+        gunAmmo.SetPosition(Vector2(20, 1020));
         gunAmmo.RegisterToGame();
     }
 
@@ -182,10 +183,10 @@ namespace Game {
 
             shieldRegenCounter++;
 
-            if (shieldRegenCounter >= 150) {
-                shieldRegenCounter = 120;
+            if (shieldRegenCounter >= 180) {
+                shieldRegenCounter = 150;
                 if (stats.shieldHealth < stats.maxShieldHealth) {
-                    double healing = 7.0 - Globals::Difficulty();
+                    double healing = 6.0 - Globals::Difficulty();
 
                     stats.shieldHealth += healing;
                     if (stats.shieldHealth > stats.maxShieldHealth) {
@@ -275,7 +276,7 @@ namespace Game {
             }
         }
         else {
-            gunAmmo.SetText("Ammo: " + std::to_string(currentRifleAmmo) + " / " + std::to_string(maxRifleAmmo) + " (" + std::to_string(rifleAmmoPool) + ")");
+            gunAmmo.SetText("Ammo: " + std::to_string(currentRifleAmmo) + " / " + std::to_string(maxRifleAmmo) + " (" + std::to_string(rifleAmmoPool) + ")" + (currentRifleAmmo + rifleAmmoPool >= 60 ? " (Max!)" : ""));
             if (currentRifleAmmo == 0) {
                 if (rifleAmmoPool == 0) {
                     gunAmmo.SetColor(Color::Orange);
@@ -405,26 +406,6 @@ namespace Game {
                     auto mouse = game.Input.GetMousePosition();
                     auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
                     auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
-                    std::cout << "Hit list: " << endl;
-                    for (auto& elem : results) {
-                        std::cout << "Distance: " << elem.first << " ";
-                        using Game::BoxCollider;
-                        using Game::SphereCollider;
-                        BoxCollider* ABox = dynamic_cast<BoxCollider*>(elem.second);
-                        SphereCollider* ASphere = nullptr;
-                        if (ABox == nullptr) {
-                            ASphere = dynamic_cast<SphereCollider*>(elem.second);
-                        }
-                        if (ABox) {
-                            std::cout << "Box" << endl;
-                        }
-                        else if (ASphere) {
-                            std::cout << "Sphere" << endl;
-                        }
-                        else {
-                            std::cout << "Apache Attack Helicopter, or something" << endl;
-                        }
-                    }
                     if (results.size() > 1) {
                         // First collider is usually the player's own, which is crappy, but c'est la vie
                         auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
@@ -449,26 +430,6 @@ namespace Game {
                     auto mouse = game.Input.GetMousePosition();
                     auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
                     auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
-                    std::cout << "Hit list: " << endl;
-                    for (auto& elem : results) {
-                        std::cout << "Distance: " << elem.first << " ";
-                        using Game::BoxCollider;
-                        using Game::SphereCollider;
-                        BoxCollider* ABox = dynamic_cast<BoxCollider*>(elem.second);
-                        SphereCollider* ASphere = nullptr;
-                        if (ABox == nullptr) {
-                            ASphere = dynamic_cast<SphereCollider*>(elem.second);
-                        }
-                        if (ABox) {
-                            std::cout << "Box" << endl;
-                        }
-                        else if (ASphere) {
-                            std::cout << "Sphere" << endl;
-                        }
-                        else {
-                            std::cout << "Apache Attack Helicopter, or something" << endl;
-                        }
-                    }
                     if (results.size() > 1) {
                         // First collider is usually the player's own, which is crappy, but c'est la vie
                         auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
@@ -477,7 +438,7 @@ namespace Game {
                             auto actor = (Actor*)entity;
                             auto actorAI = actor->GetAI();
                             if (actorAI != nullptr) {
-                                actorAI->OnHitByAttack(this->entity, 20.0);
+                                actorAI->OnHitByAttack(this->entity, 38.0);
                             }
                         }
                     }

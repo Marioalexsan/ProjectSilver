@@ -105,6 +105,7 @@ namespace Game {
 		if (std::find(animations.begin(), animations.end(), ID) == animations.end()) {
 			return;
 		}
+		parsedStart = false;
 		parsedEnd = false;
 		currentAnimation = ID;
 

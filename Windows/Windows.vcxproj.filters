@@ -118,6 +118,15 @@
     <Filter Include="ComplexFeatures\AI Library\ChaserAI">
       <UniqueIdentifier>{9f04b6ec-fa03-4d13-a201-0e453659c589}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComplexFeatures\AI Library\Turrets">
+      <UniqueIdentifier>{34db5f0a-af38-4502-b158-d36891d1bdc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComplexFeatures\AI Library\Turrets\GunTurret">
+      <UniqueIdentifier>{13033ccb-5710-4018-89a5-d640e145fbfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\RifleAmmoPack">
+      <UniqueIdentifier>{71d22a23-5674-46d0-b097-56f6207a0068}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -216,6 +225,12 @@
     <ClCompile Include="ChaserAI.cpp">
       <Filter>ComplexFeatures\AI Library\ChaserAI</Filter>
     </ClCompile>
+    <ClCompile Include="GunTurretAI.cpp">
+      <Filter>ComplexFeatures\AI Library\Turrets\GunTurret</Filter>
+    </ClCompile>
+    <ClCompile Include="RifleAmmoPack.cpp">
+      <Filter>Entity Library\RifleAmmoPack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -310,6 +325,12 @@
     </ClInclude>
     <ClInclude Include="ChaserAI.h">
       <Filter>ComplexFeatures\AI Library\ChaserAI</Filter>
+    </ClInclude>
+    <ClInclude Include="GunTurretAI.h">
+      <Filter>ComplexFeatures\AI Library\Turrets\GunTurret</Filter>
+    </ClInclude>
+    <ClInclude Include="RifleAmmoPack.h">
+      <Filter>Entity Library\RifleAmmoPack</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

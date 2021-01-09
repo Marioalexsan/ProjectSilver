@@ -58,6 +58,13 @@ namespace Game {
 		PlayerPseudoAI();
 		~PlayerPseudoAI();
 
+		inline void AddRifleAmmo(int ammo) {
+			rifleAmmoPool += ammo;
+			if (rifleAmmoPool + currentRifleAmmo > 60) {
+				rifleAmmoPool = 60 - currentRifleAmmo;
+			}
+		}
+
 		virtual void OnAttackHit();
 		virtual void OnHitByAttack(Actor* attacker, double damage);
 

@@ -41,7 +41,12 @@ namespace Game {
 
         int currentCredits;
 
+        bool didTurretSpawns;
+
+        vector<uint64_t> entitiesToKill;
+
         vector<pair<Vector2, double>> spawnPoints;
+        vector<pair<Vector2, double>> staticSpawnPoints;
     public:
         LevelDirector();
         ~LevelDirector();

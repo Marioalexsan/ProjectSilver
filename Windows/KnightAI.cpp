@@ -165,7 +165,7 @@ namespace Game {
             if (entity->GetComponent().GetFrame() == 10) {
                 doingSwing = false;
                 sword.UnregisterFromGame();
-                postSwingDelay = 150 - Globals::Difficulty() * 20;
+                postSwingDelay = 120 - Globals::Difficulty() * 16;
             }
         }
 
