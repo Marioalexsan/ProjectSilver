@@ -29,7 +29,7 @@ namespace Game {
 
 	Collider::~Collider() {
 		// Make sure we don't have dangling pointers
-		Globals::Game().RemoveCollider(this);
+		UnregisterFromGame();
 	}
 
 	Trackable<Transform>& Collider::GetTransform() {

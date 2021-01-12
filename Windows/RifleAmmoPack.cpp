@@ -6,7 +6,7 @@ namespace Game {
 	RifleAmmoPack::RifleAmmoPack() :
 		Actor(nullptr),
 		ammoToGrant(0),
-		pickUpDelay(60)
+		pickUpDelay(30)
 	{
 		collider.UnregisterFromGame();
 	}

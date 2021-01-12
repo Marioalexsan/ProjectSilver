@@ -37,25 +37,24 @@ namespace Game {
 		entityMasterList[maxAutoEntityID + SpecialEntities::Player].reset(new Actor(new PlayerPseudoAI()));
 		Game::Actor& player = *(Actor*)entityMasterList[maxAutoEntityID + SpecialEntities::Player].get();
 		Game::PlayerPseudoAI& playerLogic = *(PlayerPseudoAI*)player.GetAI();
-		player.GetComponent().AddAnimation("PlayerIdle");
-		player.GetComponent().SetDefaultAnimation("PlayerIdle");
-		player.GetComponent().SwitchAnimation("PlayerIdle");
-		player.GetComponent().AddAnimation("PlayerShoot");
-		player.GetComponent().AddAnimation("CharDead");
-		player.GetComponent().AddAnimation("PlayerReload");
-		player.GetComponent().AddAnimation("CharShieldUp");
-		player.GetComponent().AddAnimation("CharShieldDown");
-		player.GetComponent().AddAnimation("CharShieldWalk");
-		player.GetComponent().AddAnimation("CharAxeSwing");
+		player.GetComponent().AddAnimation("Player_PistolIdle");
+		player.GetComponent().SetDefaultAnimation("Player_PistolIdle");
+		player.GetComponent().SwitchAnimation("Player_PistolIdle");
 
-		player.GetComponent().AddAnimation("CharRifleIdle");
-		player.GetComponent().AddAnimation("RifleShoot");
-		player.GetComponent().AddAnimation("RifleReload");
-
-		player.GetComponent().AddAnimation("TakeOutRifle");
-		player.GetComponent().AddAnimation("TakeOutPistol");
-		player.GetComponent().AddAnimation("PutAwayRifle");
-		player.GetComponent().AddAnimation("PutAwayPistol");
+		player.GetComponent().AddAnimation("Player_RifleIdle");
+		player.GetComponent().AddAnimation("Player_PistolShoot");
+		player.GetComponent().AddAnimation("Player_PistolReload");
+		player.GetComponent().AddAnimation("Player_RifleShoot");
+		player.GetComponent().AddAnimation("Player_RifleReload");
+		player.GetComponent().AddAnimation("Player_Dead");
+		player.GetComponent().AddAnimation("Player_ShieldUp");
+		player.GetComponent().AddAnimation("Player_ShieldDown");
+		player.GetComponent().AddAnimation("Player_ShieldWalk");
+		player.GetComponent().AddAnimation("Player_AxeSwing");
+		player.GetComponent().AddAnimation("Player_TakeOutRifle");
+		player.GetComponent().AddAnimation("Player_TakeOutPistol");
+		player.GetComponent().AddAnimation("Player_PutAwayRifle");
+		player.GetComponent().AddAnimation("Player_PutAwayPistol");
 
 		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
 		player.GetCollider().SetRadius(40.0);
@@ -84,18 +83,18 @@ namespace Game {
 		return entityMasterList[position].get();
 	}
 
-	uint64_t GameMaster::AddNewEnemy(EntityType type, Vector2 worldPos) {
+	uint64_t GameMaster::AddEntity(EntityType type, Vector2 worldPos) {
 		uint64_t ID;
 		switch (type) {
 		case EntityType::Fighter: {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new Actor(new FighterAI()));
 			Game::Actor& fighter = *(Actor*)entityMasterList[ID].get();
-			fighter.GetComponent().AddAnimation("PlayerIdle");
-			fighter.GetComponent().AddAnimation("PlayerShoot");
-			fighter.GetComponent().AddAnimation("CharDead");
-			fighter.GetComponent().SetDefaultAnimation("PlayerIdle");
-			fighter.GetComponent().SwitchAnimation("PlayerIdle");
+			fighter.GetComponent().AddAnimation("Player_PistolIdle");
+			fighter.GetComponent().AddAnimation("Player_PistolShoot");
+			fighter.GetComponent().AddAnimation("Player_Dead");
+			fighter.GetComponent().SetDefaultAnimation("Player_PistolIdle");
+			fighter.GetComponent().SwitchAnimation("Player_PistolIdle");
 			fighter.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
 			fighter.SetType(EntityType::Fighter);
@@ -112,9 +111,9 @@ namespace Game {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new FighterBullet());
 			Game::FighterBullet& bullet = *(FighterBullet*)entityMasterList[ID].get();
-			bullet.GetComponent().AddAnimation("BulletTravel");
-			bullet.GetComponent().SetDefaultAnimation("BulletTravel");
-			bullet.GetComponent().SwitchAnimation("BulletTravel");
+			bullet.GetComponent().AddAnimation("Bullet_Travel");
+			bullet.GetComponent().SetDefaultAnimation("Bullet_Travel");
+			bullet.GetComponent().SwitchAnimation("Bullet_Travel");
 			bullet.GetCollider().SetEntityDestructionSignalling(true);
 
 			bullet.SetType(EntityType::FighterBulletProjectile);
@@ -125,11 +124,11 @@ namespace Game {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new Actor(new KnightAI()));
 			Game::Actor& knight = *(Actor*)entityMasterList[ID].get();
-			knight.GetComponent().AddAnimation("KnightWalk");
-			knight.GetComponent().SetDefaultAnimation("KnightWalk");
-			knight.GetComponent().SwitchAnimation("KnightWalk");
-			knight.GetComponent().AddAnimation("KnightSwing");
-			knight.GetComponent().AddAnimation("KnightDead");
+			knight.GetComponent().AddAnimation("Knight_Walk");
+			knight.GetComponent().SetDefaultAnimation("Knight_Walk");
+			knight.GetComponent().SwitchAnimation("Knight_Walk");
+			knight.GetComponent().AddAnimation("Knight_Swing");
+			knight.GetComponent().AddAnimation("Knight_Dead");
 			knight.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
 			knight.SetType(EntityType::Knight);
@@ -145,11 +144,11 @@ namespace Game {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new Actor(new ChaserAI()));
 			Game::Actor& axeman = *(Actor*)entityMasterList[ID].get();
-			axeman.GetComponent().AddAnimation("ChaserIdle");
-			axeman.GetComponent().SetDefaultAnimation("ChaserIdle");
-			axeman.GetComponent().SwitchAnimation("ChaserIdle");
-			axeman.GetComponent().AddAnimation("ChaserAxeSwing");
-			axeman.GetComponent().AddAnimation("ChaserDead");
+			axeman.GetComponent().AddAnimation("Berserker_Walk");
+			axeman.GetComponent().SetDefaultAnimation("Berserker_Walk");
+			axeman.GetComponent().SwitchAnimation("Berserker_Walk");
+			axeman.GetComponent().AddAnimation("Berserker_AxeSwing");
+			axeman.GetComponent().AddAnimation("Berserker_Dead");
 			axeman.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 
 			axeman.SetType(EntityType::Chaser);
@@ -165,11 +164,11 @@ namespace Game {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new Actor(new GunTurretAI()));
 			Game::Actor& turret = *(Actor*)entityMasterList[ID].get();
-			turret.GetComponent().AddAnimation("GunTurretIdle");
-			turret.GetComponent().SetDefaultAnimation("GunTurretIdle");
-			turret.GetComponent().SwitchAnimation("GunTurretIdle");
-			turret.GetComponent().AddAnimation("GunTurretShoot");
-			turret.GetComponent().AddAnimation("GunTurretBroken");
+			turret.GetComponent().AddAnimation("GunTurret_Idle");
+			turret.GetComponent().SetDefaultAnimation("GunTurret_Idle");
+			turret.GetComponent().SwitchAnimation("GunTurret_Idle");
+			turret.GetComponent().AddAnimation("GunTurret_Shoot");
+			turret.GetComponent().AddAnimation("GunTurret_Broken");
 			turret.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 			turret.GetCollider().SetColliderType(Collider::ColliderType::CombatStatic);
 			turret.GetCollider().SetRadius(35.0);
@@ -187,9 +186,9 @@ namespace Game {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new RifleAmmoPack());
 			Game::Actor& turret = *(Actor*)entityMasterList[ID].get();
-			turret.GetComponent().AddAnimation("AmmoPack");
-			turret.GetComponent().SwitchAnimation("AmmoPack");
-			turret.GetComponent().SetDefaultAnimation("AmmoPack");
+			turret.GetComponent().AddAnimation("RifleAmmoPack");
+			turret.GetComponent().SwitchAnimation("RifleAmmoPack");
+			turret.GetComponent().SetDefaultAnimation("RifleAmmoPack");
 
 			turret.SetType(EntityType::RifleAmmoPackThing);
 			turret.GetTransform().position = worldPos;
@@ -375,42 +374,63 @@ namespace Game {
 		// Initializes the assets and stuff
 
 		// Textures
-		const string texturePath = "Textures\\";
-		Assets.LoadTexture("Checks", texturePath + "Untitled.png");
-		Assets.LoadTexture("Test", texturePath + "Untitled2.png");
-		Assets.LoadTexture("Char", texturePath + "Char.png");
-		Assets.LoadTexture("Test2", texturePath + "Untitled3.png");
-		Assets.LoadTexture("LevelFloor", texturePath + "Floor.png");
-		Assets.LoadTexture("LevelWall", texturePath + "Walls.png");
-		Assets.LoadTexture("CharCircle", texturePath + "CharCircle.png");
-		Assets.LoadTexture("CharDead", texturePath + "CharDead.png");
-		Assets.LoadTexture("Target", texturePath + "target.png");
-		Assets.LoadTexture("CharShoot", texturePath + "CharShoot.png");
-		Assets.LoadTexture("Bullet", texturePath + "Bullet.png");
-		Assets.LoadTexture("Button", texturePath + "Button.png");
-		Assets.LoadTexture("PlayerReload", texturePath + "CharReload.png");
-		Assets.LoadTexture("KnightWalk", texturePath + "KnightWalk.png");
-		Assets.LoadTexture("KnightSwing", texturePath + "KnightSwing.png");
-		Assets.LoadTexture("KnightDead", texturePath + "KnightDead.png");
-		Assets.LoadTexture("CharShieldUp", texturePath + "CharShieldUp.png");
-		Assets.LoadTexture("CharShieldDown", texturePath + "CharShieldDown.png");
-		Assets.LoadTexture("CharShieldWalk", texturePath + "CharShieldWalk.png");
-		Assets.LoadTexture("CharAxeSwing", texturePath + "CharAxeSwing.png");
-		Assets.LoadTexture("ChaserAxeSwing", texturePath + "ChaserAxeSwing.png");
-		Assets.LoadTexture("ChaserIdleNew", texturePath + "ChaserIdleNew.png");
-		Assets.LoadTexture("ChaserDead", texturePath + "ChaserDead.png");
-		Assets.LoadTexture("LowHP", texturePath + "LowHP.png");
-		Assets.LoadTexture("RifleReload", texturePath + "RifleReload.png");
-		Assets.LoadTexture("RifleShoot", texturePath + "RifleShoot.png");
-		Assets.LoadTexture("TakeOutRifle", texturePath + "TakeOutRifle.png");
-		Assets.LoadTexture("TakeOutPistol", texturePath + "TakeOutPistol.png");
-		Assets.LoadTexture("PutAwayRifle", texturePath + "PutAwayRifle.png");
-		Assets.LoadTexture("PutAwayPistol", texturePath + "PutAwayPistol.png");
-		Assets.LoadTexture("CharRifleIdle", texturePath + "CharRifleIdle.png");
-		Assets.LoadTexture("GunTurretIdle", texturePath + "GunTurretIdle.png");
-		Assets.LoadTexture("GunTurretBroken", texturePath + "GunTurretBroken.png");
-		Assets.LoadTexture("GunTurretShoot", texturePath + "GunTurretShoot.png");
-		Assets.LoadTexture("Ammo", texturePath + "Ammo.png");
+		const string texturePath = "Textures/";
+		string assetFolder = "";
+
+		// Level
+		assetFolder = texturePath + "Level/";
+		Assets.LoadTexture("WallTile", assetFolder + "WallTile.png");
+		Assets.LoadTexture("LevelFloor", assetFolder + "LevelFloor.png");
+		Assets.LoadTexture("SmallPillar", assetFolder + "SmallPillar.png");
+		Assets.LoadTexture("LargePillar", assetFolder + "LargePillar.png");
+
+		// Player Related
+		assetFolder = texturePath + "Player/";
+		Assets.LoadTexture("Player_PistolIdle", assetFolder + "PistolIdle.png");
+		Assets.LoadTexture("Player_RifleIdle", assetFolder + "RifleIdle.png");
+		Assets.LoadTexture("Player_Dead", assetFolder + "Dead.png");
+		Assets.LoadTexture("Player_PistolShoot", assetFolder + "PistolShoot.png");
+		Assets.LoadTexture("Player_PistolReload", assetFolder + "PistolReload.png");
+		Assets.LoadTexture("Player_RifleShoot", assetFolder + "RifleShoot.png");
+		Assets.LoadTexture("Player_RifleReload", assetFolder + "RifleReload.png");
+		Assets.LoadTexture("Player_ShieldUp", assetFolder + "ShieldUp.png");
+		Assets.LoadTexture("Player_ShieldDown", assetFolder + "ShieldDown.png");
+		Assets.LoadTexture("Player_ShieldWalk", assetFolder + "ShieldWalk.png");
+		Assets.LoadTexture("Player_AxeSwing", assetFolder + "AxeSwing.png");
+		Assets.LoadTexture("Player_TakeOutRifle", assetFolder + "TakeOutRifle.png");
+		Assets.LoadTexture("Player_TakeOutPistol", assetFolder + "TakeOutPistol.png");
+		Assets.LoadTexture("Player_PutAwayRifle", assetFolder + "PutAwayRifle.png");
+		Assets.LoadTexture("Player_PutAwayPistol", assetFolder + "PutAwayPistol.png");
+
+		// GUI
+		assetFolder = texturePath + "GUI/";
+		Assets.LoadTexture("Target", assetFolder + "Target.png");
+		Assets.LoadTexture("Button", assetFolder + "Button.png");
+		Assets.LoadTexture("LowHP", assetFolder + "LowHP.png");
+		
+		// Knight Enemy
+		assetFolder = texturePath + "Knight/";
+		Assets.LoadTexture("Knight_Walk", assetFolder + "KnightWalk.png");
+		Assets.LoadTexture("Knight_Swing", assetFolder + "KnightSwing.png");
+		Assets.LoadTexture("Knight_Dead", assetFolder + "KnightDead.png");
+		
+		// Berserker Enemy
+		assetFolder = texturePath + "Berserker/";
+		Assets.LoadTexture("Berserker_AxeSwing", assetFolder + "ChaserAxeSwing.png");
+		Assets.LoadTexture("Berserker_Walk", assetFolder + "ChaserIdleNew.png");
+		Assets.LoadTexture("Berserker_Dead", assetFolder + "ChaserDead.png");
+		
+		// Turret Enemy
+		assetFolder = texturePath + "Turret/";
+		Assets.LoadTexture("GunTurret_Idle", assetFolder + "GunTurretIdle.png");
+		Assets.LoadTexture("GunTurret_Broken", assetFolder + "GunTurretBroken.png");
+		Assets.LoadTexture("GunTurret_Shoot", assetFolder + "GunTurretShoot.png");
+
+		// Misc
+		assetFolder = texturePath + "Misc/";
+		Assets.LoadTexture("RifleAmmoPack", assetFolder + "Ammo.png");
+		Assets.LoadTexture("Bullet", assetFolder + "Bullet.png");
+		
 
 		// Fonts
 		const string fontPath = "Fonts\\";
@@ -428,7 +448,6 @@ namespace Game {
 		Assets.LoadMusic("Menu", audioPath + "menu.ogg");
 
 		// Sound
-		Assets.LoadSound("Mooz", audioPath + "Mooz.ogg");
 		Assets.LoadSound("PlayerShoot", audioPath + "shot.ogg");
 		Assets.LoadSound("PlayerReload1", audioPath + "magout.ogg");
 		Assets.LoadSound("PlayerReload2", audioPath + "magin.ogg");
@@ -455,134 +474,142 @@ namespace Game {
 		Input.SetMouseGrab(true);
 
 		// Animation info
-		AddAnimation("BoxThing", Game::Animation("Test", {}));
-		SetAnimationInfo("BoxThing", { 20, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
-
-		AddAnimation("BoxThing2", Game::Animation("Test2", {}));
-		SetAnimationInfo("BoxThing2", { 10, 4, 2, Game::AnimatedSprite::LoopMode::PlayOnce });
-
-		AddAnimation("PlayerIdle", Game::Animation("Char", {}));
-		SetAnimationInfo("PlayerIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("PlayerIdle", Vector2(48, 67));
-
-
-		AddAnimation("CharDead", Game::Animation("CharDead", {}));
-		SetAnimationInfo("CharDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("CharDead", Vector2(75, 100));
-
-		AddAnimation("BulletTravel", Game::Animation("Bullet", {}));
-		SetAnimationInfo("BulletTravel", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("BulletTravel", Vector2(4, 6));
-
-		AddAnimation("PlayerReload", Game::Animation("PlayerReload", {
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "3"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload1"} },
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "8"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "10"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
-			}));
-		SetAnimationInfo("PlayerReload", { 8, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("PlayerReload", Vector2(48, 67));
-
 		using Animation = Game::Animation;
+		using LoopMode = Game::AnimatedSprite::LoopMode;
+		using AnimationCriteria = Animation::AnimationCriteria;
+		using AnimationInstruction = Animation::AnimationInstruction;
 
-		AddAnimation("PlayerShoot", Animation("CharShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
-		SetAnimationInfo("PlayerShoot", { 4, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("PlayerShoot", Vector2(48, 67));
+		// Player
+		AddAnimation("Player_PistolIdle", Animation("Player_PistolIdle", {}));
+		SetAnimationInfo("Player_PistolIdle", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Player_PistolIdle", Vector2(48, 67));
 
-		AddAnimation("KnightDead", Game::Animation("KnightDead", {}));
-		SetAnimationInfo("KnightDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("KnightDead", Vector2(75, 100));
+		AddAnimation("Player_RifleIdle", Animation("Player_RifleIdle", {}));
+		SetAnimationInfo("Player_RifleIdle", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Player_RifleIdle", Vector2(48, 67));
 
-		AddAnimation("KnightWalk", Animation("KnightWalk", {}));
-		SetAnimationInfo("KnightWalk", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
-		SetAnimationCenter("KnightWalk", Vector2(73, 66));
+		AddAnimation("Player_Dead", Animation("Player_Dead", {}));
+		SetAnimationInfo("Player_Dead", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Player_Dead", Vector2(75, 100));
 
-		AddAnimation("KnightSwing", Game::Animation("KnightSwing", {
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "5"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+		AddAnimation("Player_PistolShoot", Animation("Player_PistolShoot", { 
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerShoot"} } 
 			}));
-		SetAnimationInfo("KnightSwing", { 6, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("KnightSwing", Vector2(73, 116));
+		SetAnimationInfo("Player_PistolShoot", { 4, 4, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_PistolShoot", Vector2(48, 67));
 
-		AddAnimation("CharShieldUp", Animation("CharShieldUp", {
-			{ {Animation::AnimationCriteria::TriggerAtEnd, ""}, {Animation::AnimationInstruction::SwitchAnimation, "CharShieldWalk"} }
+		AddAnimation("Player_PistolReload", Animation("Player_PistolReload", {
+			{ {AnimationCriteria::TriggerAtFrameX, "3"}, {AnimationInstruction::PlaySound, "PlayerReload1"} },
+			{ {AnimationCriteria::TriggerAtFrameX, "8"}, {AnimationInstruction::PlaySound, "PlayerReload2"} },
+			{ {AnimationCriteria::TriggerAtFrameX, "10"}, {AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("CharShieldUp", { 3, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("CharShieldUp", Vector2(73, 66));
+		SetAnimationInfo("Player_PistolReload", { 8, 12, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_PistolReload", Vector2(48, 67));
 
-		AddAnimation("CharShieldDown", Animation("CharShieldDown", {}));
-		SetAnimationInfo("CharShieldDown", { 3, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("CharShieldDown", Vector2(73, 66));
-
-		AddAnimation("CharShieldWalk", Animation("CharShieldWalk", {}));
-		SetAnimationInfo("CharShieldWalk", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
-		SetAnimationCenter("CharShieldWalk", Vector2(73, 66));
-
-		AddAnimation("CharAxeSwing", Animation("CharAxeSwing", {
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "4"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+		AddAnimation("Player_RifleShoot", Animation("Player_RifleShoot", { 
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerShoot"} } 
 			}));
-		SetAnimationInfo("CharAxeSwing", { 5, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("CharAxeSwing", Vector2(73, 116));
+		SetAnimationInfo("Player_RifleShoot", { 2, 4, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_RifleShoot", Vector2(48, 87));
 
-		AddAnimation("ChaserAxeSwing", Animation("ChaserAxeSwing", {
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "4"}, {Animation::AnimationInstruction::PlaySound, "SwordSwing"} }
+		AddAnimation("Player_RifleReload", Animation("Player_RifleReload", {
+			{ {AnimationCriteria::TriggerAtFrameX, "5"}, {AnimationInstruction::PlaySound, "PlayerReload1"} },
+			{ {AnimationCriteria::TriggerAtFrameX, "16"}, {AnimationInstruction::PlaySound, "PlayerReload2"} },
+			{ {AnimationCriteria::TriggerAtFrameX, "19"}, {AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("ChaserAxeSwing", { 3, 12, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("ChaserAxeSwing", Vector2(73, 116));
+		SetAnimationInfo("Player_RifleReload", { 7, 21, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_RifleReload", Vector2(48, 67));
 
-		AddAnimation("ChaserIdle", Animation("ChaserIdleNew", {}));
-		SetAnimationInfo("ChaserIdle", { 12, 4, 1, Game::AnimatedSprite::LoopMode::NormalLoop });
-		SetAnimationCenter("ChaserIdle", Vector2(73, 116));
-
-		AddAnimation("ChaserDead", Game::Animation("ChaserDead", {}));
-		SetAnimationInfo("ChaserDead", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("ChaserDead", Vector2(75, 100));
-
-		AddAnimation("TakeOutRifle", Game::Animation("TakeOutRifle", {}));
-		SetAnimationInfo("TakeOutRifle", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("TakeOutRifle", Vector2(48, 67));
-
-		AddAnimation("TakeOutPistol", Game::Animation("TakeOutPistol", {}));
-		SetAnimationInfo("TakeOutPistol", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("TakeOutPistol", Vector2(48, 67));
-
-		AddAnimation("PutAwayRifle", Game::Animation("PutAwayRifle", {}));
-		SetAnimationInfo("PutAwayRifle", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("PutAwayRifle", Vector2(48, 67));
-
-		AddAnimation("PutAwayPistol", Game::Animation("PutAwayPistol", {}));
-		SetAnimationInfo("PutAwayPistol", { 4, 5, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("PutAwayPistol", Vector2(48, 67));
-
-		AddAnimation("RifleReload", Game::Animation("RifleReload", {
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "5"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload1"} },
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "16"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload2"} },
-			{ {Animation::AnimationCriteria::TriggerAtFrameX, "19"}, {Animation::AnimationInstruction::PlaySound, "PlayerReload3"} }
+		AddAnimation("Player_ShieldUp", Animation("Player_ShieldUp", {
+			{ {AnimationCriteria::TriggerAtEnd, ""}, {AnimationInstruction::SwitchAnimation, "Player_ShieldWalk"} }
 			}));
-		SetAnimationInfo("RifleReload", { 7, 21, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("RifleReload", Vector2(48, 67));
+		SetAnimationInfo("Player_ShieldUp", { 3, 4, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_ShieldUp", Vector2(73, 66));
 
-		AddAnimation("CharRifleIdle", Game::Animation("CharRifleIdle", {}));
-		SetAnimationInfo("CharRifleIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("CharRifleIdle", Vector2(48, 67));
+		AddAnimation("Player_ShieldDown", Animation("Player_ShieldDown", {}));
+		SetAnimationInfo("Player_ShieldDown", { 3, 4, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_ShieldDown", Vector2(73, 66));
 
-		AddAnimation("RifleShoot", Animation("RifleShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
-		SetAnimationInfo("RifleShoot", { 2, 4, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("RifleShoot", Vector2(48, 87));
+		AddAnimation("Player_ShieldWalk", Animation("Player_ShieldWalk", {}));
+		SetAnimationInfo("Player_ShieldWalk", { 12, 4, 1, LoopMode::NormalLoop });
+		SetAnimationCenter("Player_ShieldWalk", Vector2(73, 66));
 
-		AddAnimation("GunTurretIdle", Game::Animation("GunTurretIdle", {}));
-		SetAnimationInfo("GunTurretIdle", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("GunTurretIdle", Vector2(50, 64));
+		AddAnimation("Player_AxeSwing", Animation("Player_AxeSwing", {
+			{ {AnimationCriteria::TriggerAtFrameX, "4"}, {AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("Player_AxeSwing", { 5, 12, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_AxeSwing", Vector2(73, 116));
 
-		AddAnimation("GunTurretShoot", Animation("GunTurretShoot", { { {Animation::AnimationCriteria::TriggerAtStart, ""}, {Animation::AnimationInstruction::PlaySound, "PlayerShoot"} } }));
-		SetAnimationInfo("GunTurretShoot", { 2, 8, 1, Game::AnimatedSprite::LoopMode::PlayOnce });
-		SetAnimationCenter("GunTurretShoot", Vector2(50, 64));
+		AddAnimation("Player_TakeOutRifle", Animation("Player_TakeOutRifle", {}));
+		SetAnimationInfo("Player_TakeOutRifle", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_TakeOutRifle", Vector2(48, 67));
 
-		AddAnimation("GunTurretBroken", Game::Animation("GunTurretBroken", {}));
-		SetAnimationInfo("GunTurretBroken", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("GunTurretBroken", Vector2(50, 64));
+		AddAnimation("Player_TakeOutPistol", Animation("Player_TakeOutPistol", {}));
+		SetAnimationInfo("Player_TakeOutPistol", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_TakeOutPistol", Vector2(48, 67));
 
-		AddAnimation("AmmoPack", Game::Animation("Ammo", {}));
-		SetAnimationInfo("AmmoPack", { 1337, 1, 1, Game::AnimatedSprite::LoopMode::Static });
-		SetAnimationCenter("AmmoPack", Vector2(20, 15));
+		AddAnimation("Player_PutAwayRifle", Animation("Player_PutAwayRifle", {}));
+		SetAnimationInfo("Player_PutAwayRifle", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_PutAwayRifle", Vector2(48, 67));
+
+		AddAnimation("Player_PutAwayPistol", Animation("Player_PutAwayPistol", {}));
+		SetAnimationInfo("Player_PutAwayPistol", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Player_PutAwayPistol", Vector2(48, 67));
+
+		// Knight Enemy
+		AddAnimation("Knight_Walk", Animation("Knight_Walk", {}));
+		SetAnimationInfo("Knight_Walk", { 12, 4, 1, LoopMode::NormalLoop });
+		SetAnimationCenter("Knight_Walk", Vector2(73, 66));
+
+		AddAnimation("Knight_Swing", Animation("Knight_Swing", {
+			{ {AnimationCriteria::TriggerAtFrameX, "5"}, {AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("Knight_Swing", { 6, 12, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Knight_Swing", Vector2(73, 116));
+
+		AddAnimation("Knight_Dead", Animation("Knight_Dead", {}));
+		SetAnimationInfo("Knight_Dead", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Knight_Dead", Vector2(75, 100));
+
+		// Berserker Enemy
+
+		AddAnimation("Berserker_AxeSwing", Animation("Berserker_AxeSwing", {
+			{ {AnimationCriteria::TriggerAtFrameX, "4"}, {AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("Berserker_AxeSwing", { 3, 12, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Berserker_AxeSwing", Vector2(73, 116));
+
+		AddAnimation("Berserker_Walk", Animation("Berserker_Walk", {}));
+		SetAnimationInfo("Berserker_Walk", { 12, 4, 1, LoopMode::NormalLoop });
+		SetAnimationCenter("Berserker_Walk", Vector2(73, 116));
+
+		AddAnimation("Berserker_Dead", Animation("Berserker_Dead", {}));
+		SetAnimationInfo("Berserker_Dead", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Berserker_Dead", Vector2(75, 100));
+
+		// Turret Enemy
+		AddAnimation("GunTurret_Idle", Animation("GunTurret_Idle", {}));
+		SetAnimationInfo("GunTurret_Idle", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("GunTurret_Idle", Vector2(50, 64));
+
+		AddAnimation("GunTurret_Shoot", Animation("GunTurret_Shoot", { 
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerShoot"} } 
+			}));
+		SetAnimationInfo("GunTurret_Shoot", { 2, 8, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("GunTurret_Shoot", Vector2(50, 64));
+
+		AddAnimation("GunTurret_Broken", Animation("GunTurret_Broken", {}));
+		SetAnimationInfo("GunTurret_Broken", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("GunTurret_Broken", Vector2(50, 64));
+
+		// Misc
+		AddAnimation("Bullet_Travel", Animation("Bullet", {}));
+		SetAnimationInfo("Bullet_Travel", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Bullet_Travel", Vector2(4, 6));
+
+		AddAnimation("RifleAmmoPack", Animation("RifleAmmoPack", {}));
+		SetAnimationInfo("RifleAmmoPack", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("RifleAmmoPack", Vector2(20, 15));
 	}
 
 	void GameMaster::InitLevel() {
@@ -872,7 +899,7 @@ namespace Game {
 
 					// Disable hurt if a collider's owner entity has been hit before, and the attacker doesn't double hit
 					
-					if (alpha->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEnemies) != alpha->GetCollisionOptions().end()) {
+					if (alpha->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEntities) != alpha->GetCollisionOptions().end()) {
 						auto& AList = alpha->GetHitList();
 						auto BEntity = beta->GetEntity();
 						if (BEntity != nullptr) {
@@ -885,7 +912,7 @@ namespace Game {
 						}
 					}
 
-					if (beta->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEnemies) != beta->GetCollisionOptions().end()) {
+					if (beta->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEntities) != beta->GetCollisionOptions().end()) {
 						auto& BList = beta->GetHitList();
 						auto AEntity = alpha->GetEntity();
 						if (AEntity != nullptr) {

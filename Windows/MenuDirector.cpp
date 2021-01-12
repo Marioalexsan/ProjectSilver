@@ -42,11 +42,11 @@ namespace Game {
 		switch (Globals::Difficulty()) {
 		case 0: {
 			button2Diff.SetText("Easy");
-			button2Diff.SetColor(Color::White);
+			button2Diff.SetColor(Color::Aqua);
 		} break;
 		case 1: {
 			button2Diff.SetText("Normal");
-			button2Diff.SetColor(Color::Orange);
+			button2Diff.SetColor(Color::White);
 		} break;
 		case 2: {
 			button2Diff.SetText("Hard");
@@ -100,11 +100,11 @@ namespace Game {
 				switch (difficulty) {
 				case 0: {
 					button2Diff.SetText("Easy");
-					button2Diff.SetColor(Color::White);
+					button2Diff.SetColor(Color::Aqua);
 				} break;
 				case 1: {
 					button2Diff.SetText("Normal");
-					button2Diff.SetColor(Color::Orange);
+					button2Diff.SetColor(Color::White);
 				} break;
 				case 2: {
 					button2Diff.SetText("Hard");

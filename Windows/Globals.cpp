@@ -3,6 +3,7 @@
 
 namespace Game {
 	GameMaster* Globals::theGame = nullptr;
+	string Globals::gameVersion = "v0.86-alpha";
 
 	void Globals::SetTheGame(GameMaster& game) {
 		theGame = &game;
@@ -60,5 +61,9 @@ namespace Game {
 			throw std::invalid_argument("Game was nullptr in Globals::ChangeDifficulty()!");
 		}
 		theGame->SetDifficulty(difficulty);
+	}
+
+	string Globals::Version() {
+		return gameVersion;
 	}
 }

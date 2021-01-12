@@ -59,7 +59,7 @@ namespace Game {
 		void AddThePlayer();
 		void RemoveThePlayer();
 
-		uint64_t AddNewEnemy(EntityType type, Vector2 worldPos);
+		uint64_t AddEntity(EntityType type, Vector2 worldPos);
 		Entity* GetEntity(uint64_t ID);
 		int GetAliveEnemyCount();
 

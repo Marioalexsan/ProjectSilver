@@ -8,48 +8,48 @@
 #include "Sprite.h"
 #include "BasicText.h"
 
+/*
+Notes:
+* std::list is used to preserve iterator validity (just in case realocations would be needed in the future)
+*/
+
 namespace Game {
 	class LevelDirector : public Entity {
     private:
+        const static int dynamicSpawnListSize = 3;
+
         int counter;
         int nextSpawns;
         int resetCounter;
-        Game::BoxCollider box1L;
-        Game::BoxCollider box2L;
-        Game::BoxCollider box3L;
-        Game::BoxCollider box4L;
+        int audioStartDelay;
 
+        list<Game::BoxCollider> levelBoxes;
+        list<Game::SphereCollider> levelSpheres;
 
-        Game::SphereCollider sphere1L;
-        Game::SphereCollider sphere2L;
-        Game::SphereCollider sphere3L;
-        Game::SphereCollider sphere4L;
-        Game::SphereCollider sphere5L;
-        Game::SphereCollider sphere6L;
-        Game::SphereCollider sphere7L;
-
-        Game::Sprite levelSpriteFloor;
-        Game::Sprite levelSpriteWall;
+        list<Game::Sprite> levelSprites;
 
         Game::BasicText waveText;
         Game::BasicText difficultyText;
 
-        vector<int> currentSpawnCount;
+        array<int, dynamicSpawnListSize> currentSpawnCount;
 
         int currentWave;
-        int delayedAudioStart;
 
-        int currentCredits;
+        int spawnCredits;
 
         bool didTurretSpawns;
 
         vector<uint64_t> entitiesToKill;
 
-        vector<pair<Vector2, double>> spawnPoints;
+        vector<pair<Vector2, double>> dynamicSpawnPoints;
         vector<pair<Vector2, double>> staticSpawnPoints;
     public:
         LevelDirector();
         ~LevelDirector();
+
+        void RunWaveSpawnLogic();
+
+        void KillTrackedEntities();
 
         virtual void Update();
 	};

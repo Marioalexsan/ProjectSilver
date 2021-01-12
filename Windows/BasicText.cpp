@@ -12,15 +12,34 @@ namespace Game {
 		right(100),
 		top(0),
 		bottom(100),
-		type(TextRenderType::Continuous) {}
+		type(TextRenderType::ContinuousLeft) {}
 
-	int CalculateNextWordLength(AssetManager::SpriteFontData* fontData, string word) {
-		int pixels = 0;
-		for (int i = 0; i < word.length() - 1; i++) {
-			pixels += fontData->charLibrary[word[i]].xadvance;
+	BasicText::BasicText(const string& fontID, const string& text, BasicText::TextRenderType type):
+		text(text),
+		type(type),
+		left(0),
+		right(100),
+		top(0),
+		bottom(100)
+	{
+		SetFont(fontID);
+	}
+
+	int CalculateTextLength(const AssetManager::SpriteFontData* fontData, const string& text) {
+		if (text.length() == 0) {
+			return 0;
 		}
-		pixels += fontData->charLibrary[word[word.length() - 1]].width;
-		pixels -= fontData->charLibrary[word[word.length() - 1]].xoffset;
+
+		int pixels = 0;
+
+		pixels += fontData->charLibrary.at(text[0]).xoffset;
+
+		for (int i = 0; i < text.length(); i++) {
+			pixels += fontData->charLibrary.at(text[i]).xadvance;
+		} 
+		pixels += fontData->charLibrary.at(text[text.length() - 1]).width;
+		pixels -= fontData->charLibrary.at(text[text.length() - 1]).xadvance;
+		pixels -= fontData->charLibrary.at(text[text.length() - 1]).xoffset;
 		return pixels;
 	}
 
@@ -46,7 +65,7 @@ namespace Game {
 		int lineHeight = data.arbitraryValues.at("lineHeight");
 
 		switch (type) {
-			case TextRenderType::Continuous: 
+			case TextRenderType::ContinuousLeft: 
 			{
 				int currentX = 0;
 				int wordPos = 0;
@@ -66,6 +85,30 @@ namespace Game {
 					currentX += info.xadvance;
 				}
 			}	
+			break;
+			case TextRenderType::ContinuousRight:
+			{
+				int currentX = 0;
+				int wordPos = 0;
+
+				int textLength = CalculateTextLength(&data, text);
+
+				while (wordPos < text.length()) {
+					auto info = data.charLibrary.at(text[wordPos]);
+
+					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
+
+					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform->position.x) + currentX + info.xoffset - textLength, int(transform->position.y) + info.yoffset, info.width, info.height);
+
+					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
+
+					SDL_SetTextureAlphaMod(texture, alpha);
+					SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform->direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
+					wordPos++;
+					currentX += info.xadvance;
+				}
+			}
 			break;
 			default:
 				return;

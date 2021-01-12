@@ -16,23 +16,24 @@ namespace Game {
 		int currentRifleAmmo;
 		int maxRifleAmmo;
 		int rifleAmmoPool;
-		double rifleRecoil;
+		double rifleRecoil; // Unimplemented
 		bool wasReloadingRifle;
 
 		bool hasShield;
 		bool inShield;
+		int shieldRegenCounter;
+		int shieldFadeOutDelay;
+		int perfectGuardCounter;
+
 		bool doingSwing;
 
 		bool wasInWeaponSwitch;
 
 		int regenCounter;
-		int shieldRegenCounter;
-		int shieldFadeOutDelay;
-
+		
 		int staminaRegenCounter;
 		int staminaFadeOutDelay;
-
-		int perfectGuardCounter;
+		int boostCooldown;
 
 		int heartbeatTime;
 		int heartbeatCounter;
@@ -44,7 +45,7 @@ namespace Game {
 		Vector2 smoothSpeed;
 		Vector2 boostVector;
 
-		int boostCooldown;
+		
 
 		SphereCollider axe;
 
@@ -54,6 +55,8 @@ namespace Game {
 		Game::BasicText gunAmmo;
 
 		Game::Sprite lowHPVignette;
+
+		void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
 	public:
 		PlayerPseudoAI();
 		~PlayerPseudoAI();

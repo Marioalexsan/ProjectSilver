@@ -84,7 +84,7 @@ namespace Game {
             turnStrength /= 3 - 2 * (60.0 - postSwingDelay) / 60.0;
         }
         double maxSwingStrength = 1.2 * Globals::Difficulty() * 1.2;
-        if (entity->GetComponent().GetCurrentAnimationID() == "ChaserAxeSwing" && turnStrength > maxSwingStrength) {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing" && turnStrength > maxSwingStrength) {
             turnStrength = maxSwingStrength;
         }
         if (abs(targetDirection - entityDirection) > 180.0) {
@@ -124,7 +124,7 @@ namespace Game {
             strafeAngle = Utility::ScrollValue(entity->GetTransform().direction + 90.0, 0.0, 360.0);
         }
 
-        if (entity->GetComponent().GetCurrentAnimationID() == "ChaserAxeSwing") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing") {
             int currentFrame = entity->GetComponent().GetFrame();
             double factor = 0.0;
 
@@ -177,18 +177,18 @@ namespace Game {
         currentSpeed = currentSpeed + (targetSpeed - currentSpeed) * 0.07 * changeFactor;
 
         double speedToUse = currentSpeed;
-        if (entity->GetComponent().GetCurrentAnimationID() == "ChaserAxeSwing") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing") {
             speedToUse = sqrt(speedToUse);
         }
 
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength * speedToUse);
         entity->MoveForward(forwardStrength * speedToUse);
 
-        if (entity->GetComponent().GetCurrentAnimationID() != "ChaserAxeSwing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 20) {
-            entity->GetComponent().SwitchAnimation("ChaserAxeSwing");
+        if (entity->GetComponent().GetCurrentAnimationID() != "Berserker_AxeSwing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 20) {
+            entity->GetComponent().SwitchAnimation("Berserker_AxeSwing");
         }
 
-        if (entity->GetComponent().GetCurrentAnimationID() == "ChaserAxeSwing") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing") {
             axe.SetPosition(entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 20);
 
             if (entity->GetComponent().GetFrame() == 5 && !doingSwing) {
@@ -218,7 +218,7 @@ namespace Game {
         if (!EntityIsDeadAF()) {
             AI::OnDeath();
             Globals::Audio().PlaySound("Death");
-            entity->GetComponent().SwitchAnimation("ChaserDead");
+            entity->GetComponent().SwitchAnimation("Berserker_Dead");
             entity->GetCollider().QueueUnregisterFromGame();
             axe.QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);

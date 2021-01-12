@@ -28,7 +28,7 @@ namespace Game {
 		enum CollisionOptions {
 			DestroyCombatColliderAgainstStatic,
 			DestroyAfterCombatHit,
-			DoNotHitRememberedEnemies
+			DoNotHitRememberedEntities
 		};
 
 	protected:

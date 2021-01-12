@@ -3,43 +3,53 @@
 #include "Globals.h"
 #include "Actor.h"
 
-// This is an AI in name only. In reality, this class interfaces with inputs
-// From the game's engine
+// This is an AI in name only. This class interfaces with inputs, providing behavior for the Player's character
 
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
-        wasInWeaponSwitch(false),
+        currentPistolAmmo(12),
+        maxPistolAmmo(12),
+        wasReloadingPistol(false),
+
         currentRifleAmmo(15),
         maxRifleAmmo(30),
         rifleAmmoPool(0),
-        equippedWeapon(0),
-        targetWeaponEquip(-1),
-        boostCooldown(0),
-        staminaFadeOutDelay(0),
-        heartbeatCounter(0),
-        heartbeatTime(0),
-        staminaRegenCounter(0),
-        vignetteCounter(30),
-        doingSwing(false),
-        smoothSpeed(0.0, 0.0),
+        rifleRecoil(0.0),
+        wasReloadingRifle(false),
+
+        hasShield(true),
+        inShield(false),
         shieldFadeOutDelay(0),
         shieldRegenCounter(0),
         perfectGuardCounter(0),
-        currentPistolAmmo(12),
-        maxPistolAmmo(12),
+
+        doingSwing(false),
+
+        wasInWeaponSwitch(false),
+
         regenCounter(0),
-        wasReloadingPistol(false),
-        wasReloadingRifle(false),
-        hasShield(true),
-        inShield(false),
+        
+        staminaRegenCounter(0),
+        staminaFadeOutDelay(0),
+        boostCooldown(0),
+
+        heartbeatTime(0),
+        heartbeatCounter(0),
+        vignetteCounter(30),
+
+        equippedWeapon(0),
+        targetWeaponEquip(-1),
+        
+        smoothSpeed(0.0, 0.0),
+        boostVector(0.0, 0.0),
+        
         axe(Game::Vector2(0, 0), 60, Game::Collider::ColliderType::Combat),
         AI()
     {
-
         axe.SetCombatDamage(100.0);
         axe.SetCombatLayer(Collider::CombatLayer::None);
         axe.SetLayersToAttack({ Collider::CombatLayer::Enemies });
-        axe.SetCollisionOptions({ Collider::CollisionOptions::DoNotHitRememberedEnemies });
+        axe.SetCollisionOptions({ Collider::CollisionOptions::DoNotHitRememberedEntities });
 
         playerHealth.SetFont("Huge");
         playerHealth.SetRelativeToCamera(false);
@@ -73,81 +83,72 @@ namespace Game {
     }
 
     PlayerPseudoAI::~PlayerPseudoAI() {
-        playerHealth.UnregisterFromGame();
-        gunAmmo.UnregisterFromGame();
-        shieldHealth.UnregisterFromGame();
-        lowHPVignette.UnregisterFromGame();
-        stamina.UnregisterFromGame();
+        // Unregisters should be handled by the destructors
     }
 
 	void PlayerPseudoAI::Update() {
         static const vector<string> uninterruptibleAnimations = {
-            "CharShieldUp",
-            "CharShieldWalk",
-            "CharShieldDown",
-            "CharAxeSwing"
+            "Player_ShieldUp",
+            "Player_ShieldWalk",
+            "Player_ShieldDown",
+            "Player_AxeSwing"
         };
 
         static const vector<string> switchAnimations = {
-            "TakeOutRifle",
-            "TakeOutPistol",
-            "PutAwayRifle",
-            "PutAwayPistol"
+            "Player_TakeOutRifle",
+            "Player_TakeOutPistol",
+            "Player_PutAwayRifle",
+            "Player_PutAwayPistol"
         };
 
-        auto IsUninterruptible = [](const string & animation) {
-            return std::find(uninterruptibleAnimations.begin(), uninterruptibleAnimations.end(), animation) != uninterruptibleAnimations.end();
-        };
-
-        auto IsWeaponSwitch = [](const string& animation) {
-            return std::find(switchAnimations.begin(), switchAnimations.end(), animation) != switchAnimations.end();
-        };
-
-
-		if (entity == nullptr) {
+        if (entity == nullptr) {
 			return;
 		}
 
-        auto& stats = entity->GetStatsReference();
+        auto IsUninterruptible = [&](const string & animation) {
+            return std::find(uninterruptibleAnimations.begin(), uninterruptibleAnimations.end(), animation) != uninterruptibleAnimations.end();
+        };
 
+        auto IsWeaponSwitch = [&](const string& animation) {
+            return std::find(switchAnimations.begin(), switchAnimations.end(), animation) != switchAnimations.end();
+        };
+
+        auto& stats = entity->GetStatsReference();
+        auto difficultySetting = Globals::Difficulty();
+        auto& playerAnimation = entity->GetComponent().GetCurrentAnimationID();
+        auto& game = Globals::Game();
+        using KeyCode = Game::InputHandler::KeyCode;
+        using ButtonCode = Game::InputHandler::ButtonCode;
+
+
+        // Low HP Vignette. Serves as a "You're taking too much damage" warning for the player
         auto vignetteAlpha = lowHPVignette.GetAlpha();
         if (stats.health <= 0.0 || stats.maxHealth <= 20.0) {
             if (vignetteCounter % 5 == 0) {
                 lowHPVignette.SetAlpha(vignetteAlpha + (255 - vignetteAlpha) * 0.04);
             }
-            heartbeatTime = 120;
+            heartbeatTime = 60;
+            if (stats.maxHealth <= 60.0) {
+                heartbeatCounter = 180;
+            }
         }
         else {
-            if (vignetteCounter % 8 == 0) {
+            if (vignetteCounter % 7 == 0) {
                 lowHPVignette.SetAlpha(vignetteAlpha + (0 - vignetteAlpha) * 0.04);
             }
         }
 
-        if (heartbeatTime > 0) {
-            heartbeatTime--;
-        }
 
-        if (heartbeatCounter > 0) {
-            heartbeatCounter--;
-        }
+        // Regular Counters (down)
+        if (heartbeatTime > 0) { heartbeatTime--; }
+        if (heartbeatCounter > 0) { heartbeatCounter--; }
+        if (shieldFadeOutDelay > 0) { shieldFadeOutDelay--; }
+        if (staminaFadeOutDelay > 0) { staminaFadeOutDelay--; }
+        if (boostCooldown > 0) { boostCooldown--; }
+        if (perfectGuardCounter > 0) { perfectGuardCounter--; }
 
-        if(shieldFadeOutDelay > 0) {
-            shieldFadeOutDelay--;
-        }
-
-        if (staminaFadeOutDelay > 0) {
-            staminaFadeOutDelay--;
-        }
-
-
-        if (boostCooldown > 0) {
-            boostCooldown--;
-        }
-
-        if (perfectGuardCounter > 0) {
-            perfectGuardCounter--;
-        }
-
+        // Vignette Counter (periodic)
+        // Could probably be replaced / removed
         if (vignetteCounter > 0) {
             vignetteCounter--;
             if (vignetteCounter == 0) {
@@ -155,56 +156,43 @@ namespace Game {
             }
         }
 
+
+        // Regeneration code + GUI elements
         if (stats.isDead) {
             playerHealth.SetText("Dead!");
+            playerHealth.SetColor(Color::Red);
         }
         else {
+
             regenCounter++;
             if (regenCounter >= 60) {
                 regenCounter = 0;
-
-                double healing = 3.0 - Globals::Difficulty();
-
+                double healing = 3.0 - difficultySetting;
+                
                 if (stats.maxHealth <= 100.0 && stats.health == stats.maxHealth) {
-                    stats.maxHealth += healing;
-                    regenCounter -= 75 + 15 * Globals::Difficulty();
-                    if (stats.maxHealth > 100.0) {
-                        stats.maxHealth = 100.0;
-                    }
+                    stats.maxHealth = Utility::ClampValue(stats.maxHealth += healing, 0.0, 100.0);
+                    regenCounter -= 75 + 15 * difficultySetting;
                 }
-
-                if (stats.health < stats.maxHealth) {
-                    stats.health += healing;
-                    if (stats.health > stats.maxHealth) {
-                        stats.health = stats.maxHealth;
-                    }
-                }
+                stats.health = Utility::ClampValue(stats.health += healing, 0.0, stats.maxHealth);
             }
 
             shieldRegenCounter++;
-
             if (shieldRegenCounter >= 180) {
                 shieldRegenCounter = 150;
-                if (stats.shieldHealth < stats.maxShieldHealth) {
-                    double healing = 6.0 - Globals::Difficulty();
+                double healing = 6.0 - difficultySetting;
 
-                    stats.shieldHealth += healing;
-                    if (stats.shieldHealth > stats.maxShieldHealth) {
-                        stats.shieldHealth = stats.maxShieldHealth;
-                    }
+                if (stats.shieldHealth < stats.maxShieldHealth) {
+                    stats.shieldHealth = Utility::ClampValue(stats.shieldHealth += healing, 0.0, stats.maxShieldHealth);
                     shieldFadeOutDelay = 40;
                 }
             }
 
             staminaRegenCounter++;
-
-            if (staminaRegenCounter >= 150) {
+            if (staminaRegenCounter >= 120) {
                 staminaRegenCounter -= 5;
+
                 if (stats.stamina < stats.maxStamina) {
-                    stats.stamina += 1.0;
-                    if (stats.stamina > stats.maxStamina) {
-                        stats.stamina = stats.maxStamina;
-                    }
+                    stats.stamina = Utility::ClampValue(stats.stamina += 1.0, 0.0, stats.maxStamina);
                     staminaFadeOutDelay = 40;
                 }
             }
@@ -212,21 +200,27 @@ namespace Game {
             if (inShield || stats.shieldHealth < stats.maxShieldHealth && shieldRegenCounter >= 0) {
                 shieldHealth.SetAlpha(255);
                 shieldHealth.SetText("Shield: " + std::to_string(int(stats.shieldHealth)) + " / " + std::to_string(int(stats.maxShieldHealth)));
+                shieldHealth.SetColor(Color::White);
             }
             else if (shieldRegenCounter < 0) {
                 shieldHealth.SetAlpha(255);
                 shieldHealth.SetText("Shield broken!");
+                shieldHealth.SetColor(Color::Orange);
             }
-            else {
-                if (shieldFadeOutDelay <= 30) {
+            else if (shieldFadeOutDelay <= 30) {
                     shieldHealth.SetText("Shield: " + std::to_string(int(stats.shieldHealth)) + " / " + std::to_string(int(stats.maxShieldHealth)));
                     shieldHealth.SetAlpha(shieldFadeOutDelay * 255 / 30);
-                }
+                    shieldHealth.SetColor(Color::White);
             }
 
             playerHealth.SetText("Health: " + std::to_string(int(stats.health)) + " / " + std::to_string(int(stats.maxHealth)));
-            if (stats.health <= 0.0 || stats.maxHealth <= 20.0) {
-                playerHealth.SetColor(Color::Orange);
+            if (stats.health <= 0.0 || stats.maxHealth <= 45.0) {
+                if (stats.maxHealth <= 20.0) {
+                    playerHealth.SetColor(Color::Red);
+                }
+                else {
+                    playerHealth.SetColor(Color::Orange);
+                }
             }
             else {
                 playerHealth.SetColor(Color::White);
@@ -249,7 +243,7 @@ namespace Game {
             }
         }
 
-
+        // Low HP Audio effect
         auto vol = Globals::Audio().GetMusicVolume();
         if (heartbeatTime > 0) {
             if (vignetteCounter % 2 == 0) {
@@ -266,6 +260,8 @@ namespace Game {
                 Globals::Audio().SetMusicVolume(Utility::ClampValue(vol + 1.0, 35.0, 100.0));
             }
         }
+
+        // Ammo GUI element
         if (equippedWeapon == 0) {
             gunAmmo.SetText("Ammo: " + std::to_string(currentPistolAmmo) + " / " + std::to_string(maxPistolAmmo));
             if (currentPistolAmmo == 0) {
@@ -290,46 +286,34 @@ namespace Game {
             }
         }
         
-
-
-        if (wasReloadingPistol == true && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
+        // Weapon Reload - Ammo Refill Logic
+        if (wasReloadingPistol == true && entity->GetComponent().GetCurrentAnimationID() == "Player_PistolIdle") {
             currentPistolAmmo = maxPistolAmmo;
             wasReloadingPistol = false;
         }
-
-        if (wasReloadingRifle == true && entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle") {
-            int reloadAmount = maxRifleAmmo - currentRifleAmmo;
-            if (reloadAmount > rifleAmmoPool) {
-                reloadAmount = rifleAmmoPool;
-            }
+        if (wasReloadingRifle == true && entity->GetComponent().GetCurrentAnimationID() == "Player_RifleIdle") {
+            int reloadAmount = Utility::ClampValue(maxRifleAmmo - currentRifleAmmo, 0, rifleAmmoPool);
             currentRifleAmmo += reloadAmount;
             rifleAmmoPool -= reloadAmount;
             wasReloadingRifle = false;
-        }
-
-        auto& game = Globals::Game();
-        using KeyCode = Game::InputHandler::KeyCode;
-        using ButtonCode = Game::InputHandler::ButtonCode;
-
-        if (game.Input.IsButtonPressedThisFrame(ButtonCode::Middle) || game.Input.WasQuitCalled()) {
-            //game.Stop();
         }
 
         if (stats.isDead) {
             return;
         }
 
+        // Move Speed Logic
         double moveSpeed = 9.0;
-        if (entity->GetComponent().GetCurrentAnimationID() == "PlayerReload" || entity->GetComponent().GetCurrentAnimationID() == "RifleReload") {
+        if (playerAnimation == "Player_PistolReload" || playerAnimation == "Player_RifleReload") {
             moveSpeed /= 3.0;
         }
-        else if (entity->GetComponent().GetCurrentAnimationID() == "RifleShoot") {
-            moveSpeed /= 1.5;
+        else if (playerAnimation == "Player_RifleShoot") {
+            moveSpeed /= 1.75;
         }
         else if (inShield) {
             moveSpeed /= 1.25;
         }
-        else if (entity->GetComponent().GetCurrentAnimationID() == "CharAxeSwing") {
+        else if (playerAnimation == "Player_AxeSwing") {
             int currentFrame = entity->GetComponent().GetFrame();
             double factor = 0.0;
             if (currentFrame < 3) {
@@ -347,6 +331,7 @@ namespace Game {
             moveSpeed *= factor * 0.75;
         }
 
+        // Move Speed Direction
         int horizontalDir = 0;
         int verticalDir = 0;
         if (game.Input.IsKeyDown(KeyCode::W)) {
@@ -362,23 +347,27 @@ namespace Game {
             horizontalDir += 1;
         }
         
+        // This smooths out the player's movement
         Vector2 targetSpeed = Vector2(0.0, 0.0);
         Vector2 targetSpeedNormal = Vector2::NormalVector(Vector2(horizontalDir, verticalDir).Angle());
         if (horizontalDir != 0 || verticalDir != 0) {
             targetSpeed = targetSpeedNormal * moveSpeed;
         }
 
+        // Dash mechanic logic
         if (boostCooldown == 0 && stats.stamina >= 45.0 && targetSpeed != Vector2::Zero && Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift)) {
             stats.stamina -= 45.0;
             staminaRegenCounter = 0;
-            boostVector = targetSpeedNormal * 130.0;
+            boostVector = targetSpeedNormal * 140.0;
             boostCooldown = 18;
             Globals::Audio().PlaySound("Boost");
         }
 
+        // Movement is applied here
         smoothSpeed = smoothSpeed + (targetSpeed - smoothSpeed) * 0.18;
-
         entity->Move(smoothSpeed);
+
+        // Boost is applied here - over time
         if (boostVector != Vector2::Zero) {
             entity->Move(boostVector * 0.2);
             boostVector *= 0.8;
@@ -387,62 +376,35 @@ namespace Game {
             }
         }
         
-        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(entity->GetComponent().GetCurrentAnimationID()) && !IsWeaponSwitch(entity->GetComponent().GetCurrentAnimationID())) {
+        // Shielding logic
+        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(playerAnimation) && !IsWeaponSwitch(playerAnimation)) {
             wasReloadingPistol = false;
             inShield = true;
             perfectGuardCounter = 12;
-            entity->GetComponent().SwitchAnimation("CharShieldUp");
+            entity->GetComponent().SwitchAnimation("Player_ShieldUp");
         }
-
-        if ((!game.Input.IsButtonDown(ButtonCode::Right) || shieldRegenCounter < 0) && entity->GetComponent().GetCurrentAnimationID() == "CharShieldWalk") {
-            entity->GetComponent().SwitchAnimation("CharShieldDown");
+        if ((!game.Input.IsButtonDown(ButtonCode::Right) || shieldRegenCounter < 0) && playerAnimation == "Player_ShieldWalk") {
+            entity->GetComponent().SwitchAnimation("Player_ShieldDown");
             perfectGuardCounter = 0;
             shieldFadeOutDelay = 30;
         }
 
+        // Shooting logic
         if (game.Input.IsButtonDown(ButtonCode::Left)) {
-            if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && equippedWeapon == 0 && entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
+            if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && equippedWeapon == 0 && playerAnimation == "Player_PistolIdle") {
                 if (currentPistolAmmo > 0) {
-                    auto mouse = game.Input.GetMousePosition();
-                    auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
-                    auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
-                    if (results.size() > 1) {
-                        // First collider is usually the player's own, which is crappy, but c'est la vie
-                        auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
-                        auto entity = firstElem.second->GetEntity();
-                        if (dynamic_cast<Actor*>(entity) != nullptr) {
-                            auto actor = (Actor*)entity;
-                            auto actorAI = actor->GetAI();
-                            if (actorAI != nullptr) {
-                                actorAI->OnHitByAttack(this->entity, 35.0);
-                            }
-                        }
-                    }
-                    entity->GetComponent().SwitchAnimation("PlayerShoot");
+                    GenericWeaponFireLogic(35.0);
+                    entity->GetComponent().SwitchAnimation("Player_PistolShoot");
                     currentPistolAmmo--;
                 }
                 else {
                     Globals::Audio().PlaySound("GunClick");
                 }
             }
-            else if(equippedWeapon == 1 && (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle" || entity->GetComponent().GetCurrentAnimationID() == "RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
+            else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
-                    auto mouse = game.Input.GetMousePosition();
-                    auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
-                    auto results = game.CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle) * 1800.0 + entity->GetCollider().GetPosition());
-                    if (results.size() > 1) {
-                        // First collider is usually the player's own, which is crappy, but c'est la vie
-                        auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
-                        auto entity = firstElem.second->GetEntity();
-                        if (dynamic_cast<Actor*>(entity) != nullptr) {
-                            auto actor = (Actor*)entity;
-                            auto actorAI = actor->GetAI();
-                            if (actorAI != nullptr) {
-                                actorAI->OnHitByAttack(this->entity, 38.0);
-                            }
-                        }
-                    }
-                    entity->GetComponent().SwitchAnimation("RifleShoot");
+                    GenericWeaponFireLogic(40.0);
+                    entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;
                 }
                 else {
@@ -453,19 +415,21 @@ namespace Game {
             }
         }
 
-        if (game.Input.IsKeyDown(KeyCode::E) && (entity->GetComponent().GetCurrentAnimationID() != "CharAxeSwing") && !IsWeaponSwitch(entity->GetComponent().GetCurrentAnimationID())) {
+        // Melee Attack Start Logic
+        if (game.Input.IsKeyDown(KeyCode::E) && (playerAnimation != "Player_AxeSwing") && !IsWeaponSwitch(playerAnimation)) {
             wasReloadingPistol = false;
             wasReloadingRifle = false;
-            entity->GetComponent().SwitchAnimation("CharAxeSwing");
+            entity->GetComponent().SwitchAnimation("Player_AxeSwing");
             axe.GetHitList().clear();
         }
 
-        string currentID = entity->GetComponent().GetCurrentAnimationID();
-        if (currentID != "CharShieldWalk" && currentID != "CharShieldUp" && currentID != "CharShieldDown") {
+        // Makes sure we're out of shield if the shield animation was cancelled (which can be done with Melee Attacks)
+        if (playerAnimation != "Player_ShieldWalk" && playerAnimation != "Player_ShieldUp" && playerAnimation != "Player_ShieldDown") {
             inShield = false;
         }
 
-        if (entity->GetComponent().GetCurrentAnimationID() == "CharAxeSwing") {
+        // Melee Attack Execution Logic
+        if (playerAnimation == "Player_AxeSwing") {
             int currentFrame = entity->GetComponent().GetFrame();
 
             axe.SetPosition(entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 20);
@@ -485,58 +449,59 @@ namespace Game {
             axe.UnregisterFromGame();
         }
 
+        // Weapon Switch Logic - Take Out Weapon
         if (wasInWeaponSwitch) {
-            auto animationID = entity->GetComponent().GetCurrentAnimationID();
             auto& component = entity->GetComponent();
             bool switchCondition = component.GetFrame() == component.GetFrameCount() - 1 && component.GetAccumulatedUpdates() >= component.GetUpdatesPerFrame() - 2;
-            if (targetWeaponEquip == 0 && (animationID == "PlayerIdle" || animationID == "PutAwayRifle" && switchCondition)) {
-                entity->GetComponent().SwitchAnimation("TakeOutPistol");
+            if (targetWeaponEquip == 0 && (playerAnimation == "Player_PistolIdle" || playerAnimation == "Player_PutAwayRifle" && switchCondition)) {
+                entity->GetComponent().SwitchAnimation("Player_TakeOutPistol");
                 equippedWeapon = 0;
                 wasInWeaponSwitch = false;
             }
-            if (targetWeaponEquip == 1 && (animationID == "CharRifleIdle" || animationID == "PutAwayPistol" && switchCondition)) {
-                entity->GetComponent().SwitchAnimation("TakeOutRifle");
+            if (targetWeaponEquip == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_PutAwayPistol" && switchCondition)) {
+                entity->GetComponent().SwitchAnimation("Player_TakeOutRifle");
                 equippedWeapon = 1;
                 wasInWeaponSwitch = false;
             }
         }
 
+        // Weapon Switch Logic - Put Away Weapon
         if (game.Input.IsKeyPressedThisFrame(KeyCode::NumOne) && equippedWeapon != 0) {
-            if (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle") {
-                entity->GetComponent().SwitchAnimation("PutAwayRifle");
+            if (playerAnimation == "Player_RifleIdle") {
+                entity->GetComponent().SwitchAnimation("Player_PutAwayRifle");
                 entity->GetComponent().Update();
-                entity->GetComponent().SetDefaultAnimation("PlayerIdle");
+                entity->GetComponent().SetDefaultAnimation("Player_PistolIdle");
                 targetWeaponEquip = 0;
                 wasInWeaponSwitch = true;
             }
         }
-
         if (game.Input.IsKeyPressedThisFrame(KeyCode::NumTwo) && equippedWeapon != 1) {
-            if (entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle") {
-                entity->GetComponent().SwitchAnimation("PutAwayPistol");
+            if (playerAnimation == "Player_PistolIdle") {
+                entity->GetComponent().SwitchAnimation("Player_PutAwayPistol");
                 entity->GetComponent().Update();
-                entity->GetComponent().SetDefaultAnimation("CharRifleIdle");
+                entity->GetComponent().SetDefaultAnimation("Player_RifleIdle");
                 targetWeaponEquip = 1;
                 wasInWeaponSwitch = true;
             }
         }
 
+        // Weapon Reload Logic
         if (game.Input.IsKeyPressedThisFrame(KeyCode::R)) {
-            if (entity->GetComponent().GetCurrentAnimationID() == "PlayerIdle" && currentPistolAmmo < maxPistolAmmo) {
-                entity->GetComponent().SwitchAnimation("PlayerReload");
+            if (playerAnimation == "Player_PistolIdle" && currentPistolAmmo < maxPistolAmmo) {
+                entity->GetComponent().SwitchAnimation("Player_PistolReload");
                 wasReloadingPistol = true;
             }
-            else if (entity->GetComponent().GetCurrentAnimationID() == "CharRifleIdle" && currentRifleAmmo < maxRifleAmmo && rifleAmmoPool > 0) {
-                entity->GetComponent().SwitchAnimation("RifleReload");
+            else if (playerAnimation == "Player_RifleIdle" && currentRifleAmmo < maxRifleAmmo && rifleAmmoPool > 0) {
+                entity->GetComponent().SwitchAnimation("Player_RifleReload");
                 wasReloadingRifle = true;
             }
         }
 
+        // Makes the player face the mouse position
         auto var = game.Input.GetMousePosition();
         auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
         auto angle = vect.Angle();
         entity->GetComponent().SetDirection(angle);
-
 	}
 
     void PlayerPseudoAI::OnDeath() {
@@ -544,7 +509,7 @@ namespace Game {
             AI::OnDeath();
             Globals::Audio().PlaySound("PlayerDeath");
             axe.QueueUnregisterFromGame();
-            entity->GetComponent().SwitchAnimation("CharDead");
+            entity->GetComponent().SwitchAnimation("Player_Dead");
             entity->GetCollider().QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);
         }
@@ -604,6 +569,26 @@ namespace Game {
                     else {
                         Globals::Audio().PlaySound("PlayerHurt");
                     }
+                }
+            }
+        }
+    }
+
+    void PlayerPseudoAI::GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply) {
+        // Fires a non-piercing round that damages the first entity it hits, if it's an enemy
+
+        auto mouse = Globals::Game().Input.GetMousePosition();
+        auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
+        auto results = Globals::Game().CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle + angleDeltaToApply) * 1800.0 + entity->GetCollider().GetPosition());
+        if (results.size() > 1) {
+            // First collider is usually the player's own, which is crappy, but c'est la vie
+            auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
+            auto entity = firstElem.second->GetEntity();
+            if (dynamic_cast<Actor*>(entity) != nullptr) {
+                auto actor = (Actor*)entity;
+                auto actorAI = actor->GetAI();
+                if (actorAI != nullptr) {
+                    actorAI->OnHitByAttack(this->entity, damageToDeal);
                 }
             }
         }

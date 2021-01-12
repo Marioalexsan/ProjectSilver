@@ -17,6 +17,7 @@ namespace Game {
         sword.SetCombatDamage(28.0 + Globals::Difficulty() * 5.0);
         sword.SetCombatLayer(Collider::CombatLayer::None);
         sword.SetLayersToAttack({ Collider::CombatLayer::Players });
+        sword.SetCollisionOptions({Collider::CollisionOptions::DoNotHitRememberedEntities});
     }
 
     void KnightAI::Update() {
@@ -77,7 +78,7 @@ namespace Game {
             turnStrength /= 2.0 - Utility::ClampValue(60.0 - postSwingDelay, 0.0, 60.0) / 60.0 + 1.0;
         }
         double maxSwingStrength = Globals::Difficulty() + 1.0;
-        if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing" && turnStrength > maxSwingStrength) {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Knight_Swing" && turnStrength > maxSwingStrength) {
             turnStrength = maxSwingStrength;
         }
         if (abs(targetDirection - entityDirection) > 180.0) {
@@ -121,7 +122,7 @@ namespace Game {
             strafeAngle = Utility::ScrollValue(entity->GetTransform().direction + 90.0, 0.0, 360.0);
         }
 
-        if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Knight_Swing") {
             int currentFrame = entity->GetComponent().GetFrame();
             double factor;
             if (currentFrame <= 3) {
@@ -149,23 +150,24 @@ namespace Game {
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength);
         entity->MoveForward(forwardStrength);
 
-        if (entity->GetComponent().GetCurrentAnimationID() != "KnightSwing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 100) {
-            entity->GetComponent().SwitchAnimation("KnightSwing");
+        if (entity->GetComponent().GetCurrentAnimationID() != "Knight_Swing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 100) {
+            entity->GetComponent().SwitchAnimation("Knight_Swing");
         }
 
-        if (entity->GetComponent().GetCurrentAnimationID() == "KnightSwing") {
+        if (entity->GetComponent().GetCurrentAnimationID() == "Knight_Swing") {
             sword.SetPosition(entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
         
             if (entity->GetComponent().GetFrame() == 7 && !doingSwing) {
                 doingSwing = true;
                 sword.SetOwner(entity);
+                sword.GetHitList().clear();
                 sword.RegisterToGame();
             }
 
             if (entity->GetComponent().GetFrame() == 10) {
                 doingSwing = false;
                 sword.UnregisterFromGame();
-                postSwingDelay = 120 - Globals::Difficulty() * 16;
+                postSwingDelay = 120 - Globals::Difficulty() * 32;
             }
         }
 
@@ -176,7 +178,7 @@ namespace Game {
         if (!EntityIsDeadAF()) {
             AI::OnDeath();
             Globals::Audio().PlaySound("Death");
-            entity->GetComponent().SwitchAnimation("KnightDead");
+            entity->GetComponent().SwitchAnimation("Knight_Dead");
             entity->GetCollider().QueueUnregisterFromGame();
             sword.QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);

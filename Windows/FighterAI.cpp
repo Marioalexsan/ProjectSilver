@@ -163,8 +163,8 @@ namespace Game {
                 return;
             }
 
-            entity->GetComponent().SwitchAnimation("PlayerShoot");
-            auto bulletID = Globals::Game().AddNewEnemy(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
+            entity->GetComponent().SwitchAnimation("Player_PistolShoot");
+            auto bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
             auto theBullet = Globals::Game().GetEntity(bulletID);
             theBullet->GetTransform().direction = shootDirection;
             previousShot = nextShot;
@@ -180,7 +180,7 @@ namespace Game {
         if (!EntityIsDeadAF()) {
             AI::OnDeath();
             Globals::Audio().PlaySound("Death");
-            entity->GetComponent().SwitchAnimation("CharDead");
+            entity->GetComponent().SwitchAnimation("Player_Dead");
             entity->GetCollider().QueueUnregisterFromGame();
             entity->GetComponent().SetLayer(GraphicsEngine::CommonLayers::OnFloor);
             destroyDelay = 300;

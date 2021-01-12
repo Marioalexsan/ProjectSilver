@@ -6,11 +6,13 @@
 #include "PCHeader.h"
 
 #include <iostream>
-#include <chrono>
 using std::cout;
 using std::cerr;
 using std::endl;
 
+#include <chrono>
+
+#include "ErrorLogging.h"
 #include "GameMaster.h"
 #include "Sprite.h"
 #include "BasicText.h"
@@ -93,7 +95,7 @@ int main(int argc, char* args[]) {
     Game::Globals::SetTheGame(ProjectSilver);
     ProjectSilver.UltimateMegaInitOfDestiny();
 
-    
+    // Acts as a cursor; is also used as the player's targeting reticle
 
     Game::Sprite targetSprite;
     targetSprite.SetTexture("Target");
@@ -111,45 +113,58 @@ int main(int argc, char* args[]) {
 
     while (ProjectSilver.IsGameRunning()) 
     {
-        // Wait for next engine frame
-        double step = ProjectSilver.fixedTimeStep;
-        int currentTime = SDL_GetTicks();
-        int delta = currentTime - prevTime;
-        if ((double)delta < step) {
-            // Do a small delay
-            SDL_Delay((uint32_t)(step - (double)delta));
-            currentTime = SDL_GetTicks();
-            delta = step;
-        }
-        //angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
-        int bonusUpdates = (int)round(delta / step) - 1;
-
-        // Do code
-
-        if (bonusUpdates > 0) {
-            if (bonusUpdates > 2) {
-                bonusUpdates = 2;
+        try {
+            // Wait for next engine frame
+            double step = ProjectSilver.fixedTimeStep;
+            int currentTime = SDL_GetTicks();
+            int delta = currentTime - prevTime;
+            if ((double)delta < step) {
+                // Do a small delay
+                SDL_Delay((uint32_t)(step - (double)delta));
+                currentTime = SDL_GetTicks();
+                delta = step;
             }
-            cout << "Lag: " << delta - step << " ";
-            for (int i = 0; i < bonusUpdates; i++) {
-                ProjectSilver.Update(true); // Skips rendering for all bonus updates
+            //angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
+            int bonusUpdates = (int)round(delta / step) - 1;
+
+            // Do code
+
+            if (bonusUpdates > 0) {
+                if (bonusUpdates > 2) {
+                    bonusUpdates = 2;
+                }
+                cout << "Lag: " << delta - step << " ";
+                for (int i = 0; i < bonusUpdates; i++) {
+                    ProjectSilver.Update(true); // Skips rendering for all bonus updates
+                }
             }
+
+            ProjectSilver.Update(false);
+
+            //auto prevPos = sphere2.GetPosition();
+
+            auto var = ProjectSilver.Input.GetMousePosition();
+            auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
+            auto angle = vect.Angle();
+            targetSprite.SetPosition({ var.first, var.second });
+
+            //cout << angle << endl;
+            // Code end
+
+
+            prevTime = currentTime;
         }
-
-        ProjectSilver.Update(false);
-
-        //auto prevPos = sphere2.GetPosition();
+        catch (std::exception& e) {
+            string message = "A standard exception occured!\nException message: " + string(e.what());
+            Game::Logger::LogError(message);
+            ProjectSilver.Stop();
+        }
+        catch (...) {
+            string message = "An unknown exception occured!";
+            Game::Logger::LogError(message);
+            ProjectSilver.Stop();
+        }
         
-        auto var = ProjectSilver.Input.GetMousePosition();
-        auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
-        auto angle = vect.Angle();
-        targetSprite.SetPosition({ var.first, var.second });
-
-        //cout << angle << endl;
-        // Code end
-
-
-        prevTime = currentTime;
 
     }
     ProjectSilver.UnloadLevel();

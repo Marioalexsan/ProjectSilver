@@ -10,10 +10,11 @@ namespace Game {
 	class BasicText : public Drawable {
 	public:
 		enum TextRenderType {
-			Continuous,
-			BlockCentered,
-			BlockLeft,
-			BlockRight
+			ContinuousLeft,
+			ContinuousRight,
+			BlockCentered, // Not implemented
+			BlockLeft, // Not implemented
+			BlockRight // Not implemented
 		};
 	protected:
 		SDL_Texture* texture;
@@ -26,10 +27,13 @@ namespace Game {
 		TextRenderType type;
 	public:
 		BasicText();
+		BasicText(const string& fontID, const string& text, TextRenderType type = TextRenderType::ContinuousLeft);
 		virtual void Draw();
 		void SetFont(const string& ID);
-		void SetConstraints(int left, int right, int top, int bottom);
+		void SetConstraints(int left, int right, int top, int bottom); // Not implemented
 		void SetText(const string& text);
+
+		inline void SetRenderType(TextRenderType type) { this->type = type; }
 	};
 }
 

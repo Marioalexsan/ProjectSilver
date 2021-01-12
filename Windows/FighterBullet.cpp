@@ -22,6 +22,7 @@ namespace Game {
 
 	void FighterBullet::Update() {
 		if (collider.IsDestructionSignalled()) {
+			collider.QueueUnregisterFromGame();
 			SignalDestruction();
 			return;
 		}

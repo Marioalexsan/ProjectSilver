@@ -100,6 +100,10 @@ namespace Game {
 		Transform(const Vector2& position, const Vector2& center, double direction);
 	};
 
+	// Reminder: I was dumb enough not to use the Rule of Three with this class. I deserve the crashes I got.
+	// Null pointer checks in this class are redundant since it's not supposed to house a nullptr
+	// Still, I'm just a mortal programmer, so they get to stay
+
 	template<class T>
 	class Trackable {
 	private:
@@ -121,6 +125,39 @@ namespace Game {
 			}
 			object = target;
 			ownsObject = false;
+		}
+
+		Trackable(const Trackable<T>& other):
+			object(nullptr),
+			ownsObject(true)
+		{
+			// This does NOT do Tracking. It creates its own copy of the value
+			if (other.object != nullptr) {
+				// Copy the other object
+				object = new T(*other.object);
+			}
+			else {
+				// Nullptr not allowed
+				object = new T;
+			}
+		}
+
+		Trackable<T>& operator=(const Trackable<T>& other) {
+			// This does NOT do Tracking. It creates its own copy of the value
+			if (ownsObject) {
+				delete object;
+			}
+			if (other.object != nullptr) {
+				// Copy the other object
+				object = new T(*other.object);
+			}
+			else {
+				// Nullptr not allowed
+				object = new T;
+			}
+			ownsObject = true;
+
+			return *this;
 		}
 
 		~Trackable() {
