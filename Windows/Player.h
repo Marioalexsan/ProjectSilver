@@ -5,6 +5,8 @@
 
 #include "Actor.h"
 
+/// DEPRECATED - see PlayerPseudoAI
+
 namespace Game {
 	class Player: public Actor {
 	public:

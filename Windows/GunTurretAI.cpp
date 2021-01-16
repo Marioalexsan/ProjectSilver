@@ -39,7 +39,7 @@ namespace Game {
         if (entity->GetStatsReference().isDead == true) {
             destroyDelay--;
             if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(destroyDelay / 150.0 * 255.0);
+                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
             }
             if (destroyDelay == 0) {
                 entity->SignalDestruction();
@@ -55,20 +55,20 @@ namespace Game {
             reloadCounter = 0;
         }
 
-        auto player = Globals::ThePlayer();
+        Entity* player = Globals::ThePlayer();
 
-        auto targetVector = player->GetTransform().position - this->entity->GetTransform().position;
+        Vector2 targetVector = player->GetTransform().position - this->entity->GetTransform().position;
 
-        auto targetDirection = targetVector.Angle();
-        auto entityDirection = this->entity->GetTransform().direction;
+        double targetDirection = targetVector.Angle();
+        double entityDirection = this->entity->GetTransform().direction;
 
-        auto angleDelta = abs(targetDirection - entityDirection);
+        double angleDelta = abs(targetDirection - entityDirection);
         angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
 
         int aimTime = 12 - Globals::Difficulty() * 2;
 
         if (counter + aimTime < nextShot) {
-            auto turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
+            double turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
             if (counter < previousShot + 10) {
                 turnStrength /= 5;
             }
@@ -93,7 +93,7 @@ namespace Game {
 
 
 
-        auto distance = targetVector.Length();
+        double distance = targetVector.Length();
 
         bool playerOutOfAim = abs(targetDirection - entityDirection) > 30.0 || distance > 670.0;
 
@@ -159,8 +159,8 @@ namespace Game {
             }
 
             entity->GetComponent().SwitchAnimation("GunTurret_Shoot");
-            auto bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 45);
-            auto theBullet = Globals::Game().GetEntity(bulletID);
+            uint64_t bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 45);
+            Entity* theBullet = Globals::Game().GetEntity(bulletID);
             theBullet->GetTransform().direction = entity->GetTransform().direction;
             previousShot = nextShot;
             nextShot += 26 - 6 * Globals::Difficulty() + rand() % 3;
@@ -184,21 +184,21 @@ namespace Game {
                 entity->GetComponent().SwitchAnimation("GunTurret_Broken");
                 Globals::Audio().PlaySound("TurretBreak");
 
-                auto ID = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position + Vector2(25.0, 0.0));
-                auto pack = (RifleAmmoPack*)Globals::Game().GetEntity(ID);
+                uint64_t ID = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position + Vector2(25.0, 0.0));
+                RifleAmmoPack* pack = (RifleAmmoPack*)Globals::Game().GetEntity(ID);
                 if (pack != nullptr) {
                     pack->SetAmmoToGrant(ammo);
                 }
-                auto ID2 = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position + Vector2(-25.0, 0.0));
-                auto pack2 = (RifleAmmoPack*)Globals::Game().GetEntity(ID2);
+                uint64_t ID2 = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position + Vector2(-25.0, 0.0));
+                RifleAmmoPack* pack2 = (RifleAmmoPack*)Globals::Game().GetEntity(ID2);
                 if (pack2 != nullptr) {
                     pack2->SetAmmoToGrant(ammo);
                 }
             }
             else {
                 Globals::Audio().PlaySound("TurretDown");
-                auto ID = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position);
-                auto pack = (RifleAmmoPack*)Globals::Game().GetEntity(ID);
+                uint64_t ID = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, entity->GetTransform().position);
+                RifleAmmoPack* pack = (RifleAmmoPack*)Globals::Game().GetEntity(ID);
                 if (pack != nullptr) {
                     pack->SetAmmoToGrant(ammo);
                 }

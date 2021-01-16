@@ -36,7 +36,7 @@ namespace Game {
 		return transform;
 	}
 
-	const Game::Vector2 Collider::GetPosition() const {
+	const Game::Vector2& Collider::GetPosition() const {
 		return transform->position;
 	}
 

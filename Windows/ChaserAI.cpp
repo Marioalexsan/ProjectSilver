@@ -56,7 +56,7 @@ namespace Game {
         if (entity->GetStatsReference().isDead == true) {
             destroyDelay--;
             if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(destroyDelay / 150.0 * 255.0);
+                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
             }
             if (destroyDelay == 0) {
                 entity->SignalDestruction();
@@ -64,19 +64,19 @@ namespace Game {
             return;
         }
 
-        auto player = Globals::ThePlayer();
+        Entity* player = Globals::ThePlayer();
 
         double predictionStrength = 0.05;
 
-        auto targetVector = player->GetTransform().position - this->entity->GetTransform().position + (player->GetTransform().position - lastFramePlayerPos) * predictionStrength * 60.0;
+        Vector2 targetVector = player->GetTransform().position - this->entity->GetTransform().position + (player->GetTransform().position - lastFramePlayerPos) * predictionStrength * 60.0;
 
-        auto targetDirection = targetVector.Angle();
-        auto entityDirection = this->entity->GetTransform().direction;
+        double targetDirection = targetVector.Angle();
+        double entityDirection = this->entity->GetTransform().direction;
 
-        auto angleDelta = abs(targetDirection - entityDirection);
+        double angleDelta = abs(targetDirection - entityDirection);
         angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
 
-        auto turnStrength = angleDelta > 8.0 ? 6.0 : 0.5;
+        double turnStrength = angleDelta > 8.0 ? 6.0 : 0.5;
         if (postSwingDelay > 60) {
             turnStrength /= 4;
         }
@@ -105,9 +105,9 @@ namespace Game {
         }
         entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
 
-        auto distance = targetVector.Length();
-        int forwardStrength = 4.0 + Globals::Difficulty() * 0.7;
-        int strafeStrength = 0.0;
+        double distance = targetVector.Length();
+        double forwardStrength = 4.0 + Globals::Difficulty() * 0.7;
+        double strafeStrength = 0.0;
         if (distance < 600.0) {
             strafeStrength = Utility::ClampValue(600.0 - distance, 0.0, 400.0) / 400.0 * 2.8;
         }
@@ -233,8 +233,8 @@ namespace Game {
     void ChaserAI::OnHitByAttack(Actor* attacker, double damage) {
         if (!EntityIsDeadAF()) {
             painCounter += int(damage * (3 - 0.4 * Globals::Difficulty()));
-            if (painCounter < 120.0) {
-                painCounter = 120.0;
+            if (painCounter > 120) {
+                painCounter = 120;
             }
             Globals::Audio().PlaySound("HurtBeta");
             Globals::Audio().PlaySound("ZerkHurt");

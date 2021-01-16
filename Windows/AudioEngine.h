@@ -35,6 +35,8 @@ namespace Game {
 			string		dataID;
 			Vector2		worldPos;
 			int			channel;
+
+			Sound() = default;
 		};
 
 		// A music instance that's currently playing
@@ -44,6 +46,8 @@ namespace Game {
 			uint64_t	timePos;
 			uint64_t	loopStart;
 			uint64_t	loopEnd;
+
+			Music() = default;
 		};
 
 		// Music Actions are used to tell the engine how to play music
@@ -143,21 +147,21 @@ namespace Game {
 
 		inline void SetUserMusicVolume(double volume)
 		{
-			userMusicVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			userMusicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
 			AddAction(MusicAction::Type::ChangeVolume, "");
 		}
 		inline void SetUserSoundVolume(double volume) {
-			userSoundVolume = Utility::ClampValue(volume, 0.0, 100.0);
-			Mix_Volume(-1, soundVolume / 100.0 * 128 * userSoundVolume / 100.0);
+			userSoundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+			Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
 		}
 
 		inline void SetMusicVolume(double volume) { 
-			musicVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			musicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
 			AddAction(MusicAction::Type::ChangeVolume, "");
 		}
 		inline void SetSoundVolume(double volume) { 
-			soundVolume = Utility::ClampValue(volume, 0.0, 100.0);
-			Mix_Volume(-1, soundVolume / 100.0 * 128 * userSoundVolume / 100.0);
+			soundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+			Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
 		}
 
 		uint64_t GetMusicPosition();

@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "Globals.h"
 
+/// DEPRECATED
+
 namespace Game {
 	Player::Player():
 		Actor(nullptr) {

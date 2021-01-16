@@ -39,7 +39,7 @@ namespace Game {
 
 	void AI::OnDeath() {
 		if (entity != nullptr) {
-			auto stats = entity->GetStatsReference().isDead = true;
+			entity->GetStatsReference().isDead = true;
 		}
 	}
 

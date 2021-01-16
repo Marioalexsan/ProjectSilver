@@ -8,7 +8,7 @@
 #include "Animation.h"
 #include "CollisionMaster.h"
 #include "Effect.h"
-#include "Tracer.h"
+
 
 
 namespace Game {
@@ -71,11 +71,13 @@ namespace Game {
 		Entity* GetEntity(uint64_t ID);
 		int GetAliveEnemyCount();
 
-		void CreateDefaultTracerEffect(const Vector2& start, const Vector2& end);
+		uint64_t CreateDefaultTracerEffect(const Vector2& start, const Vector2& end);
+		uint64_t CreateAfterImageEffect(const Transform& parentTransform, const string& texAnimID, int frame = -1);
 
 		int GetActiveThreat();
 
 		void RemoveNonSpecialEntities();
+		void ClearEffects();
 
 		void BuildSpacialHashMap();
 		vector<Collider*> GetCollisionCandidates(int startX, int startY, int endX, int endY);

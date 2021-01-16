@@ -95,6 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,6 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,6 +145,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PCHeader.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,6 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="AfterImage.cpp" />
     <ClCompile Include="AnimatedSprite.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="ChaserAI.cpp" />
@@ -169,7 +173,7 @@
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="BasicText.cpp" />
     <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="ErrorLogging.cpp" />
+    <ClCompile Include="LogHandler.cpp" />
     <ClCompile Include="GameMaster.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="InputHandler.cpp" />
@@ -197,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="AfterImage.h" />
     <ClInclude Include="AI.h" />
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="BoxCollider.h" />
@@ -213,7 +218,7 @@
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="BasicText.h" />
     <ClInclude Include="Entity.h" />
-    <ClInclude Include="ErrorLogging.h" />
+    <ClInclude Include="LogHandler.h" />
     <ClInclude Include="GameMaster.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="InputHandler.h" />

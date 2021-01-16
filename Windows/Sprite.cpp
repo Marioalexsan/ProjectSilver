@@ -8,7 +8,7 @@ namespace Game {
 		texture(nullptr) {}
 
 	void Sprite::SetTexture(const string& ID) {
-		auto lib = Globals::Assets().GetTextureLibrary();
+		auto& lib = Globals::Assets().GetTextureLibrary();
 		if (lib.find(ID) == lib.end()) {
 			//Error
 			return;

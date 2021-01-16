@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "Actor.h"
 #include "GunTurretAI.h"
+#include "LogHandler.h"
 
 namespace Game {
     LevelDirector::LevelDirector() :
@@ -155,6 +156,8 @@ namespace Game {
         auto& ProjectSilver = Globals::Game();
         ProjectSilver.RemoveThePlayer();
         ProjectSilver.RemoveNonSpecialEntities();
+        ProjectSilver.ClearEffects(); // Removes bullet trails and whatnot
+        Game::LogHandler::Log("Exited Level", Game::LogHandler::MessageType::Info);
     }
 
     void LevelDirector::Update() {
@@ -184,7 +187,7 @@ namespace Game {
         // Threat Level of 1 means low enemy count Threat Level of 4 should mean you're getting swarmed
 
         int activeThreat = Globals::Game().GetActiveThreat() / (35 + Globals::Difficulty() * 5 + currentWave * 5);
-        int mercyChance = activeThreat / (2.0 + activeThreat) * 100.0;
+        double mercyChance = activeThreat / (2.0 + activeThreat) * 100.0;
 
         if (mercyChance > 60.0) {
             mercyChance = 50.0;
@@ -209,7 +212,7 @@ namespace Game {
         }
 
         if (outOfCredits) {
-            auto enemiesAlive = Globals::Game().GetAliveEnemyCount();
+            int enemiesAlive = Globals::Game().GetAliveEnemyCount();
             if (enemiesAlive < 3) {
                 // Turrets get disabled, dropping one ammo pack
                 KillTrackedEntities();
@@ -246,10 +249,10 @@ namespace Game {
     void LevelDirector::KillTrackedEntities() {
         if (entitiesToKill.size() > 0) {
             for (auto ID : entitiesToKill) {
-                auto entity = Globals::Game().GetEntity(ID);
+                Entity* entity = Globals::Game().GetEntity(ID);
                 if (entity != nullptr) {
                     if (entity->GetType() == EntityType::GunTurret) {
-                        auto theAI = ((GunTurretAI*)(((Actor*)entity)->GetAI()));
+                        GunTurretAI* theAI = ((GunTurretAI*)(((Actor*)entity)->GetAI()));
                         theAI->ApplyWaveEndBonus();
                         theAI->OnDeath();
                     }
@@ -264,7 +267,7 @@ namespace Game {
     void LevelDirector::RunWaveSpawnLogic() {
         // Max spawns allowed for current subwave
         int spawns = 3 + rand() % 2 + currentWave / 2 + (Globals::Difficulty() > 0 ? 1 : 0);
-        spawns = spawns > dynamicSpawnPoints.size() ? dynamicSpawnPoints.size() : spawns;
+        spawns = spawns > (int)dynamicSpawnPoints.size() ? (int)dynamicSpawnPoints.size() : spawns;
 
         // Base value for next spawn time
         nextSpawns = std::max(330 + rand() % 20 - currentWave * (5 + 2 * Globals::Difficulty()), 140);
@@ -309,8 +312,8 @@ namespace Game {
                     spawnPoint = rand() % staticSpawnPoints.size();
                 }
 
-                auto ID = Globals::Game().AddEntity(EntityType::GunTurret, staticSpawnPoints[spawnPoint].first);
-                auto entity = Globals::Game().GetEntity(ID);
+                uint64_t ID = Globals::Game().AddEntity(EntityType::GunTurret, staticSpawnPoints[spawnPoint].first);
+                Entity* entity = Globals::Game().GetEntity(ID);
                 entity->GetTransform().direction = staticSpawnPoints[spawnPoint].second;
                 entitiesToKill.push_back(ID);
 
@@ -345,12 +348,12 @@ namespace Game {
 
             if (enemy == 1 && rand() % 100 < 20) {
                 // 20% Chance to replace Swordsman spawn with Fighter
-                enemy == 0;
+                enemy = 0;
             }
 
             if (enemy == 2 && rand() % 100 < 20) {
                 // Same with Zerk
-                enemy == 0;
+                enemy = 0;
             }
 
             EntityType enemyToAdd;
@@ -380,8 +383,8 @@ namespace Game {
                 break;
             }
 
-            auto ID = Globals::Game().AddEntity(enemyToAdd, dynamicSpawnPoints[spawnPoint].first);
-            auto entity = Globals::Game().GetEntity(ID);
+            uint64_t ID = Globals::Game().AddEntity(enemyToAdd, dynamicSpawnPoints[spawnPoint].first);
+            Entity* entity = Globals::Game().GetEntity(ID);
             entity->GetTransform().direction = dynamicSpawnPoints[spawnPoint].second;
             currentSpawnCount[enemy]++;
 

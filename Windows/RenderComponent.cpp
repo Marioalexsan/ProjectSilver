@@ -10,12 +10,12 @@ namespace Game {
 		parsedEnd(false) {}
 
 	bool RenderComponent::IsCurrentValid() {
-		auto lib = Globals::Game().GetAnimationLibrary();
+		auto& lib = Globals::Game().GetAnimationLibrary();
 		return lib.find(currentAnimation) != lib.end();
 	}
 
 	bool RenderComponent::IsDefaultValid() {
-		auto lib = Globals::Game().GetAnimationLibrary();
+		auto& lib = Globals::Game().GetAnimationLibrary();
 		return lib.find(defaultAnimation) != lib.end();
 	}
 
@@ -86,7 +86,7 @@ namespace Game {
 	}
 
 	void RenderComponent::SetDefaultAnimation(const string& ID) {
-		auto lib = Globals::Game().GetAnimationLibrary();
+		auto& lib = Globals::Game().GetAnimationLibrary();
 		if (lib.find(ID) == lib.end() || std::find(animations.begin(), animations.end(), ID) == animations.end()) {
 			return;
 		}
@@ -94,7 +94,7 @@ namespace Game {
 	}
 
 	void RenderComponent::AddAnimation(const string& ID) {
-		auto lib = Globals::Game().GetAnimationLibrary();
+		auto& lib = Globals::Game().GetAnimationLibrary();
 		if (lib.find(ID) == lib.end() || std::find(animations.begin(), animations.end(), ID) != animations.end() ) {
 			return;
 		}
@@ -109,7 +109,7 @@ namespace Game {
 		parsedEnd = false;
 		currentAnimation = ID;
 
-		auto info = GetCurrentAnimation().GetInfo();
+		auto& info = GetCurrentAnimation().GetInfo();
 
 		updatesPerFrame = info.updatesPerFrame;
 		framesPerRow = info.framesPerRow;
@@ -129,7 +129,7 @@ namespace Game {
 			parsedEnd = false;
 			currentAnimation = defaultAnimation;
 
-			auto info = GetCurrentAnimation().GetInfo();
+			auto& info = GetCurrentAnimation().GetInfo();
 
 			updatesPerFrame = info.updatesPerFrame;
 			framesPerRow = info.framesPerRow;

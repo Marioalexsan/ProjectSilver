@@ -6,10 +6,11 @@
 namespace Game {
 
     FighterAI::FighterAI() :
+        predictionStrengthToUse(0.0),
         aimAnnoyance(0),
         strafesLeft(false),
         nextStrafeChange(300),
-        nextShot(120),
+        nextShot(110 - 15 * Globals::Difficulty() + rand() % 20),
         previousShot(-100),
         lastFramePlayerPos(Vector2::Zero),
         AI()
@@ -39,7 +40,7 @@ namespace Game {
         if (entity->GetStatsReference().isDead == true) {
             destroyDelay--;
             if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(destroyDelay / 150.0 * 255.0);
+                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
             }
             if (destroyDelay == 0) {
                 entity->SignalDestruction();
@@ -47,20 +48,20 @@ namespace Game {
             return;
         }
 
-        auto player = Globals::ThePlayer();
+        Entity* player = Globals::ThePlayer();
 
-        auto targetVector = player->GetTransform().position - this->entity->GetTransform().position;
+        Vector2 targetVector = player->GetTransform().position - this->entity->GetTransform().position;
 
-        auto targetDirection = targetVector.Angle();
-        auto entityDirection = this->entity->GetTransform().direction;
+        double targetDirection = targetVector.Angle();
+        double entityDirection = this->entity->GetTransform().direction;
 
-        auto angleDelta = abs(targetDirection - entityDirection);
+        double angleDelta = abs(targetDirection - entityDirection);
         angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
 
         int aimTime = (24 + (2 - Globals::Difficulty()) * 6);
 
         if (counter + aimTime < nextShot) {
-            auto turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
+            double turnStrength = angleDelta > 8.0 ? 2.5 : 0.4;
             if (counter < previousShot + 10) {
                 turnStrength /= 5;
             }
@@ -85,9 +86,9 @@ namespace Game {
 
         
 
-        auto distance = targetVector.Length();
-        int forwardStrength = 4.0;
-        int strafeStrength = 0.3;
+        double distance = targetVector.Length();
+        double forwardStrength = 4.0;
+        double strafeStrength = 0.3;
         if (distance < 400.0) {
             forwardStrength = Utility::ClampValue(400.0 - distance, 0.0, 200.0) / 200.0 * (-2.4 - 0.8 * Globals::Difficulty());
             strafeStrength = 3.3;
@@ -163,7 +164,7 @@ namespace Game {
         entity->MoveForward(forwardStrength);
 
         if (counter > nextShot) {
-            if (playerOutOfAim && aimAnnoyance <= 10) {
+            if (playerOutOfAim && aimAnnoyance <= 16) {
                 nextShot += 6;
                 aimAnnoyance++;
                 return;
@@ -172,8 +173,8 @@ namespace Game {
             aimAnnoyance = 0;
 
             entity->GetComponent().SwitchAnimation("Player_PistolShoot");
-            auto bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
-            auto theBullet = Globals::Game().GetEntity(bulletID);
+            uint64_t bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
+            Entity* theBullet = Globals::Game().GetEntity(bulletID);
             theBullet->GetTransform().direction = Utility::ScrollValue(entityDirection + (shootDirection - entityDirection) * 0.18, 0.0, 360.0);
             previousShot = nextShot;
             nextShot += 110 - 15 * Globals::Difficulty() + rand() % 20;

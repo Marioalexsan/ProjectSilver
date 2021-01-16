@@ -15,8 +15,8 @@ namespace Game {
 		int fadeCounter;
 
 		// Arbitratrily named values that make the tracer move slightly while fading
-		Vector2 startSpeed;
-		Vector2 endSpeed;
+		Vector2 forwardSpeed;
+		Vector2 sideSpeed;
 
 		// Represents the body of a 90 degree tracer
 		// Should be a Nx1 texture

@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "CollisionMaster.h"
 #include "ConfigHandler.h"
+#include "LogHandler.h"
 
 namespace Game {
 	MenuDirector::MenuDirector():
@@ -145,7 +146,7 @@ namespace Game {
 		gameTitle.RegisterToGame();
 
 
-		auto res = ConfigHandler::GetConfigResolution();
+		pair<int, int> res = ConfigHandler::GetConfigResolution();
 
 		auto& resList = Globals::Graphics().Resolutions;
 
@@ -177,6 +178,7 @@ namespace Game {
 		// Somewhat redundant
 		StateExitCurrent();
 		gameTitle.UnregisterFromGame();
+		Game::LogHandler::Log("Exited Main Menu", Game::LogHandler::MessageType::Info);
 	}
 
 	void MenuDirector::StateEnter(MenuDirector::MenuState state) {
@@ -276,7 +278,7 @@ namespace Game {
 		switch (currentState) {
 		case MenuState::MainScreen: {
 			if (Globals::Game().Input.IsButtonPressedThisFrame(InputHandler::ButtonCode::Left)) {
-				auto pos = Globals::Game().Input.GetMousePosition();
+				pair<int, int> pos = Globals::Game().Input.GetMousePosition();
 				if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), mainPlay.col)) {
 					Globals::Game().InitLevel();
 					toBeDestroyed = true;
@@ -314,7 +316,7 @@ namespace Game {
 		} break;
 		case MenuState::Options: {
 			if (Globals::Game().Input.IsButtonPressedThisFrame(InputHandler::ButtonCode::Left)) {
-				auto pos = Globals::Game().Input.GetMousePosition();
+				pair<int, int> pos = Globals::Game().Input.GetMousePosition();
 				if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), optionsRes.col)) {
 					
 					auto& resList = Globals::Graphics().Resolutions;

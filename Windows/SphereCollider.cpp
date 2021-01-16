@@ -19,7 +19,7 @@ namespace Game {
 	}
 
 	pair<Vector2, Vector2> SphereCollider::GetBoundingBox() {
-		auto pos = GetPosition();
+		auto& pos = GetPosition();
 		return { Vector2(pos.x - radius, pos.y - radius), Vector2(pos.x + radius, pos.y + radius) };
 	}
 }

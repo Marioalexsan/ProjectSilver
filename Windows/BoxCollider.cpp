@@ -22,11 +22,11 @@ namespace Game {
 		return { width, height };
 	}
 
-	const Vector2 BoxCollider::GetPosition() const {
+	const Vector2& BoxCollider::GetPosition() const {
 		return transform->position;
 	}
 
-	const Vector2 BoxCollider::GetCenteredPosition() const {
+	Vector2 BoxCollider::GetCenteredPosition() const {
 		return GetPosition() + Vector2(width / 2.0, height / 2.0);
 	}
 
@@ -35,7 +35,7 @@ namespace Game {
 	}
 
 	pair<Vector2, Vector2> BoxCollider::GetBoundingBox() {
-		auto pos = GetPosition();
+		auto& pos = GetPosition();
 		return { Vector2(pos.x, pos.y), Vector2(pos.x + width, pos.y + height) };
 	}
 }

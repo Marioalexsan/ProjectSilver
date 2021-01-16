@@ -70,9 +70,6 @@
     <Filter Include="Utility\MiscUtility">
       <UniqueIdentifier>{7923a0cb-c04e-4b81-97bd-c5255da6324a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utility\ErrorLogging">
-      <UniqueIdentifier>{bc300dde-c226-4dc0-bf3f-1ca432c58822}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Collision">
       <UniqueIdentifier>{f2e9b77f-cccc-4d85-8980-b5d298a3cd08}</UniqueIdentifier>
     </Filter>
@@ -142,6 +139,12 @@
     <Filter Include="Graphics\Effects Library\Tracer">
       <UniqueIdentifier>{f7516002-b495-49c2-a36a-adbf0beff8be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Effects Library\AfterImage">
+      <UniqueIdentifier>{58b5c010-ebc1-496f-b2a1-a7e54fc7ecc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\LogHandler">
+      <UniqueIdentifier>{bc300dde-c226-4dc0-bf3f-1ca432c58822}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -197,9 +200,6 @@
     </ClCompile>
     <ClCompile Include="MiscUtility.cpp">
       <Filter>Utility\MiscUtility</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorLogging.cpp">
-      <Filter>Utility\ErrorLogging</Filter>
     </ClCompile>
     <ClCompile Include="Collider.cpp">
       <Filter>Collision\Collider</Filter>
@@ -258,6 +258,12 @@
     <ClCompile Include="Tracer.cpp">
       <Filter>Graphics\Effects Library\Tracer</Filter>
     </ClCompile>
+    <ClCompile Include="AfterImage.cpp">
+      <Filter>Graphics\Effects Library\AfterImage</Filter>
+    </ClCompile>
+    <ClCompile Include="LogHandler.cpp">
+      <Filter>Utility\LogHandler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -310,9 +316,6 @@
     </ClInclude>
     <ClInclude Include="MiscUtility.h">
       <Filter>Utility\MiscUtility</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorLogging.h">
-      <Filter>Utility\ErrorLogging</Filter>
     </ClInclude>
     <ClInclude Include="Collider.h">
       <Filter>Collision\Collider</Filter>
@@ -371,6 +374,12 @@
     </ClInclude>
     <ClInclude Include="Tracer.h">
       <Filter>Graphics\Effects Library\Tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterImage.h">
+      <Filter>Graphics\Effects Library\AfterImage</Filter>
+    </ClInclude>
+    <ClInclude Include="LogHandler.h">
+      <Filter>Utility\LogHandler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

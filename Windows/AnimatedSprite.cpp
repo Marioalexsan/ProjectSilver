@@ -5,6 +5,7 @@
 
 namespace Game {
 	AnimatedSprite::AnimatedSprite():
+		finished(false),
 		framesPerCollumn(0),
 		framesPerRow(0),
 		totalFrames(0),

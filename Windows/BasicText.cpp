@@ -82,7 +82,7 @@ namespace Game {
 				}
 
 				while (wordPos < text.length()) {
-					auto info = data.charLibrary.at(text[wordPos]);
+					auto& info = data.charLibrary.at(text[wordPos]);
 
 					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
 
@@ -106,7 +106,7 @@ namespace Game {
 
 	void BasicText::SetFont(const string& ID) {
 		AssetManager& manager = Globals::Assets();
-		auto lib = manager.GetFontLibrary();
+		auto& lib = manager.GetFontLibrary();
 		if (lib.find(ID) == lib.end()) {
 			//Error
 			return;

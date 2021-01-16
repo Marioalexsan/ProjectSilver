@@ -14,6 +14,8 @@ namespace Game {
 	const Color Color::Orange = { 255, 165, 0 };
 	const Color Color::Purple = { 128, 0, 128 };
 	const Color Color::Aqua = { 0, 255, 255 };
+	const Color Color::Gray = { 128, 128, 128 };
+
 
 	Drawable::Drawable() :
 		color(Color::White),

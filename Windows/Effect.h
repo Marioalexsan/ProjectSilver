@@ -22,6 +22,8 @@ namespace Game {
 	protected:
 		int timeToLive;
 	public:
+		Effect();
+
 		virtual void Update();  // Must either be called by dervied classes, or timeToLive needs to be counted down manually
 
 		inline int GetTimeLeft() { return timeToLive; }

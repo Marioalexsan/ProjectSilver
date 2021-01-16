@@ -12,7 +12,7 @@ using std::endl;
 
 #include <chrono>
 
-#include "ErrorLogging.h"
+#include "LogHandler.h"
 #include "GameMaster.h"
 #include "Sprite.h"
 #include "BasicText.h"
@@ -49,7 +49,7 @@ bool SystemInit() {
         return false;
     }
     
-    Game::GraphicsEngine::Window = SDL_CreateWindow("Project Silver", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, SDL_WINDOW_OPENGL);
+    Game::GraphicsEngine::Window = SDL_CreateWindow("Project Silver", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, 0);
     if (Game::GraphicsEngine::Window == nullptr) {
         return false;
     }
@@ -80,20 +80,23 @@ void SystemQuit() {
 
 int main(int argc, char* args[]) {
 
+    Game::LogHandler::Log("Starting Game", Game::LogHandler::MessageType::Info);
+
     #pragma region Initialization Stuff
 
     if (!SystemInit()) {
         SystemQuit();
         return -1;
     }
-
-    srand(time(0));
+    srand(unsigned(time(0)));
 
     int prevTime = SDL_GetTicks();
 
     Game::GameMaster ProjectSilver;
     Game::Globals::SetTheGame(ProjectSilver);
     ProjectSilver.UltimateMegaInitOfDestiny();
+
+    Game::LogHandler::Log("Inited Game", Game::LogHandler::MessageType::Info);
 
     // Acts as a cursor; is also used as the player's targeting reticle
 
@@ -122,7 +125,7 @@ int main(int argc, char* args[]) {
                 // Do a small delay
                 SDL_Delay((uint32_t)(step - (double)delta));
                 currentTime = SDL_GetTicks();
-                delta = step;
+                delta = (int)step;
             }
             //angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
             int bonusUpdates = (int)round(delta / step) - 1;
@@ -155,13 +158,13 @@ int main(int argc, char* args[]) {
             prevTime = currentTime;
         }
         catch (std::exception& e) {
-            string message = "A standard exception occured!\nException message: " + string(e.what());
-            Game::Logger::LogError(message);
+            string message = "A standard exception occured!\n\tException message: " + string(e.what());
+            Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
         }
         catch (...) {
             string message = "An unknown exception occured!";
-            Game::Logger::LogError(message);
+            Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
         }
         

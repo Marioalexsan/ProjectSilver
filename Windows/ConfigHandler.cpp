@@ -27,9 +27,9 @@ namespace Game {
 
 	void ConfigHandler::WritePair(std::ofstream& file, const string& key, const string& value) {
 		if (file) {
-			int start = key.find_first_not_of(" \n\r\t");
+			int start = (int)key.find_first_not_of(" \n\r\t");
 			string trimmedKey = key.substr(start, key.find_last_not_of(" \n\r\t") - start + 1);
-			start = value.find_first_not_of(" \n\r\t");
+			start = (int)value.find_first_not_of(" \n\r\t");
 			string trimmedValue = value.substr(start, value.find_last_not_of(" \n\r\t") - start + 1);
 
 			file << key << " " << value << endl;
@@ -104,16 +104,16 @@ namespace Game {
 	}
 
 	pair<int, int> ConfigHandler::GetConfigResolution() {
-		auto cfgResolution = ConfigHandler::RetrieveItem("resolution");
+		string cfgResolution = ConfigHandler::RetrieveItem("resolution");
 		int width = 1280;
 		int height = 720;
 
-		auto cfgResolutionWidth = cfgResolution.substr(0, cfgResolution.find('.'));
+		string cfgResolutionWidth = cfgResolution.substr(0, cfgResolution.find('.'));
 		if (cfgResolutionWidth != "") {
 			width = std::stoi(cfgResolutionWidth);
 		}
 
-		auto cfgResolutionHeight = cfgResolution.substr(cfgResolution.find('.') + 1);
+		string cfgResolutionHeight = cfgResolution.substr(cfgResolution.find('.') + 1);
 		if (cfgResolutionHeight != "") {
 			height = std::stoi(cfgResolutionHeight);
 		}

@@ -89,7 +89,7 @@ namespace Game {
 	}
 
 	uint64_t GraphicsEngine::AddDrawable(Drawable* element) {
-		auto ID = NextID();
+		uint64_t ID = NextID();
 		drawableLibrary[ID] = element;
 		return ID;
 	}

@@ -45,7 +45,7 @@ namespace Game {
 	// "True" positon
 	pair<int, int> InputHandler::GetRelativeMousePosition() {
 		auto var = GraphicsEngine::GetWindowSize();
-		return { virtualMouseX * var.x / 1920, virtualMouseY * var.y / 1080};
+		return { int(virtualMouseX * var.x / 1920), int(virtualMouseY * var.y / 1080) };
 	}
 
 	void InputHandler::SetMouseGrab(bool grab) {
@@ -97,8 +97,8 @@ namespace Game {
 				// Resolution dependent sensitivity component
 				auto res = Globals::Graphics().GetWindowSize();
 
-				virtualMouseX = Utility::ClampValue(virtualMouseX + event.motion.xrel * res.x / 1920.0, 0.0, 1920.0);
-				virtualMouseY = Utility::ClampValue(virtualMouseY + event.motion.yrel * res.y / 1080.0, 0.0, 1080.0);
+				virtualMouseX = (int)Utility::ClampValue((double)virtualMouseX + event.motion.xrel * res.x / 1920.0, 0.0, 1920.0);
+				virtualMouseY = (int)Utility::ClampValue((double)virtualMouseY + event.motion.yrel * res.y / 1080.0, 0.0, 1080.0);
 			} break;
 				
 

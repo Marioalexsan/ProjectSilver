@@ -19,6 +19,7 @@ namespace Game {
 		static const Color Orange;
 		static const Color Purple;
 		static const Color Aqua;
+		static const Color Gray;
 	};
 
 	// Base interface for drawable

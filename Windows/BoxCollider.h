@@ -16,8 +16,8 @@ namespace Game {
 		BoxCollider();
 		BoxCollider(const Vector2& topLeft, double width, double height, ColliderType type);
 
-		virtual const Vector2 GetPosition() const;
-		const Vector2 GetCenteredPosition() const;
+		virtual const Vector2& GetPosition() const;
+		Vector2 GetCenteredPosition() const;
 
 		void SetSize(double width, double height);
 		pair<double, double> GetSize() const;

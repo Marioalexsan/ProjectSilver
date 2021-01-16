@@ -14,6 +14,9 @@
 #include "GunTurretAI.h"
 #include "RifleAmmoPack.h"
 #include "ConfigHandler.h"
+#include "Tracer.h"
+#include "AfterImage.h"
+#include "LogHandler.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
@@ -251,7 +254,7 @@ namespace Game {
 		return threat;
 	}
 
-	void GameMaster::CreateDefaultTracerEffect(const Vector2& start, const Vector2& end) {
+	uint64_t GameMaster::CreateDefaultTracerEffect(const Vector2& start, const Vector2& end) {
 		uint64_t ID = NextEffectID();
 		effectMasterList[ID].reset(new Tracer(start, end));
 		auto& tracer = *((Tracer*)effectMasterList[ID].get());
@@ -260,7 +263,30 @@ namespace Game {
 		tracer.SetBodyTexture("DefaultTracer");
 		tracer.RegisterToGame();
 		tracer.SetLayer(GraphicsEngine::CommonLayers::BelowDefaultHeight);
-		tracer.SetAlpha(127);
+		tracer.SetAlpha(100);
+		return ID;
+	}
+
+	uint64_t GameMaster::CreateAfterImageEffect(const Transform& parentTransform, const string& texAnimID, int frame) {
+		uint64_t ID = NextEffectID();
+		effectMasterList[ID].reset(new AfterImage());
+		auto& afterimage = *((AfterImage*)effectMasterList[ID].get());
+		*afterimage.GetTransform().Get() = parentTransform;
+		afterimage.SetTimeLeft(20);
+		afterimage.SetFadeTime(20);
+		if (frame == -1) {
+			// Treat as texture
+			afterimage.SetStaticTexture(texAnimID);
+		}
+		else {
+			// Treat as animation
+			afterimage.SetAnimationFrame(texAnimID, frame);
+		}
+		afterimage.RegisterToGame();
+		afterimage.SetLayer(GraphicsEngine::CommonLayers::BelowDefaultHeight);
+		afterimage.SetAlpha(80);
+		afterimage.SetColor(Color::Gray);
+		return ID;
 	}
 
 	void GameMaster::RemoveNonSpecialEntities() {
@@ -273,6 +299,17 @@ namespace Game {
 
 		for (auto& entity : entitiesToDelete) {
 			entityMasterList.erase(entity);
+		}
+	}
+
+	void GameMaster::ClearEffects() {
+		vector<uint64_t> effectsToDelete;
+		for (auto& pair : effectMasterList) {
+			effectsToDelete.push_back(pair.first);
+		}
+
+		for (auto& effect : effectsToDelete) {
+			effectMasterList.erase(effect);
 		}
 	}
 
@@ -368,10 +405,10 @@ namespace Game {
 			// Is currently broken, needs fixing
 			if (ABox != nullptr || ASphere != nullptr) {
 				auto result = alpha->GetBoundingBox();
-				startX = floor(result.first.x / cellSize);
-				endX = floor(result.second.x / cellSize);
-				startY = floor(result.first.y / cellSize);
-				endY = floor(result.second.y / cellSize);
+				startX = (int)floor(result.first.x / cellSize);
+				endX = (int)floor(result.second.x / cellSize);
+				startY = (int)floor(result.first.y / cellSize);
+				endY = (int)floor(result.second.y / cellSize);
 			}
 			else {
 				// Abandon ship
@@ -390,7 +427,7 @@ namespace Game {
     #pragma warning(disable: 26451)
 	vector<Collider*> GameMaster::GetCollisionCandidates(int startX, int startY, int endX, int endY) {
 		vector<Collider*> results;
-		int prediction = 0;
+		size_t prediction = 0;
 		for (int X = startX; X <= endX; X++) {
 			for (int Y = startY; Y <= endY; Y++) {
 				prediction += spacialHashMap[{X, Y}].size();
@@ -538,8 +575,8 @@ namespace Game {
 		Assets.LoadSound("TurretCharge", audioPath + "turretcharge.ogg");
 
 		// Settings
-		auto res = ConfigHandler::GetConfigResolution();
-		auto mode = ConfigHandler::GetConfigFullscreen();
+		pair<int, int> res = ConfigHandler::GetConfigResolution();
+		bool mode = ConfigHandler::GetConfigFullscreen();
 		Graphics.SetDisplayMode({ res.first, res.second, mode });
 		Audio.SetUserMusicVolume(ConfigHandler::GetMusicVolume());
 		Audio.SetUserSoundVolume(ConfigHandler::GetSoundVolume());
@@ -700,6 +737,7 @@ namespace Game {
 			return;
 		}
 		entityMasterList[maxAutoEntityID + SpecialEntities::TheLevelDirector].reset(new LevelDirector());
+		Game::LogHandler::Log("Entered Level", Game::LogHandler::MessageType::Info);
 	}
 
 	void GameMaster::UnloadLevel() {
@@ -714,6 +752,7 @@ namespace Game {
 			return;
 		}
 		entityMasterList[maxAutoEntityID + SpecialEntities::TheMenuDirector].reset(new MenuDirector());
+		Game::LogHandler::Log("Entered Main Menu", Game::LogHandler::MessageType::Info);
 	}
 
 	void GameMaster::UnloadMenu() {
@@ -761,7 +800,7 @@ namespace Game {
 		using CType = Collider::ColliderType;
 		auto libEnd = colliderLibrary.end();
 		for (auto firstIt = colliderLibrary.begin(); firstIt != libEnd; firstIt++) {
-			auto alpha = *firstIt;
+			Collider* alpha = *firstIt;
 			// Discard pure combat colliders
 			if (alpha->GetColliderType() == CType::Combat) {
 				continue;
@@ -794,7 +833,7 @@ namespace Game {
 			auto candidates = GetCollisionCandidates(int(startX), int(startY), int(endX), int(endY));
 
 			// Reduce second loop to pairs not yet checked by previous loops
-			for (auto beta: candidates) {
+			for (Collider* beta: candidates) {
 				// Check prerequisites
 
 				// This may cause multiple checks for certain colliders. But only for a few out of thousands
@@ -880,13 +919,13 @@ namespace Game {
 		set<pair<Collider*, Collider*>> collidedPairs;
 
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			auto alpha = *firstIt;
+			Collider* alpha = *firstIt;
 			// Discard anything which isn't a combat collider
 			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
 				continue;
 			}
 
-			auto AasAttacker = alpha->GetLayersToAttack();
+			auto& AasAttacker = alpha->GetLayersToAttack();
 			auto AasDefender = alpha->GetCombatLayer();
 
 			// Get alpha true type
@@ -898,14 +937,14 @@ namespace Game {
 
 			// TO DO IF NEEDED: Space Hashmap optimization will go after this
 
-			double startX, startY, endX, endY;
+			int startX, startY, endX, endY;
 
 			if (ABox != nullptr || ASphere != nullptr) {
 				auto result = alpha->GetBoundingBox();
-				startX = floor(result.first.x / cellSize);
-				endX = floor(result.second.x / cellSize);
-				startY = floor(result.first.y / cellSize);
-				endY = floor(result.second.y / cellSize);
+				startX = (int)floor(result.first.x / cellSize);
+				endX = (int)floor(result.second.x / cellSize);
+				startY = (int)floor(result.first.y / cellSize);
+				endY = (int)floor(result.second.y / cellSize);
 			}
 			else {
 				// ABANDON SHIP
@@ -916,7 +955,7 @@ namespace Game {
 			auto candidates = GetCollisionCandidates(startX, startY, endX, endY);
 
 			// Reduce second loop to pairs not yet checked by previous loops
-			for (auto beta: candidates) {
+			for (Collider* beta: candidates) {
 				// Check prerequisites
 
 				if (collidedPairs.find({ alpha, beta }) != collidedPairs.end() || collidedPairs.find({ beta, alpha }) != collidedPairs.end()) {
@@ -928,7 +967,7 @@ namespace Game {
 					continue;
 				}
 
-				auto BasAttacker = beta->GetLayersToAttack();
+				auto& BasAttacker = beta->GetLayersToAttack();
 				auto BasDefender = beta->GetCombatLayer();
 
 				bool HurtB = false, HurtA = false;
@@ -977,14 +1016,14 @@ namespace Game {
 
 				if (result.first) {
 					// Collision - only Actors can do callbacks
-					auto EntityA = dynamic_cast<Game::Actor*>(alpha->GetEntity());
-					auto EntityB = dynamic_cast<Game::Actor*>(beta->GetEntity());
+					Actor* EntityA = dynamic_cast<Game::Actor*>(alpha->GetEntity());
+					Actor* EntityB = dynamic_cast<Game::Actor*>(beta->GetEntity());
 
 					// Disable hurt if a collider's owner entity has been hit before, and the attacker doesn't double hit
 					
 					if (alpha->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEntities) != alpha->GetCollisionOptions().end()) {
 						auto& AList = alpha->GetHitList();
-						auto BEntity = beta->GetEntity();
+						Entity* BEntity = beta->GetEntity();
 						if (BEntity != nullptr) {
 							if (std::find(AList.begin(), AList.end(), BEntity) != AList.end()) {
 								HurtB = false;
@@ -997,7 +1036,7 @@ namespace Game {
 
 					if (beta->GetCollisionOptions().find(Collider::CollisionOptions::DoNotHitRememberedEntities) != beta->GetCollisionOptions().end()) {
 						auto& BList = beta->GetHitList();
-						auto AEntity = alpha->GetEntity();
+						Entity* AEntity = alpha->GetEntity();
 						if (AEntity != nullptr) {
 							if (std::find(BList.begin(), BList.end(), AEntity) != BList.end()) {
 								HurtA = false;
@@ -1040,7 +1079,7 @@ namespace Game {
 
 		// Destroy combat colliders on contact with Statics
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			auto alpha = *firstIt;
+			Collider* alpha = *firstIt;
 
 			// Discard anything which isn't a combat collider
 			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
@@ -1052,14 +1091,14 @@ namespace Game {
 				continue;
 			}
 
-			auto info = alpha->GetCollisionOptions();
+			auto& info = alpha->GetCollisionOptions();
 
 			// Discard anything which doesn't get destroyed on contact with Statics
 			if (info.find(Collider::CollisionOptions::DestroyCombatColliderAgainstStatic) == info.end()) {
 				continue;
 			}
 
-			auto AasAttacker = alpha->GetLayersToAttack();
+			auto& AasAttacker = alpha->GetLayersToAttack();
 			auto AasDefender = alpha->GetCombatLayer();
 
 			// Get alpha true type
@@ -1071,14 +1110,14 @@ namespace Game {
 
 			// TO DO IF NEEDED: Space Hashmap optimization will go after this
 
-			double startX, startY, endX, endY;
+			int startX, startY, endX, endY;
 
 			if (ABox != nullptr || ASphere != nullptr) {
 				auto result = alpha->GetBoundingBox();
-				startX = floor(result.first.x / cellSize);
-				endX = floor(result.second.x / cellSize);
-				startY = floor(result.first.y / cellSize);
-				endY = floor(result.second.y / cellSize);
+				startX = (int)floor(result.first.x / cellSize);
+				endX = (int)floor(result.second.x / cellSize);
+				startY = (int)floor(result.first.y / cellSize);
+				endY = (int)floor(result.second.y / cellSize);
 			}
 			else {
 				// ABANDON SHIP
@@ -1090,7 +1129,7 @@ namespace Game {
 
 			bool toDestroy = false;
 
-			for (auto beta : candidates) {
+			for (Collider* beta : candidates) {
 				// Check prerequisites
 
 				// This part only checks for static colliders
@@ -1147,7 +1186,7 @@ namespace Game {
 		vector<pair<double, Collider*>> hitList;
 		using CType = Collider::ColliderType;
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			auto alpha = *firstIt;
+			Collider* alpha = *firstIt;
 			// Get alpha true type
 			BoxCollider* ABox = dynamic_cast<BoxCollider*>(alpha);
 			SphereCollider* ASphere = nullptr;
@@ -1171,7 +1210,7 @@ namespace Game {
 			}
 		}
 
-		// Sort based on distance. Uses a lambda KEKLOL
+		// Sort based on distance. Uses a lambda
 		std::sort(hitList.begin(), hitList.end(), [](auto& left, auto& right) {
 			return left.first < right.first;
 			});

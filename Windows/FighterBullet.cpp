@@ -31,6 +31,7 @@ namespace Game {
 		if (currentDistance >= maxDistance) {
 			SignalDestruction();
 		}
+		Globals::Game().CreateAfterImageEffect(transform, "Bullet_Travel", 0);
 		Actor::Update();
 	}
 }

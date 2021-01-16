@@ -123,10 +123,10 @@ namespace Game {
 
 
         // Low HP Vignette. Serves as a "You're taking too much damage" warning for the player
-        auto vignetteAlpha = lowHPVignette.GetAlpha();
+        uint8_t vignetteAlpha = lowHPVignette.GetAlpha();
         if (stats.health <= 0.0 || stats.maxHealth <= 20.0) {
             if (vignetteCounter % 5 == 0) {
-                lowHPVignette.SetAlpha(vignetteAlpha + (255 - vignetteAlpha) * 0.04);
+                lowHPVignette.SetAlpha(vignetteAlpha + uint8_t((255 - vignetteAlpha) * 0.04));
             }
             heartbeatTime = 60;
             if (stats.maxHealth <= 60.0) {
@@ -135,7 +135,7 @@ namespace Game {
         }
         else {
             if (vignetteCounter % 7 == 0) {
-                lowHPVignette.SetAlpha(vignetteAlpha + (0 - vignetteAlpha) * 0.04);
+                lowHPVignette.SetAlpha(vignetteAlpha + uint8_t((0 - vignetteAlpha) * 0.04));
             }
         }
 
@@ -253,7 +253,7 @@ namespace Game {
         }
 
         // Low HP Audio effect
-        auto vol = Globals::Audio().GetMusicVolume();
+        double vol = Globals::Audio().GetMusicVolume();
         if (heartbeatTime > 0) {
             if (vignetteCounter % 2 == 0) {
                 Globals::Audio().SetMusicVolume(Utility::ClampValue(vol - 1.0, 35.0, 100.0));
@@ -522,9 +522,9 @@ namespace Game {
         }
 
         // Makes the player face the mouse position
-        auto var = game.Input.GetMousePosition();
-        auto vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
-        auto angle = vect.Angle();
+        pair<int, int> var = game.Input.GetMousePosition();
+        Vector2 vect = Game::Vector2(var.first - 960.0, var.second - 540.0);
+        double angle = vect.Angle();
         entity->GetComponent().SetDirection(angle);
 	}
 
@@ -641,6 +641,6 @@ namespace Game {
         }
         Vector2 normal = Vector2::NormalVector(shotAngle + angleDeltaToApply);
         Vector2 perpend = Vector2::NormalVector(normal.Angle() + 90.0);
-        Globals::Game().CreateDefaultTracerEffect(entity->GetCollider().GetPosition() + normal * 50 + perpend * 12, normal * tracerDrawDistance + entity->GetCollider().GetPosition() + perpend * 12 + normal * 3.0);
+        Globals::Game().CreateDefaultTracerEffect(entity->GetCollider().GetPosition() + normal * 50 + perpend * 4, normal * tracerDrawDistance + entity->GetCollider().GetPosition() + perpend * 4 + normal * 3.0);
     }
 }

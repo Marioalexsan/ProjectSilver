@@ -172,7 +172,7 @@ namespace Game {
 					actionQueue.pop();
 					break;
 				}
-				auto sectionList = SearchMusicLib(music.dataID).sectionList;
+				auto& sectionList = SearchMusicLib(music.dataID).sectionList;
 				if (sectionList.find(action.param) == sectionList.end()) {
 					// Broken
 					actionQueue.pop();
@@ -213,7 +213,7 @@ namespace Game {
 				} break;
 			case MusicAction::Type::ChangeVolume:
 				if (Mix_PlayingMusic() != 0) {
-					Mix_VolumeMusic(musicVolume / 100.0 * 128.0 * userMusicVolume / 100.0);
+					Mix_VolumeMusic(int(musicVolume / 100.0 * 128.0 * double(userMusicVolume) / 100.0));
 				} 
 				actionQueue.pop();
 				doNextAction = true;
@@ -280,7 +280,7 @@ namespace Game {
 			// Not likely, buuuuuttt....
 			return false;
 		}
-		auto sectionList = SearchMusicLib(music.dataID).sectionList;
+		auto& sectionList = SearchMusicLib(music.dataID).sectionList;
 		if (sectionList.find(section) == sectionList.end()) {
 			// Not found LOL
 			return false;

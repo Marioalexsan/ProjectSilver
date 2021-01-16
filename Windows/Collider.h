@@ -56,7 +56,7 @@ namespace Game {
 
 		Trackable<Game::Transform>& GetTransform();
 
-		virtual const Vector2 GetPosition() const;
+		virtual const Vector2& GetPosition() const;
 		void SetPosition(const Vector2& position);
 		void Move(const Vector2& amount);
 
