@@ -61,7 +61,7 @@ namespace Game {
 		player.GetComponent().AddAnimation("Player_PutAwayPistol");
 
 		player.GetCollider().SetCombatLayer(Collider::CombatLayer::Players);
-		player.GetCollider().SetRadius(40.0);
+		player.GetCollider().SetRadius(35.0);
 
 		player.SetType(EntityType::Player);
 
@@ -100,6 +100,7 @@ namespace Game {
 			fighter.GetComponent().SetDefaultAnimation("Player_PistolIdle");
 			fighter.GetComponent().SwitchAnimation("Player_PistolIdle");
 			fighter.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+			fighter.GetCollider().SetRadius(35.0);
 
 			fighter.SetType(EntityType::Fighter);
 
@@ -119,6 +120,7 @@ namespace Game {
 			bullet.GetComponent().SetDefaultAnimation("Bullet_Travel");
 			bullet.GetComponent().SwitchAnimation("Bullet_Travel");
 			bullet.GetCollider().SetEntityDestructionSignalling(true);
+			// radius set in entity
 
 			bullet.SetType(EntityType::FighterBulletProjectile);
 
@@ -134,6 +136,7 @@ namespace Game {
 			knight.GetComponent().AddAnimation("Knight_Swing");
 			knight.GetComponent().AddAnimation("Knight_Dead");
 			knight.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+			knight.GetCollider().SetRadius(40.0);
 
 			knight.SetType(EntityType::Knight);
 
@@ -154,6 +157,7 @@ namespace Game {
 			axeman.GetComponent().AddAnimation("Berserker_AxeSwing");
 			axeman.GetComponent().AddAnimation("Berserker_Dead");
 			axeman.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+			axeman.GetCollider().SetRadius(35.0);
 
 			axeman.SetType(EntityType::Chaser);
 
@@ -175,7 +179,7 @@ namespace Game {
 			turret.GetComponent().AddAnimation("GunTurret_Broken");
 			turret.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
 			turret.GetCollider().SetColliderType(Collider::ColliderType::CombatStatic);
-			turret.GetCollider().SetRadius(35.0);
+			turret.GetCollider().SetRadius(40.0);
 
 			turret.SetType(EntityType::GunTurret);
 

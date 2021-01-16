@@ -12,10 +12,10 @@ namespace Game {
 		endCap(nullptr)
 	{
 		Vector2 directionVector = end - start;
-		double speedPower = rand() % 15 / 100.0 + 0.05;
+		double speedPower = rand() % 40 / 100.0 + 0.6;
 		double angle = Utility::ScrollValue(directionVector.Angle() - 10.0 + rand() % 20 / 1.0, 0.0, 360.0);
 		startSpeed = Vector2::NormalVector(angle) * speedPower;
-		speedPower = rand() % 15 / 100.0 + 0.05;
+		speedPower = rand() % 40 / 100.0 + 0.6;
 		angle = angle = Utility::ScrollValue(directionVector.Angle() - 10.0 + rand() % 20 / 1.0, 0.0, 360.0);
 		endSpeed = Vector2::NormalVector(angle) * speedPower;
 	}
@@ -55,12 +55,12 @@ namespace Game {
 			}
 		}
 		if (fading) {
-			start += startSpeed * (1.1 - fadeFactor);
-			end += endSpeed * (1.1 - fadeFactor);
+			start += startSpeed * (2.5 - 2.0 * fadeFactor * fadeFactor);
+			end += endSpeed * (2.5 - 2.0 * fadeFactor * fadeFactor);
 		}
 		else {
-			start += startSpeed * 0.1;
-			end += endSpeed * 0.1;
+			start += startSpeed * 0.5;
+			end += endSpeed * 0.5;
 		}
 		Effect::Update();
 	}

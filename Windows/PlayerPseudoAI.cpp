@@ -414,7 +414,8 @@ namespace Game {
         if (game.Input.IsButtonDown(ButtonCode::Left)) {
             if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && equippedWeapon == 0 && playerAnimation == "Player_PistolIdle") {
                 if (currentPistolAmmo > 0) {
-                    GenericWeaponFireLogic(35.0, -2.0 + rand() % 40 / 10.0);
+                    // 1.5 degree spread
+                    GenericWeaponFireLogic(35.0, -1.5 + rand() % 30 / 10.0);
                     entity->GetComponent().SwitchAnimation("Player_PistolShoot");
                     currentPistolAmmo--;
                 }
@@ -424,7 +425,8 @@ namespace Game {
             }
             else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
-                    GenericWeaponFireLogic(40.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 1.0 + rand() % 20 / 10.0);
+                    // 0.5 + rifleRecoil degree spread
+                    GenericWeaponFireLogic(40.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 0.5 + rand() % 10 / 10.0);
                     rifleRecoil += 5.3;
                     entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;
@@ -613,17 +615,29 @@ namespace Game {
         
         double tracerDrawDistance = 1800;
         if (results.size() > 1) {
-            // First collider is usually the player's own, which is crappy, but c'est la vie
-            auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
-            auto entity = firstElem.second->GetEntity();
-            if (dynamic_cast<Actor*>(entity) != nullptr) {
-                auto actor = (Actor*)entity;
-                auto actorAI = actor->GetAI();
-                if (actorAI != nullptr) {
-                    actorAI->OnHitByAttack(this->entity, damageToDeal);
+            // Collide with first result that is an "enemy" or a static collider
+            Collider* hit = nullptr;
+            double distance = 0.0;
+            for (auto& elem : results) {
+                auto entity = elem.second->GetEntity();
+                if (elem.second->GetCombatLayer() == Collider::CombatLayer::Enemies || elem.second->GetColliderType() == Collider::ColliderType::Static) {
+                    hit = elem.second;
+                    distance = elem.first;
+                    break;
                 }
             }
-            tracerDrawDistance *= firstElem.first;
+            if (hit != nullptr) {
+                auto entity = hit->GetEntity();
+                if (dynamic_cast<Actor*>(entity) != nullptr) {
+                    auto actor = (Actor*)entity;
+                    auto actorAI = actor->GetAI();
+                    if (actorAI != nullptr) {
+                        actorAI->OnHitByAttack(this->entity, damageToDeal);
+                    }
+                }
+                tracerDrawDistance *= distance;
+            }
+            
         }
         Vector2 normal = Vector2::NormalVector(shotAngle + angleDeltaToApply);
         Vector2 perpend = Vector2::NormalVector(normal.Angle() + 90.0);
