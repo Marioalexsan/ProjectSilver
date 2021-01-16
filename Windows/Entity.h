@@ -10,7 +10,7 @@
 namespace Game {
 	class AI;
 
-	enum EntityType {
+	enum class EntityType {
 		Unknown,
 		Player,
 		Fighter,

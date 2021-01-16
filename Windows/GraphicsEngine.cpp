@@ -15,23 +15,31 @@ namespace Game {
 
 	const map<string, GraphicsEngine::VideoMode> GraphicsEngine::VideoModes = {
 		{"1920.1080.f", {1920, 1080, true}},
-		{"1600.900.f", {1600, 900, true}},
-		{"1366.768.f", {1366, 768, true}},
-		{"1280.720.f", {1280, 720, true}},
 		{"1920.1080.w", {1920, 1080, false}},
+		{"1600.900.f", {1600, 900, true}},
 		{"1600.900.w", {1600, 900, false}},
+		{"1366.768.f", {1366, 768, true}},
 		{"1366.768.w", {1366, 768, false}},
+		{"1280.720.f", {1280, 720, true}},
 		{"1280.720.w", {1280, 720, false}}
+	};
+
+	const pair<int, int> GraphicsEngine::Resolutions[GraphicsEngine::ResolutionCount] = {
+		{1920, 1080},
+		{1600, 900},
+		{1366, 768},
+		{1280, 720}
 	};
 
 	GraphicsEngine::GraphicsEngine() :
 		currentID(1)
 	{
-		windowWidth = 1920;
-		windowHeight = 1080;
-		renderWidth = 1920;
-		renderHeight = 1080;
-		SetDisplayMode(VideoModes.at("1920.1080.w"));
+		windowWidth = 1280;
+		windowHeight = 1280;
+		renderWidth = 1280;
+		renderHeight = 1280;
+		SetDisplayMode(VideoModes.at("1280.720.w"));
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	}
 
 	GraphicsEngine::~GraphicsEngine() {
@@ -44,24 +52,28 @@ namespace Game {
 	bool GraphicsEngine::SetDisplayMode(VideoMode mode) {
 		renderWidth = mode.width;
 		renderHeight = mode.height;
+		SDL_RenderSetLogicalSize(GraphicsEngine::Renderer, ResolutionTargetWidth, ResolutionTargetHeight);
 		if (mode.fullscreen) {
+			SDL_DisplayMode display = { SDL_PIXELFORMAT_RGBA32, mode.width, mode.height, 60, 0 };
+			if (fullscreen == mode.fullscreen) {
+				SDL_SetWindowFullscreen(GraphicsEngine::Window, 0);
+			}
+			if (SDL_SetWindowDisplayMode(Window, &display) == -1) {
+				SDL_SetWindowDisplayMode(Window, nullptr);
+			}
 			SDL_SetWindowFullscreen(GraphicsEngine::Window, SDL_WINDOW_FULLSCREEN);
-			SDL_DisplayMode display = {SDL_PIXELFORMAT_RGBA32, mode.width, mode.height, 0, 0};
-			SDL_SetWindowDisplayMode(Window, &display);
+			SDL_GetWindowDisplayMode(Window, &display);
+			windowWidth = display.w;
+			windowHeight = display.h;
+		}
+		else {
+			if (fullscreen != mode.fullscreen) {
+				SDL_SetWindowFullscreen(GraphicsEngine::Window, 0);
+			}
+			SDL_SetWindowSize(Window, mode.width, mode.height);
 			SDL_GetWindowSize(Window, &windowWidth, &windowHeight);
 		}
-		else {
-			SDL_SetWindowFullscreen(GraphicsEngine::Window, 0);
-			SDL_SetWindowSize(Window, mode.width, mode.height);
-			windowWidth = mode.width;
-			windowHeight = mode.height;
-		}
-		if (!mode.fullscreen) {
-			SDL_RenderSetScale(Renderer, float(renderWidth) / ResolutionTargetWidth, float(renderHeight) / ResolutionTargetHeight);
-		}
-		else {
-			SDL_RenderSetScale(Renderer, 1.0f, 1.0f);
-		}
+		fullscreen = mode.fullscreen;
 		SDL_RenderSetClipRect(Renderer, &Utility::MakeSDLRect(0, 0, ResolutionTargetWidth, ResolutionTargetWidth));
 		return true;
 	}

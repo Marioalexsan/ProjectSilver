@@ -13,21 +13,25 @@
 #include "ChaserAI.h"
 #include "GunTurretAI.h"
 #include "RifleAmmoPack.h"
+#include "ConfigHandler.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
 		entityID(1),
+		effectID(1),
 		gameRunning(true),
 		difficulty(DifficultyLevel::Easy)
 	{
 	}
 
 	GameMaster::~GameMaster() {
-		//Cleanup
+		// Cleanup - probably not required?
 		while (entityMasterList.size() > 0) {
 			entityMasterList.erase(entityMasterList.begin());
 		}
-
+		while (effectMasterList.size() > 0) {
+			effectMasterList.erase(effectMasterList.begin());
+		}
 	}
 
 	void GameMaster::AddThePlayer() {
@@ -243,6 +247,18 @@ namespace Game {
 		return threat;
 	}
 
+	void GameMaster::CreateDefaultTracerEffect(const Vector2& start, const Vector2& end) {
+		uint64_t ID = NextEffectID();
+		effectMasterList[ID].reset(new Tracer(start, end));
+		auto& tracer = *((Tracer*)effectMasterList[ID].get());
+		tracer.SetTimeLeft(30);
+		tracer.SetFadeTime(30);
+		tracer.SetBodyTexture("DefaultTracer");
+		tracer.RegisterToGame();
+		tracer.SetLayer(GraphicsEngine::CommonLayers::BelowDefaultHeight);
+		tracer.SetAlpha(127);
+	}
+
 	void GameMaster::RemoveNonSpecialEntities() {
 		vector<uint64_t> entitiesToDelete;
 		for (auto& pair : entityMasterList) {
@@ -262,12 +278,23 @@ namespace Game {
 		return returnID;
 	}
 
+	uint64_t GameMaster::NextEffectID() {
+		uint64_t returnID = effectID++;
+		effectID = (effectID >= maxAutoEffectID ? 1 : effectID);
+		return returnID;
+	}
+
 	void GameMaster::Update(bool skipGraphicsFrame = false) {
 		if (!gameRunning) {
 			return;
 		}
 
 		Input.Update();
+
+		if (Input.WasQuitCalled()) {
+			Stop();
+			return;
+		}
 
 		for (auto& pair : entityMasterList) {
 			pair.second->Update();
@@ -276,6 +303,12 @@ namespace Game {
 		BuildSpacialHashMap();
 		ResolveMovementCollisions();
 		ResolveCombatCollisions();
+
+		for (auto& pair : effectMasterList) {
+			pair.second->Update();
+		}
+		
+		// Destroy marked entities
 
 		vector<uint64_t> entitiesToDelete;
 		for (auto& pair : entityMasterList) {
@@ -286,6 +319,19 @@ namespace Game {
 
 		for (auto& entity : entitiesToDelete) {
 			entityMasterList.erase(entity);
+		}
+
+		// Destroy expired effects
+
+		vector<uint64_t> effectsToDelete;
+		for (auto& pair : effectMasterList) {
+			if (pair.second->GetTimeLeft() <= 0) {
+				effectsToDelete.push_back(pair.first);
+			}
+		}
+
+		for (auto& effect : effectsToDelete) {
+			effectMasterList.erase(effect);
 		}
 
 		while (colliderUnregisterQueue.size() > 0) {
@@ -371,6 +417,12 @@ namespace Game {
 	}
 
 	void GameMaster::UltimateMegaInitOfDestiny() {
+		string configPath = "config.cfg";
+		if (!ConfigHandler::ReadConfig(configPath)) {
+			ConfigHandler::CreateDefaultConfig(configPath);
+			ConfigHandler::ReadConfig(configPath);
+		}
+
 		// Initializes the assets and stuff
 
 		// Textures
@@ -407,6 +459,7 @@ namespace Game {
 		Assets.LoadTexture("Target", assetFolder + "Target.png");
 		Assets.LoadTexture("Button", assetFolder + "Button.png");
 		Assets.LoadTexture("LowHP", assetFolder + "LowHP.png");
+		Assets.LoadTexture("ValueButton", assetFolder + "ValueButton.png");
 		
 		// Knight Enemy
 		assetFolder = texturePath + "Knight/";
@@ -430,15 +483,24 @@ namespace Game {
 		assetFolder = texturePath + "Misc/";
 		Assets.LoadTexture("RifleAmmoPack", assetFolder + "Ammo.png");
 		Assets.LoadTexture("Bullet", assetFolder + "Bullet.png");
-		
+
+		// Shadow - Boss
+		assetFolder = texturePath + "Shadow/";
+		Assets.LoadTexture("Shadow_PistolIdle", assetFolder + "PistolIdle.png");
+		Assets.LoadTexture("Shadow_AxeSwing", assetFolder + "AxeSwing.png");
+
+		// Effects
+		const string effectPath = texturePath + "Effects/";
+		Assets.LoadTexture("DefaultTracer", effectPath + "DefaultTracer.png");
 
 		// Fonts
-		const string fontPath = "Fonts\\";
+		const string fontPath = "Fonts/";
 		Assets.LoadSpriteFont("Huge", fontPath + "CourierNewHuge_0.png", fontPath + "CourierNewHuge.fnt");
 		Assets.LoadSpriteFont("Big", fontPath + "CourierNewBig_0.png", fontPath + "CourierNewBig.fnt");
 
+		
 
-		const string audioPath = "Audio\\";
+		const string audioPath = "Audio/";
 		// Music
 		Assets.LoadMusic("DigitalGhost", audioPath + "digi.ogg");
 		Assets.LoadMusicSections("DigitalGhost", {
@@ -455,6 +517,8 @@ namespace Game {
 		Assets.LoadSound("GunClick", audioPath + "gunclick.ogg");
 		Assets.LoadSound("SwordSwing", audioPath + "swordswing.ogg");
 		Assets.LoadSound("ShieldImpact", audioPath + "shieldimpact.ogg");
+		Assets.LoadSound("PerfectGuard", audioPath + "perfectguard.ogg");
+		Assets.LoadSound("ShieldBreak", audioPath + "shieldbreak.ogg");
 		Assets.LoadSound("ButtonClick", audioPath + "buttonclick.ogg");
 		Assets.LoadSound("Death", audioPath + "death.ogg");
 		Assets.LoadSound("PlayerDeath", audioPath + "playerdeath.ogg");
@@ -470,7 +534,12 @@ namespace Game {
 		Assets.LoadSound("TurretCharge", audioPath + "turretcharge.ogg");
 
 		// Settings
-		Graphics.SetDisplayMode(Graphics.VideoModes.at("1920.1080.f"));
+		auto res = ConfigHandler::GetConfigResolution();
+		auto mode = ConfigHandler::GetConfigFullscreen();
+		Graphics.SetDisplayMode({ res.first, res.second, mode });
+		Audio.SetUserMusicVolume(ConfigHandler::GetMusicVolume());
+		Audio.SetUserSoundVolume(ConfigHandler::GetSoundVolume());
+
 		Input.SetMouseGrab(true);
 
 		// Animation info
@@ -540,11 +609,15 @@ namespace Game {
 		SetAnimationInfo("Player_AxeSwing", { 5, 12, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_AxeSwing", Vector2(73, 116));
 
-		AddAnimation("Player_TakeOutRifle", Animation("Player_TakeOutRifle", {}));
+		AddAnimation("Player_TakeOutRifle", Animation("Player_TakeOutRifle", {
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerReload1"} }
+			}));
 		SetAnimationInfo("Player_TakeOutRifle", { 4, 5, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_TakeOutRifle", Vector2(48, 67));
 
-		AddAnimation("Player_TakeOutPistol", Animation("Player_TakeOutPistol", {}));
+		AddAnimation("Player_TakeOutPistol", Animation("Player_TakeOutPistol", {
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerReload1"} }
+			}));
 		SetAnimationInfo("Player_TakeOutPistol", { 4, 5, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_TakeOutPistol", Vector2(48, 67));
 
@@ -610,6 +683,12 @@ namespace Game {
 		AddAnimation("RifleAmmoPack", Animation("RifleAmmoPack", {}));
 		SetAnimationInfo("RifleAmmoPack", { 1337, 1, 1, LoopMode::Static });
 		SetAnimationCenter("RifleAmmoPack", Vector2(20, 15));
+	}
+
+	void GameMaster::ArmageddonExitProcedures() {
+		// Save config
+		string configPath = "config.cfg";
+		ConfigHandler::SaveConfig(configPath);
 	}
 
 	void GameMaster::InitLevel() {

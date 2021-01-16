@@ -7,12 +7,15 @@
 #include "InputHandler.h"
 #include "Animation.h"
 #include "CollisionMaster.h"
+#include "Effect.h"
+#include "Tracer.h"
+
 
 namespace Game {
 	class Entity;
 
 	class Actor;
-	enum EntityType;
+	enum class EntityType;
 
 	class GameMaster {
 	public:
@@ -46,7 +49,12 @@ namespace Game {
 		uint64_t entityID;
 		static const uint64_t maxAutoEntityID = 16384;
 
+		map<uint64_t, std::unique_ptr<Effect>> effectMasterList;
+		uint64_t effectID;
+		static const uint64_t maxAutoEffectID = 16384;
+
 		uint64_t NextEntityID();
+		uint64_t NextEffectID();
 
 		DifficultyLevel difficulty;
 
@@ -62,6 +70,8 @@ namespace Game {
 		uint64_t AddEntity(EntityType type, Vector2 worldPos);
 		Entity* GetEntity(uint64_t ID);
 		int GetAliveEnemyCount();
+
+		void CreateDefaultTracerEffect(const Vector2& start, const Vector2& end);
 
 		int GetActiveThreat();
 
@@ -82,6 +92,7 @@ namespace Game {
 		~GameMaster();
 
 		void UltimateMegaInitOfDestiny();
+		void ArmageddonExitProcedures();
 
 		void InitLevel();
 		void UnloadLevel();

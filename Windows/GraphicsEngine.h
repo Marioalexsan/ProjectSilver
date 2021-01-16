@@ -21,17 +21,20 @@ namespace Game {
 		enum CommonLayers {
 			WorldBase = 0,
 			Background = 64,
-			Floor = 65,
-			OnFloor = 66,
-			DefaultHeight = 67,
-			BelowCeiling = 68,
-			Ceiling = 69,
+			Floor,
+			OnFloor,
+			BelowDefaultHeight,
+			DefaultHeight,
+			BelowCeiling,
+			Ceiling,
 			GUI = 192,
-			AboveGUI = 193,
-			WorldTop = 255,
+			AboveGUI,
+			WorldTop = 255
 		};
 
+		static const int ResolutionCount = 4;
 		static const map<string, VideoMode> VideoModes;
+		static const pair<int, int> Resolutions[ResolutionCount];
 
 		static SDL_Window* Window;
 		static SDL_Renderer* Renderer;
@@ -65,7 +68,13 @@ namespace Game {
 
 		static Vector2 GetWindowSize();
 		bool SetDisplayMode(VideoMode mode);
+		inline VideoMode GetRenderDisplayMode() {
+			return { renderWidth, renderHeight, fullscreen };
+		}
 		void SetStandardViewport();
+
+		inline bool IsFullscreen() { return fullscreen; }
+		inline void SetFullscreen(bool mode) { fullscreen = mode; }
 
 		uint64_t AddDrawable(Drawable* element);
 		bool	 RemoveDrawable(uint64_t ID);

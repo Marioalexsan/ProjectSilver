@@ -12,6 +12,7 @@ namespace Game {
 		enum TextRenderType {
 			ContinuousLeft,
 			ContinuousRight,
+			ContinuousCentered,
 			BlockCentered, // Not implemented
 			BlockLeft, // Not implemented
 			BlockRight // Not implemented

@@ -6,6 +6,7 @@
 namespace Game {
 
     FighterAI::FighterAI() :
+        aimAnnoyance(0),
         strafesLeft(false),
         nextStrafeChange(300),
         nextShot(120),
@@ -112,16 +113,20 @@ namespace Game {
 
         if (counter + aimTime == nextShot) {
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
-                predictionStrengthToUse = 0.10 + rand() % 15 / 100.0;
+                predictionStrengthToUse = 0.15 + rand() % 15 / 100.0;
             }
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
-                predictionStrengthToUse = 0.25 + rand() % 20 / 100.0;
+                predictionStrengthToUse = 0.3 + rand() % 15 / 100.0;
+            }
+            if (distance <= 300.0) {
+                predictionStrengthToUse *= 0.25;
+            }
+            if (distance >= 520) {
+                predictionStrengthToUse *= 1.2;
             }
         }
 
-        if (distance <= 350) {
-            predictionStrengthToUse *= distance / 350;
-        }
+        
         
         if (counter + aimTime > nextShot) {
             shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0).Angle();
@@ -158,15 +163,18 @@ namespace Game {
         entity->MoveForward(forwardStrength);
 
         if (counter > nextShot) {
-            if (playerOutOfAim) {
+            if (playerOutOfAim && aimAnnoyance <= 10) {
                 nextShot += 6;
+                aimAnnoyance++;
                 return;
             }
+
+            aimAnnoyance = 0;
 
             entity->GetComponent().SwitchAnimation("Player_PistolShoot");
             auto bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
             auto theBullet = Globals::Game().GetEntity(bulletID);
-            theBullet->GetTransform().direction = shootDirection;
+            theBullet->GetTransform().direction = Utility::ScrollValue(entityDirection + (shootDirection - entityDirection) * 0.18, 0.0, 360.0);
             previousShot = nextShot;
             nextShot += 110 - 15 * Globals::Difficulty() + rand() % 20;
         }

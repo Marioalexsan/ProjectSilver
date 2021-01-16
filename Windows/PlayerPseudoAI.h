@@ -16,7 +16,7 @@ namespace Game {
 		int currentRifleAmmo;
 		int maxRifleAmmo;
 		int rifleAmmoPool;
-		double rifleRecoil; // Unimplemented
+		double rifleRecoil;
 		bool wasReloadingRifle;
 
 		bool hasShield;
@@ -41,6 +41,7 @@ namespace Game {
 
 		int equippedWeapon;
 		int targetWeaponEquip;
+		int pistolPenaltyCountdown;
 		
 		Vector2 smoothSpeed;
 		Vector2 boostVector;

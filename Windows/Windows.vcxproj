@@ -71,19 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>Project Silver</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)SDL2_image\include;$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>Project Silver</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>Project Silver</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)SDL2_mixer\include;$(SolutionDir)SDL2\include;$(SolutionDir)SDL2_image\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)SDL2\lib\x64;$(SolutionDir)SDL2_mixer\lib\x64;$(SolutionDir)SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>Project Silver</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -93,7 +97,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -108,7 +112,7 @@
       <PrecompiledHeaderFile>PCHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -123,7 +127,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,7 +145,7 @@
       <PrecompiledHeaderFile>PCHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -155,6 +159,8 @@
     <ClCompile Include="ChaserAI.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CollisionMaster.cpp" />
+    <ClCompile Include="ConfigHandler.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="FighterAI.cpp" />
     <ClCompile Include="FighterBullet.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -183,9 +189,11 @@
     <ClCompile Include="RenderComponent.cpp" />
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="RifleAmmoPack.cpp" />
+    <ClCompile Include="ShadowAI.cpp" />
     <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="GunTurretAI.cpp" />
+    <ClCompile Include="Tracer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -195,6 +203,8 @@
     <ClInclude Include="ChaserAI.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="CollisionMaster.h" />
+    <ClInclude Include="ConfigHandler.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="FighterAI.h" />
     <ClInclude Include="FighterBullet.h" />
     <ClInclude Include="Globals.h" />
@@ -215,12 +225,21 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerPseudoAI.h" />
     <ClInclude Include="RenderComponent.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RifleAmmoPack.h" />
+    <ClInclude Include="ShadowAI.h" />
     <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="PCHeader.h" />
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="GunTurretAI.h" />
+    <ClInclude Include="Tracer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Windows.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

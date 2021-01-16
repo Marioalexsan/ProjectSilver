@@ -7,6 +7,7 @@
 
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
+        pistolPenaltyCountdown(0),
         currentPistolAmmo(12),
         maxPistolAmmo(12),
         wasReloadingPistol(false),
@@ -129,7 +130,7 @@ namespace Game {
             }
             heartbeatTime = 60;
             if (stats.maxHealth <= 60.0) {
-                heartbeatCounter = 180;
+                heartbeatTime = 150;
             }
         }
         else {
@@ -146,6 +147,14 @@ namespace Game {
         if (staminaFadeOutDelay > 0) { staminaFadeOutDelay--; }
         if (boostCooldown > 0) { boostCooldown--; }
         if (perfectGuardCounter > 0) { perfectGuardCounter--; }
+
+        if (rifleRecoil > 0.0) {
+            rifleRecoil *= 0.98;
+            rifleRecoil -= 0.1;
+            if (rifleRecoil <= 0.4) {
+                rifleRecoil = 0.0;
+            }
+        }
 
         // Vignette Counter (periodic)
         // Could probably be replaced / removed
@@ -252,6 +261,9 @@ namespace Game {
             
             if (heartbeatCounter == 0) {
                 heartbeatCounter = 48;
+                if (stats.maxHealth <= 20.0) {
+                    heartbeatCounter = 88;
+                }
                 Globals::Audio().PlaySound("Heartbeat");
             }
         }
@@ -302,13 +314,18 @@ namespace Game {
             return;
         }
 
+        if (playerAnimation == "Player_PistolShoot") {
+            // No running and gunning, noob!
+            pistolPenaltyCountdown = 9;
+        }
+
         // Move Speed Logic
         double moveSpeed = 9.0;
         if (playerAnimation == "Player_PistolReload" || playerAnimation == "Player_RifleReload") {
             moveSpeed /= 3.0;
         }
         else if (playerAnimation == "Player_RifleShoot") {
-            moveSpeed /= 1.75;
+            moveSpeed /= 2;
         }
         else if (inShield) {
             moveSpeed /= 1.25;
@@ -329,6 +346,10 @@ namespace Game {
                 factor = 2.0 * Utility::ClampValue(11 - currentFrame, 0, 3) / 3;
             }
             moveSpeed *= factor * 0.75;
+        }
+        else if (pistolPenaltyCountdown > 0) {
+            pistolPenaltyCountdown--;
+            moveSpeed /= 1.7;
         }
 
         // Move Speed Direction
@@ -393,7 +414,7 @@ namespace Game {
         if (game.Input.IsButtonDown(ButtonCode::Left)) {
             if (game.Input.IsButtonPressedThisFrame(ButtonCode::Left) && equippedWeapon == 0 && playerAnimation == "Player_PistolIdle") {
                 if (currentPistolAmmo > 0) {
-                    GenericWeaponFireLogic(35.0);
+                    GenericWeaponFireLogic(35.0, -2.0 + rand() % 40 / 10.0);
                     entity->GetComponent().SwitchAnimation("Player_PistolShoot");
                     currentPistolAmmo--;
                 }
@@ -403,7 +424,8 @@ namespace Game {
             }
             else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
-                    GenericWeaponFireLogic(40.0);
+                    GenericWeaponFireLogic(40.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 1.0 + rand() % 20 / 10.0);
+                    rifleRecoil += 5.3;
                     entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;
                 }
@@ -538,7 +560,6 @@ namespace Game {
                 angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
                 if (angleDelta < 90.0) {
                     shieldBlock = true;
-                    Globals::Audio().PlaySound("ShieldImpact");
                 }
             }
             if (shieldBlock) {
@@ -551,6 +572,15 @@ namespace Game {
                     stats.shieldHealth = 0.0;
                     shieldRegenCounter = -240;
                     stats.currentInvincibilityFrames = 40;
+                    Globals::Audio().PlaySound("ShieldBreak");
+                }
+                else {
+                    if (perfectGuardCounter > 0) {
+                        Globals::Audio().PlaySound("PerfectGuard");
+                    }
+                    else {
+                        Globals::Audio().PlaySound("ShieldImpact");
+                    }
                 }
             }
             else {
@@ -580,6 +610,8 @@ namespace Game {
         auto mouse = Globals::Game().Input.GetMousePosition();
         auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
         auto results = Globals::Game().CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle + angleDeltaToApply) * 1800.0 + entity->GetCollider().GetPosition());
+        
+        double tracerDrawDistance = 1800;
         if (results.size() > 1) {
             // First collider is usually the player's own, which is crappy, but c'est la vie
             auto firstElem = results[0].second->GetEntity() == Globals::Game().GetThePlayer() ? results[1] : results[0];
@@ -591,6 +623,10 @@ namespace Game {
                     actorAI->OnHitByAttack(this->entity, damageToDeal);
                 }
             }
+            tracerDrawDistance *= firstElem.first;
         }
+        Vector2 normal = Vector2::NormalVector(shotAngle + angleDeltaToApply);
+        Vector2 perpend = Vector2::NormalVector(normal.Angle() + 90.0);
+        Globals::Game().CreateDefaultTracerEffect(entity->GetCollider().GetPosition() + normal * 50 + perpend * 12, normal * tracerDrawDistance + entity->GetCollider().GetPosition() + perpend * 12 + normal * 3.0);
     }
 }

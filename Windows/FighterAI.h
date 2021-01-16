@@ -11,6 +11,7 @@ namespace Game {
 		int nextStrafeChange;
 		int nextShot;
 		int previousShot;
+		int aimAnnoyance;
 
 		double predictionStrengthToUse;
 

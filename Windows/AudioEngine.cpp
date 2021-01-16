@@ -2,6 +2,7 @@
 
 #include "Globals.h" // Also includes the required AssetManager
 #include "AudioEngine.h"
+#include "ConfigHandler.h"
 
 namespace Game {
 	AudioEngine::AudioEngine() :
@@ -10,8 +11,11 @@ namespace Game {
 		currentID(1),
 		soundCount(0),
 		musicVolume(100),
-		soundVolume(80)
+		soundVolume(80),
+		userMusicVolume(100),
+		userSoundVolume(100)
 	{
+		// Music and audio volumes for the user are set later by the Game, during mega init
 		Mix_AllocateChannels(maxChannels);
 	}
 
@@ -46,7 +50,7 @@ namespace Game {
 			return 0;
 		}
 
-		Mix_Volume(channel, int(double(soundVolume))); // Max is 128, but (as a convention), we can just use 0-100. That way, the sound won't be stupidly loud.
+		Mix_Volume(channel, int(double(soundVolume) * userSoundVolume / 100.0)); // Max is 128, but (as a convention), we can just use 0-100. That way, the sound won't be stupidly loud.
 
 		auto nextID = NextID();
 		sounds[nextID] = { ID, pos, channel };
@@ -142,7 +146,7 @@ namespace Game {
 						// Error
 						break;
 					}
-					Mix_VolumeMusic(int(double(musicVolume))); // Max is 128, but we'll use the range 0-100
+					Mix_VolumeMusic(int(double(musicVolume) * userMusicVolume / 100.0)); // Max is 128, but we'll use the range 0-100
 					music = { action.param, action.extraParams[0], 0, 0 };
 
 					//Also do next action in sequence, *if* possible
@@ -209,7 +213,7 @@ namespace Game {
 				} break;
 			case MusicAction::Type::ChangeVolume:
 				if (Mix_PlayingMusic() != 0) {
-					Mix_VolumeMusic(musicVolume / 100.0 * 128);
+					Mix_VolumeMusic(musicVolume / 100.0 * 128.0 * userMusicVolume / 100.0);
 				} 
 				actionQueue.pop();
 				doNextAction = true;

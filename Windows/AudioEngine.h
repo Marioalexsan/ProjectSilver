@@ -105,6 +105,9 @@ namespace Game {
 		uint8_t musicVolume;
 		uint8_t soundVolume;
 
+		uint8_t userMusicVolume;
+		uint8_t userSoundVolume;
+
 		uint64_t	NextID();
 
 		// Private function used for readability
@@ -135,13 +138,26 @@ namespace Game {
 		inline double GetMusicVolume() { return musicVolume; }
 		inline double GetSoundVolume() { return soundVolume; }
 
+		inline uint8_t GetUserMusicVolume() { return userMusicVolume; }
+		inline uint8_t GetUserSoundVolume() { return userSoundVolume; }
+
+		inline void SetUserMusicVolume(double volume)
+		{
+			userMusicVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			AddAction(MusicAction::Type::ChangeVolume, "");
+		}
+		inline void SetUserSoundVolume(double volume) {
+			userSoundVolume = Utility::ClampValue(volume, 0.0, 100.0);
+			Mix_Volume(-1, soundVolume / 100.0 * 128 * userSoundVolume / 100.0);
+		}
+
 		inline void SetMusicVolume(double volume) { 
 			musicVolume = Utility::ClampValue(volume, 0.0, 100.0);
 			AddAction(MusicAction::Type::ChangeVolume, "");
 		}
 		inline void SetSoundVolume(double volume) { 
 			soundVolume = Utility::ClampValue(volume, 0.0, 100.0);
-			Mix_Volume(-1, soundVolume / 100.0 * 128);
+			Mix_Volume(-1, soundVolume / 100.0 * 128 * userSoundVolume / 100.0);
 		}
 
 		uint64_t GetMusicPosition();

@@ -101,16 +101,20 @@ namespace Game {
 
         if (counter + aimTime == nextShot) {
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
-                predictionStrengthToUse = rand() % 20 / 100.0;
+                predictionStrengthToUse = 0.05 + rand() % 20 / 100.0;
             }
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
-                predictionStrengthToUse = 0.25 + rand() % 15 / 100.0;
+                predictionStrengthToUse = 0.3 + rand() % 15 / 100.0;
+            }
+            if (distance <= 300.0) {
+                predictionStrengthToUse *= 0.25;
+            }
+            if (distance >= 520) {
+                predictionStrengthToUse *= 1.2;
             }
         }
 
-        if (distance <= 400.0) {
-            predictionStrengthToUse *= distance / 400.0;
-        }
+        
 
         if (counter + aimTime > nextShot) {
             shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0).Angle();

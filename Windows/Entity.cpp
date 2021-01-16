@@ -4,7 +4,7 @@
 
 namespace Game {
 	Entity::Entity():
-		type(Unknown),
+		type(EntityType::Unknown),
 		transform(),
 		toBeDestroyed(false) {}
 

@@ -3,6 +3,7 @@
 #include "InputHandler.h"
 #include "MiscUtility.h"
 #include "GraphicsEngine.h"
+#include "Globals.h"
 
 namespace Game {
 	const map<SDL_Scancode, InputHandler::KeyCode> InputHandler::keyTranslation = {
@@ -90,11 +91,16 @@ namespace Game {
 
 				// Mouse
 
-			case SDL_EventType::SDL_MOUSEMOTION:
+			case SDL_EventType::SDL_MOUSEMOTION: {
 				// Limited to game area
-				virtualMouseX = Utility::ClampValue(virtualMouseX + event.motion.xrel, 0, 1920);
-				virtualMouseY = Utility::ClampValue(virtualMouseY + event.motion.yrel, 0, 1080);
-				break;
+
+				// Resolution dependent sensitivity component
+				auto res = Globals::Graphics().GetWindowSize();
+
+				virtualMouseX = Utility::ClampValue(virtualMouseX + event.motion.xrel * res.x / 1920.0, 0.0, 1920.0);
+				virtualMouseY = Utility::ClampValue(virtualMouseY + event.motion.yrel * res.y / 1080.0, 0.0, 1080.0);
+			} break;
+				
 
 				// Misc
 

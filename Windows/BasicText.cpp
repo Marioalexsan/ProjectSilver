@@ -66,15 +66,27 @@ namespace Game {
 
 		switch (type) {
 			case TextRenderType::ContinuousLeft: 
+			case TextRenderType::ContinuousRight:
+			case TextRenderType::ContinuousCentered:
 			{
 				int currentX = 0;
 				int wordPos = 0;
+
+				int orientationOffset = 0;
+
+				if (type == TextRenderType::ContinuousCentered) {
+					orientationOffset = CalculateTextLength(&data, text) / 2;
+				}
+				else if (type == TextRenderType::ContinuousRight) {
+					orientationOffset = CalculateTextLength(&data, text);
+				}
+
 				while (wordPos < text.length()) {
 					auto info = data.charLibrary.at(text[wordPos]);
 
 					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
 
-					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform->position.x) + currentX + info.xoffset, int(transform->position.y) + info.yoffset, info.width, info.height);
+					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform->position.x) + currentX + info.xoffset - orientationOffset, int(transform->position.y) + info.yoffset, info.width, info.height);
 
 					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
 
@@ -85,30 +97,6 @@ namespace Game {
 					currentX += info.xadvance;
 				}
 			}	
-			break;
-			case TextRenderType::ContinuousRight:
-			{
-				int currentX = 0;
-				int wordPos = 0;
-
-				int textLength = CalculateTextLength(&data, text);
-
-				while (wordPos < text.length()) {
-					auto info = data.charLibrary.at(text[wordPos]);
-
-					SDL_Rect src = Game::Utility::MakeSDLRect(info.x, info.y, info.width, info.height);
-
-					SDL_Rect dest = Game::Utility::MakeSDLRect(int(transform->position.x) + currentX + info.xoffset - textLength, int(transform->position.y) + info.yoffset, info.width, info.height);
-
-					SDL_Point cen = Game::Utility::MakeSDLPoint(0, 0);
-
-					SDL_SetTextureAlphaMod(texture, alpha);
-					SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
-					GraphicsEngine::RenderCopyExAdvanced(texture, &src, &dest, transform->direction, &cen, SDL_RendererFlip::SDL_FLIP_NONE, relativeToCamera);
-					wordPos++;
-					currentX += info.xadvance;
-				}
-			}
 			break;
 			default:
 				return;

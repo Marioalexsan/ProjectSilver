@@ -169,6 +169,7 @@ int main(int argc, char* args[]) {
     }
     ProjectSilver.UnloadLevel();
     ProjectSilver.UnloadMenu();
+    ProjectSilver.ArmageddonExitProcedures();
     
     #pragma endregion
 

@@ -127,6 +127,21 @@
     <Filter Include="Entity Library\RifleAmmoPack">
       <UniqueIdentifier>{71d22a23-5674-46d0-b097-56f6207a0068}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComplexFeatures\AI Library\Shadow">
+      <UniqueIdentifier>{35533f56-ede9-4b31-a6f4-c0648e5e41e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\ConfigHandler">
+      <UniqueIdentifier>{fdf13593-df53-4d53-ba4a-b276e06991d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Effects Library">
+      <UniqueIdentifier>{34e8733e-a77e-434b-81c2-928c9d8315f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Effects Library\Effect">
+      <UniqueIdentifier>{9c341d07-b90c-4bff-a666-5f589f48784b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Effects Library\Tracer">
+      <UniqueIdentifier>{f7516002-b495-49c2-a36a-adbf0beff8be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -231,6 +246,18 @@
     <ClCompile Include="RifleAmmoPack.cpp">
       <Filter>Entity Library\RifleAmmoPack</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowAI.cpp">
+      <Filter>ComplexFeatures\AI Library\Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigHandler.cpp">
+      <Filter>Utility\ConfigHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Graphics\Effects Library\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracer.cpp">
+      <Filter>Graphics\Effects Library\Tracer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -332,5 +359,24 @@
     <ClInclude Include="RifleAmmoPack.h">
       <Filter>Entity Library\RifleAmmoPack</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowAI.h">
+      <Filter>ComplexFeatures\AI Library\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigHandler.h">
+      <Filter>Utility\ConfigHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Effect.h">
+      <Filter>Graphics\Effects Library\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracer.h">
+      <Filter>Graphics\Effects Library\Tracer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Windows.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
 </Project>

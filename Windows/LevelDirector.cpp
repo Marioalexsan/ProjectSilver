@@ -195,6 +195,11 @@ namespace Game {
             counter++;
         }
 
+        if (didTurretSpawns && counter + 60 <= nextSpawns && Globals::Game().GetAliveEnemyCount() == 0) {
+            // Speed up next subwave if all enemies from current subwave are dead
+            counter++;
+        }
+
         // Waits until next spawns. If out of credits, advances the counter to current next spawns
         if (counter <= nextSpawns) {
             if (outOfCredits) {
@@ -226,7 +231,7 @@ namespace Game {
             
             didTurretSpawns = false;
             counter = 0;
-            nextSpawns = 300;
+            nextSpawns = 220;
 
             return;
         }
