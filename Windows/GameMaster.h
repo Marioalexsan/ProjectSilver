@@ -58,7 +58,12 @@ namespace Game {
 
 		DifficultyLevel difficulty;
 
+		int renderDisableCounter;
+
 	public:
+		// For avoiding epilepsy during fullscreen change
+		inline void SetRenderDisableCounter(int count) { renderDisableCounter = count; }
+
 		inline void SetDifficulty(DifficultyLevel difficulty) { this->difficulty = difficulty; }
 
 		inline DifficultyLevel GetDifficulty() { return this->difficulty; }

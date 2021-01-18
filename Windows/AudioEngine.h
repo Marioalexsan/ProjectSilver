@@ -24,10 +24,8 @@ namespace Game {
 	class AudioEngine {
 	public:
 		static const int maxChannels = 64;
-		static const int maxDistance = 1000;
+		static const int maxDistance = 1000; // UNUSED
 		static const int defaultFadeTime = 400;
-
-
 
 	private:
 		// A sound instance that's currently playing
@@ -80,7 +78,7 @@ namespace Game {
 		};
 
 		enum class SoundEffect {
-			Distance
+			Distance // UNIMPLEMENTED. There's little reason to add it now though.
 		};
 
 		// Current State Variables
@@ -92,8 +90,6 @@ namespace Game {
 		
 		// Action queue used by Update()
 		queue<MusicAction> actionQueue;
-
-		
 
 		// Stores the ID of the sound instances playing. 0 means the channel is free
 		array<uint64_t, maxChannels> channels;
@@ -117,6 +113,7 @@ namespace Game {
 		// Private function used for readability
 		void		AddAction(MusicAction::Type, const string & = "", const vector<uint64_t>& = { 0 }, bool = true);
 
+		// Cannot be inlined due to a circular dependency (either that or I suck at code)
 		const map<string, AssetManager::MusicData>& GetMusicLib();
 		const map<string, AssetManager::SoundData>& GetSoundLib();
 
@@ -136,8 +133,10 @@ namespace Game {
 
 		void HaltEngine();
 
+		// This function is important
 		void Update();
-		int GetSoundCount();
+
+		inline int GetSoundCount() { return soundCount; }
 
 		inline double GetMusicVolume() { return musicVolume; }
 		inline double GetSoundVolume() { return soundVolume; }
@@ -145,27 +144,14 @@ namespace Game {
 		inline uint8_t GetUserMusicVolume() { return userMusicVolume; }
 		inline uint8_t GetUserSoundVolume() { return userSoundVolume; }
 
-		inline void SetUserMusicVolume(double volume)
-		{
-			userMusicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
-			AddAction(MusicAction::Type::ChangeVolume, "");
-		}
-		inline void SetUserSoundVolume(double volume) {
-			userSoundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
-			Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
-		}
+		void SetUserMusicVolume(double volume);
+		void SetUserSoundVolume(double volume);
 
-		inline void SetMusicVolume(double volume) { 
-			musicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
-			AddAction(MusicAction::Type::ChangeVolume, "");
-		}
-		inline void SetSoundVolume(double volume) { 
-			soundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
-			Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
-		}
+		void SetMusicVolume(double volume);
+		void SetSoundVolume(double volume);
 
-		uint64_t GetMusicPosition();
-		bool IsMusicPlaying();
+		inline uint64_t GetMusicPosition() { return music.timePos; }
+		inline bool IsMusicPlaying() {return Mix_PlayingMusic(); }
 
 		bool SetLoopSection(const string& section);
 		bool SeekToSection(const string& section);

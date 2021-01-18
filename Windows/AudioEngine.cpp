@@ -25,6 +25,11 @@ namespace Game {
 		}
 	}
 
+	void AudioEngine::AddAction(MusicAction::Type type, const string& param, const vector<uint64_t>& extraParams, bool useFade) {
+		MusicAction lol = { type, MusicAction::SubType::None, param, extraParams, useFade };
+		actionQueue.push(lol);
+	}
+
 	const map<string, AssetManager::MusicData>& AudioEngine::GetMusicLib() {
 		return Globals::Assets().GetMusicLibrary();
 	}
@@ -45,7 +50,16 @@ namespace Game {
 			return 0;
 		}
 
-		int channel = Mix_PlayChannel(-1, SearchSoundLib(ID).samples, 0);
+		// It's better to search through our own records first. At least, I think this fixes a bug where sounds won't play from time to time
+		int firstFreeChannel = -1;
+		for (int index = 0; index < maxChannels; index++) {
+			if (channels[index] == 0) {
+				firstFreeChannel = index;
+				break;
+			}
+		}
+
+		int channel = Mix_PlayChannel(firstFreeChannel, SearchSoundLib(ID).samples, 0);
 		if (channel == -1) {
 			return 0;
 		}
@@ -105,8 +119,9 @@ namespace Game {
 			// Check for music loop requirement
 			if (!(music.loopEnd == 0 && music.loopStart == 0)) {
 				if (music.timePos > music.loopEnd) {
-					Mix_SetMusicPosition(double(music.loopStart) / 1000.0);
-					music.timePos = music.loopStart;
+					music.timePos = music.loopStart + music.timePos - music.loopEnd;
+					Mix_SetMusicPosition(double(music.timePos) / 1000.0);
+					
 				}
 			}
 		}
@@ -225,23 +240,13 @@ namespace Game {
 		}
 	}
 
-	int AudioEngine::GetSoundCount() {
-		return soundCount;
-		// Maybe use Mix_Playing(-1) instead
-	}
 
-	
-
-	void AudioEngine::AddAction(MusicAction::Type type, const string& param, const vector<uint64_t>& extraParams, bool useFade) {
-		MusicAction lol = { type, MusicAction::SubType::None, param, extraParams, useFade };
-		actionQueue.push(lol);
-	}
 
 	bool AudioEngine::PlayMusic(const string& ID, uint64_t timePos) {
 		// Unlike sounds, there's only one music playing at a time
 		// Partly due to SDL Mixer implementation
 		if (GetMusicLib().find(ID) == GetMusicLib().end()) {
-			// Error
+			Game::LogHandler::Log("Couldn't play music " + ID, Game::LogHandler::MessageType::Warn);
 			return false;
 		}
 
@@ -258,7 +263,6 @@ namespace Game {
 
 	bool AudioEngine::StopMusic() {
 		if (Mix_PlayingMusic() == 0) {
-			//Lmao
 			return false;
 		}
 		AddAction(MusicAction::Type::Stop);
@@ -275,14 +279,32 @@ namespace Game {
 		sounds.clear();
 	}
 
+	void AudioEngine::SetUserMusicVolume(double volume)
+	{
+		userMusicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+		AddAction(MusicAction::Type::ChangeVolume, "");
+	}
+	void AudioEngine::SetUserSoundVolume(double volume) {
+		userSoundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+		Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
+	}
+
+	void AudioEngine::SetMusicVolume(double volume) {
+		musicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+		AddAction(MusicAction::Type::ChangeVolume, "");
+	}
+	void AudioEngine::SetSoundVolume(double volume) {
+		soundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+		Mix_Volume(-1, int(soundVolume / 100.0 * 128.0 * double(userSoundVolume) / 100.0));
+	}
+
 	bool AudioEngine::SetLoopSection(const string& section) {
 		if (GetMusicLib().find(music.dataID) == GetMusicLib().end()) {
-			// Not likely, buuuuuttt....
 			return false;
 		}
 		auto& sectionList = SearchMusicLib(music.dataID).sectionList;
 		if (sectionList.find(section) == sectionList.end()) {
-			// Not found LOL
+			Game::LogHandler::Log("Couldn't set loop section " + section + ". Current music playing: \"" + music.dataID + "\"", Game::LogHandler::MessageType::Warn);
 			return false;
 		}
 		AddAction(MusicAction::Type::SetLoopSection, section);
@@ -294,16 +316,8 @@ namespace Game {
 		return true;
 	}
 
-	uint64_t AudioEngine::GetMusicPosition() {
-		return music.timePos;
-	}
-
-	bool AudioEngine::IsMusicPlaying() {
-		return Mix_PlayingMusic();
-	}
-
 	bool AudioEngine::IsEngineIdle() {
-		Update();
+		Update(); // Improves accuracy
 		return actionQueue.size() == 0 && !Mix_PlayingMusic() && Mix_Playing(-1) == 0;
 	}
 }

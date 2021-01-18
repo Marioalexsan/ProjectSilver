@@ -65,5 +65,6 @@ using std::set;
 // My own utilities
 
 #include "MiscUtility.h"
+#include "LogHandler.h"
 
 #endif

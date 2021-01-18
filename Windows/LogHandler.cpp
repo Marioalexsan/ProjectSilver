@@ -1,6 +1,7 @@
 #include "PCHeader.h"
 
 #include "LogHandler.h"
+#include "ConfigHandler.h"
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -12,6 +13,14 @@
 
 namespace Game {
     bool LogHandler::hasStartedActionLog = false;
+
+    void LogHandler::LogInfoToCrashLog(std::ofstream& errorLog) {
+        if (errorLog.good()) {
+            errorLog << "Game Information: " << Globals::Version() << endl;
+            errorLog << "Resolution: " << ConfigHandler::RetrieveItem("resolution") << endl;
+            errorLog << "Window Mode: " << ConfigHandler::RetrieveItem("videomode") << endl;
+        }
+    }
 
 	void LogHandler::Log(string message, MessageType type) {
         auto now = std::chrono::system_clock::now();
@@ -50,7 +59,8 @@ namespace Game {
         const static map<MessageType, string> translation = {
             {MessageType::Info, "Info"},
             {MessageType::Warn, "Warn"},
-            {MessageType::Error, "Error"}
+            {MessageType::Error, "Error"},
+            {MessageType::Debug, "Debug"}
         };
 
         actionLog << "[ " << ss.str() << " ] [ " + translation.at(type) + " ] " + message << std::endl;
@@ -65,7 +75,7 @@ namespace Game {
                     throw std::exception(fatalError.c_str());
                 return;
             }
-            errorLog << "Game Version: " << Globals::Version() << endl;
+            LogInfoToCrashLog(errorLog);
             errorLog << message << std::endl;
             errorLog.close();
         }

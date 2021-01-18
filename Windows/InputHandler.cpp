@@ -4,6 +4,7 @@
 #include "MiscUtility.h"
 #include "GraphicsEngine.h"
 #include "Globals.h"
+#include <numeric>
 
 namespace Game {
 	const map<SDL_Scancode, InputHandler::KeyCode> InputHandler::keyTranslation = {
@@ -93,12 +94,14 @@ namespace Game {
 
 			case SDL_EventType::SDL_MOUSEMOTION: {
 				// Limited to game area
-
+				if (!gameFocused) {
+					break;
+				}
 				// Resolution dependent sensitivity component
 				auto res = Globals::Graphics().GetWindowSize();
 
-				virtualMouseX = (int)Utility::ClampValue((double)virtualMouseX + event.motion.xrel * res.x / 1920.0, 0.0, 1920.0);
-				virtualMouseY = (int)Utility::ClampValue((double)virtualMouseY + event.motion.yrel * res.y / 1080.0, 0.0, 1080.0);
+				virtualMouseX = Utility::ClampValue(virtualMouseX + std::lround(event.motion.xrel * res.x / 1920.0), 0, 1920);
+				virtualMouseY = Utility::ClampValue(virtualMouseY + std::lround(event.motion.yrel * res.y / 1080.0), 0, 1080);
 			} break;
 				
 
@@ -107,9 +110,11 @@ namespace Game {
 			case SDL_EventType::SDL_WINDOWEVENT:
 				switch (event.window.event) {
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					SetMouseGrab(true);
 					gameFocused = true;
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
+					SetMouseGrab(false);
 					gameFocused = false;
 					break;
 				case SDL_QUIT:

@@ -20,6 +20,7 @@
 
 namespace Game {
 	GameMaster::GameMaster() :
+		renderDisableCounter(0),
 		entityID(1),
 		effectID(1),
 		gameRunning(true),
@@ -332,6 +333,10 @@ namespace Game {
 
 		Input.Update();
 
+		if (renderDisableCounter > 0) {
+			renderDisableCounter--;
+		}
+
 		if (Input.WasQuitCalled()) {
 			Stop();
 			return;
@@ -383,7 +388,12 @@ namespace Game {
 			Graphics.CenterCameraOn(GetThePlayer()->GetTransform().position);
 		}
 		if (!skipGraphicsFrame) {
-			Graphics.RenderAll();
+			if (renderDisableCounter <= 0) {
+				Graphics.RenderAll();
+			}
+			else {
+				Graphics.EmptyRender();
+			}
 		}
 		Audio.Update();
 	}
@@ -538,14 +548,15 @@ namespace Game {
 		const string fontPath = "Fonts/";
 		Assets.LoadSpriteFont("Huge", fontPath + "CourierNewHuge_0.png", fontPath + "CourierNewHuge.fnt");
 		Assets.LoadSpriteFont("Big", fontPath + "CourierNewBig_0.png", fontPath + "CourierNewBig.fnt");
-
+		Assets.LoadSpriteFont("Medium", fontPath + "CourierNewMedium_0.png", fontPath + "CourierNewMedium.fnt");
+		Assets.LoadSpriteFont("Small", fontPath + "CourierNewSmall_0.png", fontPath + "CourierNewSmall.fnt");
 		
 
 		const string audioPath = "Audio/";
 		// Music
 		Assets.LoadMusic("DigitalGhost", audioPath + "digi.ogg");
 		Assets.LoadMusicSections("DigitalGhost", {
-			{"Loop", {(1 * 60 + 48) * 1000 + 199, (3 * 60 + 1) * 1000 + 566 }}
+			{"Loop", {(1 * 60 + 47) * 1000 + 950, (3 * 60 + 1) * 1000 + 650 }}
 			});
 
 		Assets.LoadMusic("Menu", audioPath + "menu.ogg");
@@ -575,9 +586,15 @@ namespace Game {
 		Assets.LoadSound("TurretCharge", audioPath + "turretcharge.ogg");
 
 		// Settings
-		pair<int, int> res = ConfigHandler::GetConfigResolution();
-		bool mode = ConfigHandler::GetConfigFullscreen();
-		Graphics.SetDisplayMode({ res.first, res.second, mode });
+
+		#pragma region Resolution Check
+
+		//pair<int, int> res = ConfigHandler::GetConfigResolution();
+		//bool mode = ConfigHandler::GetConfigFullscreen();
+		Graphics.SetDisplayMode({ 1024, 768, false });
+
+		#pragma endregion
+
 		Audio.SetUserMusicVolume(ConfigHandler::GetMusicVolume());
 		Audio.SetUserSoundVolume(ConfigHandler::GetSoundVolume());
 

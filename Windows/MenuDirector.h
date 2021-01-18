@@ -38,6 +38,7 @@ namespace Game {
 		BasicText mainDiffExtra;
 		BasicButton mainOptions;
 		BasicButton mainQuit;
+		BasicText mainTip;
 
 		BasicButton optionsRes;
 		BasicText optionsResExtra;
@@ -56,6 +57,13 @@ namespace Game {
 
 		void StateEnter(MenuState state);
 		void StateExitCurrent();
+
+		void ChangeDifficulty();
+		void ChangeResolution();
+		void ChangeVideoMode();
+
+		void CycleTip();
+		
 	public:
 		MenuDirector();
 		~MenuDirector();

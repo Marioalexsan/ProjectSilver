@@ -32,8 +32,10 @@ namespace Game {
 			WorldTop = 255
 		};
 
-		static const int ResolutionCount = 4;
+		// Deprecated
 		static const map<string, VideoMode> VideoModes;
+
+		static const int ResolutionCount = 7;
 		static const pair<int, int> Resolutions[ResolutionCount];
 
 		static SDL_Window* Window;
@@ -81,6 +83,7 @@ namespace Game {
 		void	 ClearDrawables();
 
 		void RenderAll();
+		void EmptyRender();
 
 		void	SetCameraPosition(Vector2 position);
 		Vector2	GetCameraPosition();

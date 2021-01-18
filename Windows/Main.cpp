@@ -114,6 +114,17 @@ int main(int argc, char* args[]) {
 
     ProjectSilver.InitMenu();
 
+    // Scope
+    {
+        SDL_Rect display;
+        SDL_GetDisplayBounds(0, &display);
+
+        Game::LogHandler::Log("Display Resolution: " + std::to_string(display.w) + " x " + std::to_string(display.h), Game::LogHandler::MessageType::Debug);
+    }
+    // End scope
+
+    bool crash = false;
+
     while (ProjectSilver.IsGameRunning()) 
     {
         try {
@@ -161,20 +172,30 @@ int main(int argc, char* args[]) {
             string message = "A standard exception occured!\n\tException message: " + string(e.what());
             Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
+            crash = true;
         }
         catch (...) {
             string message = "An unknown exception occured!";
             Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
+            crash = true;
         }
         
 
     }
+
     ProjectSilver.UnloadLevel();
     ProjectSilver.UnloadMenu();
     ProjectSilver.ArmageddonExitProcedures();
     
     #pragma endregion
+
+    if (crash) {
+        Game::LogHandler::Log("Exiting Game due to an Error", Game::LogHandler::MessageType::Info);
+    }
+    else {
+        Game::LogHandler::Log("Exiting Game normally", Game::LogHandler::MessageType::Info);
+    }
 
     // Quit SDL
     SystemQuit();

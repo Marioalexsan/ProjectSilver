@@ -41,6 +41,10 @@ namespace Game {
 		
 		mainDiffExtra.SetFont("Huge");
 		mainDiffExtra.SetPosition(Vector2(660, 650));
+
+		mainTip.SetFont("Small");
+		mainTip.SetPosition(Vector2(960, 1020));
+		mainTip.SetRenderType(BasicText::TextRenderType::ContinuousCentered);
 		
 		switch (Globals::Difficulty()) {
 		case 0: {
@@ -66,13 +70,13 @@ namespace Game {
 		mainOptions.text.SetPosition(Vector2(100 + 230, 850));
 		mainOptions.text.SetRenderType(BasicText::TextRenderType::ContinuousCentered);
 
-		mainQuit.col = BoxCollider(Vector2(1300, 900), 460, 150, Collider::ColliderType::Static);
+		mainQuit.col = BoxCollider(Vector2(1300, 850), 460, 150, Collider::ColliderType::Static);
 		mainQuit.sprite.SetTexture("Button");
 		mainQuit.sprite.SetLayer(GraphicsEngine::CommonLayers::Background);
-		mainQuit.sprite.SetPosition(Vector2(1300, 900));
+		mainQuit.sprite.SetPosition(Vector2(1300, 850));
 		mainQuit.text.SetFont("Huge");
 		mainQuit.text.SetText("Quit");
-		mainQuit.text.SetPosition(Vector2(1300 + 230, 950));
+		mainQuit.text.SetPosition(Vector2(1300 + 230, 900));
 		mainQuit.text.SetRenderType(BasicText::TextRenderType::ContinuousCentered);
 
 		optionsRes.col = BoxCollider(Vector2(100, 400), 460, 150, Collider::ColliderType::Static);
@@ -145,27 +149,36 @@ namespace Game {
 
 		gameTitle.RegisterToGame();
 
-
+		int targetVideoMode = Globals::Graphics().ResolutionCount - 1;
 		pair<int, int> res = ConfigHandler::GetConfigResolution();
-
 		auto& resList = Globals::Graphics().Resolutions;
+		Vector2 current = Globals::Graphics().GetWindowSize();
 
-		currentVideoMode = Globals::Graphics().ResolutionCount - 1;
 		for (int i = 0; i < Globals::Graphics().ResolutionCount; i++) {
-			if (resList[i] == res) {
-				currentVideoMode = i;
-				break;
+			if (res == resList[i]) {
+				targetVideoMode = i;
 			}
 		}
 
-		optionsResExtra.SetText(std::to_string(resList[currentVideoMode].first) + "x" + std::to_string(resList[currentVideoMode].second));
+		currentVideoMode = targetVideoMode;
+		if (current.x != res.first || current.y != res.second) {
+			currentVideoMode--;
+			ChangeResolution();
+		}
 
+		if (ConfigHandler::GetConfigFullscreen() != Globals::Graphics().IsFullscreen()) {
+			ChangeVideoMode();
+		}
 		if (Globals::Graphics().IsFullscreen()) {
 			optionsVideoExtra.SetText("Fullscreen");
+			ConfigHandler::SetItem("windowmode", "f");
 		}
 		else {
 			optionsVideoExtra.SetText("Windowed");
+			ConfigHandler::SetItem("windowmode", "w");
 		}
+
+		optionsResExtra.SetText(std::to_string(resList[currentVideoMode].first) + "x" + std::to_string(resList[currentVideoMode].second));
 
 		optionsMVolExtra.SetText(std::to_string(Globals::Audio().GetUserMusicVolume()));
 		optionsSVolExtra.SetText(std::to_string(Globals::Audio().GetUserSoundVolume()));
@@ -197,6 +210,9 @@ namespace Game {
 
 			mainQuit.sprite.RegisterToGame();
 			mainQuit.text.RegisterToGame();
+
+			mainTip.RegisterToGame();
+			CycleTip();
 		} break;
 		case MenuDirector::Options: {
 			optionsRes.sprite.RegisterToGame();
@@ -238,6 +254,8 @@ namespace Game {
 
 			mainQuit.sprite.UnregisterFromGame();
 			mainQuit.text.UnregisterFromGame();
+
+			mainTip.UnregisterFromGame();
 		} break;
 		case MenuDirector::Options: {
 			optionsRes.sprite.UnregisterFromGame();
@@ -264,15 +282,66 @@ namespace Game {
 		}
 	}
 
-	void MenuDirector::Update()
-	{
-		if (Globals::Game().Input.IsButtonPressedThisFrame(InputHandler::ButtonCode::Right)) {
-			SDL_RenderSetScale(Globals::Graphics().Renderer, 0.5f, 0.5f);
+	void MenuDirector::ChangeDifficulty() {
+		int difficulty = (Globals::Difficulty() + 1) % 3;
+		Globals::ChangeDifficulty((GameMaster::DifficultyLevel)difficulty);
+		switch (difficulty) {
+		case 0: {
+			mainDiffExtra.SetText("Easy");
+			mainDiffExtra.SetColor(Color::Aqua);
+		} break;
+		case 1: {
+			mainDiffExtra.SetText("Normal");
+			mainDiffExtra.SetColor(Color::White);
+		} break;
+		case 2: {
+			mainDiffExtra.SetText("Hard");
+			mainDiffExtra.SetColor(Color::Red);
+		} break;
 		}
-		if (Globals::Game().Input.IsButtonPressedThisFrame(InputHandler::ButtonCode::Middle)) {
-			SDL_RenderSetScale(Globals::Graphics().Renderer, 1.0f, 1.0f);
+	}
+
+	void MenuDirector::ChangeResolution() {
+		auto& resList = Globals::Graphics().Resolutions;
+		int count = Globals::Graphics().ResolutionCount;
+		currentVideoMode++;
+		if (currentVideoMode <= 0) {
+			currentVideoMode = 0;
+		}
+		currentVideoMode %= count;
+
+		SDL_DisplayMode testDisp = { SDL_PIXELFORMAT_RGBA32, resList[currentVideoMode].first, resList[currentVideoMode].second, 60, 0 };
+		SDL_DisplayMode disp;
+		SDL_GetClosestDisplayMode(0, &testDisp, &disp);
+
+		// Cycle through resolutions until we either get a compatible one, or we reach 1280x720
+		while (currentVideoMode != count - 1 && (resList[currentVideoMode].first > disp.w || resList[currentVideoMode].second > disp.h)) {
+			currentVideoMode++;
+			testDisp = { SDL_PIXELFORMAT_RGBA32, resList[currentVideoMode].first, resList[currentVideoMode].second, 60, 0 };
+			SDL_GetClosestDisplayMode(0, &testDisp, &disp);
 		}
 
+		Globals::Graphics().SetDisplayMode({ resList[currentVideoMode].first, resList[currentVideoMode].second, Globals::Graphics().IsFullscreen() });
+		optionsResExtra.SetText(std::to_string(resList[currentVideoMode].first) + "x" + std::to_string(resList[currentVideoMode].second));
+		ConfigHandler::SetItem("resolution", std::to_string(resList[currentVideoMode].first) + "." + std::to_string(resList[currentVideoMode].second));
+	}
+
+	void MenuDirector::ChangeVideoMode() {
+		auto newVideoMode = Globals::Graphics().GetRenderDisplayMode();
+		newVideoMode.fullscreen = !newVideoMode.fullscreen;
+		Globals::Graphics().SetDisplayMode(newVideoMode);
+		if (newVideoMode.fullscreen) {
+			optionsVideoExtra.SetText("Fullscreen");
+			ConfigHandler::SetItem("windowmode", "f");
+		}
+		else {
+			optionsVideoExtra.SetText("Windowed");
+			ConfigHandler::SetItem("windowmode", "w");
+		}
+	}
+
+	void MenuDirector::Update()
+	{
 		bool doClick = false;
 		bool doVolume = false;
 		switch (currentState) {
@@ -285,22 +354,7 @@ namespace Game {
 					doClick = true;
 				}
 				else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), mainDiff.col)) {
-					int difficulty = (Globals::Difficulty() + 1) % 3;
-					Globals::ChangeDifficulty((GameMaster::DifficultyLevel)difficulty);
-					switch (difficulty) {
-					case 0: {
-						mainDiffExtra.SetText("Easy");
-						mainDiffExtra.SetColor(Color::Aqua);
-					} break;
-					case 1: {
-						mainDiffExtra.SetText("Normal");
-						mainDiffExtra.SetColor(Color::White);
-					} break;
-					case 2: {
-						mainDiffExtra.SetText("Hard");
-						mainDiffExtra.SetColor(Color::Red);
-					} break;
-					}
+					ChangeDifficulty();
 					doClick = true;
 				}
 				else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), mainOptions.col)) {
@@ -318,28 +372,11 @@ namespace Game {
 			if (Globals::Game().Input.IsButtonPressedThisFrame(InputHandler::ButtonCode::Left)) {
 				pair<int, int> pos = Globals::Game().Input.GetMousePosition();
 				if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), optionsRes.col)) {
-					
-					auto& resList = Globals::Graphics().Resolutions;
-					currentVideoMode++;
-					currentVideoMode %= Globals::Graphics().ResolutionCount;
-					Globals::Graphics().SetDisplayMode({ resList[currentVideoMode].first, resList[currentVideoMode].second, Globals::Graphics().IsFullscreen() });
-					optionsResExtra.SetText(std::to_string(resList[currentVideoMode].first) + "x" + std::to_string(resList[currentVideoMode].second));
-					ConfigHandler::SetItem("resolution", std::to_string(resList[currentVideoMode].first) + "." + std::to_string(resList[currentVideoMode].second));
+					ChangeResolution();
 					doClick = true;
 				}
 				else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), optionsVideo.col)) {
-					auto newVideoMode = Globals::Graphics().GetRenderDisplayMode();
-					newVideoMode.fullscreen = !newVideoMode.fullscreen;
-					Globals::Graphics().SetDisplayMode(newVideoMode);
-					if (newVideoMode.fullscreen) {
-						optionsVideoExtra.SetText("Fullscreen");
-						ConfigHandler::SetItem("windowmode", "f");
-					}
-					else {
-						optionsVideoExtra.SetText("Windowed");
-						ConfigHandler::SetItem("windowmode", "w");
-					}
-					
+					ChangeVideoMode();
 					doClick = true;
 				}
 				else if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second), optionsMain.col)) {
@@ -381,5 +418,48 @@ namespace Game {
 			ConfigHandler::SetItem("musicvolume", std::to_string(Globals::Audio().GetUserMusicVolume()));
 			ConfigHandler::SetItem("soundvolume", std::to_string(Globals::Audio().GetUserSoundVolume()));
 		}
+	}
+
+	void MenuDirector::CycleTip() {
+		const static vector<string> tipList = {
+			// Shield
+			"You can shield against attacks with Right Mouse Button.",
+			"Your Shield will break if it takes too much damage.",
+			"Shielding just as an attack hits you will cause a Perfect Guard, reducing the damage the shield takes.",
+			"If your Shield breaks, you will be immune to damage for a very short time. Use this moment to get to safety!",
+
+			// Gun stuff
+			"You can swap to your Pistol with \"1\", and to your Rifle with \"2\".",
+			"The Rifle is strong, but has limited ammunition, and is affected by recoil.",
+			"Gun Turrets that deactivate drop a Rifle Ammo Pack; destroyed Gun Turrets drop two.",
+			"The Pistol has infinite ammo, but a limited magazine capacity.",
+			
+			// Melee
+			"You can do a Melee Attack with your Axe by pressing E.",
+			"Melee Attacks deal heavy damage to enemies, but are risky to use.",
+			"During a Melee Attack, your movement resembles a lunge: slow at the beginning, but fast during the swing.",
+
+			// Enemies
+			"Gun Turrets are dangerous up close! Snipe them from afar with your Pistol, or use your Rifle to destroy them quickly.",
+			"Berserkers will kill you quickly if you let them get close. Luckily, they slow down if hurt.",
+			"Fighters wield Pistols! Unfortunately for them, you can dodge their predictable bullets.",
+			"Knights wield a Shield that block most damage from the front! Hit them in the back where they're vulnerable.",
+
+
+			// Other
+			"You can interrupt most animations by shielding or doing a melee attack. A melee attack can't be interrupted, however.",
+
+			// Player
+			"You regenerate your Health over time.",
+			"If your Health goes below 0, damage will reduce your Max Health instead. When that hits 0, you die.",
+			"If your Health is equal to your Max Health, both will start regenerating until 100 at a very slow rate.",
+			"You move slower while Shooting or Shielding. Reloading, however, slows you down to a crawl.",
+			"You can press Shift to dash in your current movement direction. You can also dash during actions!"
+
+			// Misc
+			"Check the options menu! You can change your video and audio settings there."
+		};
+
+		mainTip.SetText("Tip: " + tipList[rand() % (tipList.size() - 1)]);
 	}
 }

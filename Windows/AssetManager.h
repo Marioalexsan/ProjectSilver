@@ -85,28 +85,30 @@ namespace Game {
 		map<string, MusicData> musicLibrary;
 		map<string, SoundData> soundLibrary;
 		map<string, TextureData> textureLibrary;
-		map <string, pair<SpriteFontData, TextureData>> fontLibrary;
+		map<string, pair<SpriteFontData, TextureData>> fontLibrary;
 
 	public:
 		AssetManager();
 		~AssetManager();
+
+		// Load and Unload functions return true on success, false if the operation failed for whatever reason
 
 		bool LoadSound(const string& ID, const string& path);
 		bool LoadMusic(const string& ID, const string& path, uint64_t duration = 0);
 		bool LoadTexture(const string& ID, const string& path);
 		bool LoadSpriteFont(const string& ID, const string& texPath, const string& dataPath);
 		
+		bool LoadMusicSections(const string& ID, const map<string, Section>& sectionList);
+
 		bool UnloadSound(const string& ID); // WARNING: Do not call UnloadSound if it is still playing!
 		bool UnloadMusic(const string& ID);
 		bool UnloadTexture(const string& ID);
 		bool UnloadSpriteFont(const string& ID);
 
-		bool LoadMusicSections(const string& ID, const map<string, Section>& sectionList);
-
-		const map<string, MusicData>& GetMusicLibrary();
-		const map<string, SoundData>& GetSoundLibrary();
-		const map<string, TextureData>& GetTextureLibrary();
-		const map<string, pair<SpriteFontData, TextureData>>& GetFontLibrary();
+		inline const map<string, MusicData>& GetMusicLibrary() { return musicLibrary; }
+		inline const map<string, SoundData>& GetSoundLibrary() { return soundLibrary; }
+		inline const map<string, TextureData>& GetTextureLibrary() { return textureLibrary; }
+		inline const map<string, pair<SpriteFontData, TextureData>>& GetFontLibrary() { return fontLibrary; }
 	};
 }
 

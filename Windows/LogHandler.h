@@ -9,10 +9,13 @@ namespace Game {
 		enum class MessageType {
 			Info,
 			Warn,
-			Error
+			Error,
+			Debug
 		};
 	private:
 		static bool hasStartedActionLog;
+
+		static void LogInfoToCrashLog(std::ofstream& errorLog);
 	public:
 		static void Log(string message, MessageType type);
 	};

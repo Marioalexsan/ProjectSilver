@@ -1,6 +1,7 @@
 #include "PCHeader.h"
 
 #include "GraphicsEngine.h"
+#include "Globals.h"
 
 namespace Game {
 	SDL_Window*		GraphicsEngine::Window = nullptr;
@@ -13,6 +14,7 @@ namespace Game {
 
 	Vector2	GraphicsEngine::cameraPosition = { 0.0, 0.0 };
 
+	// Deprecated
 	const map<string, GraphicsEngine::VideoMode> GraphicsEngine::VideoModes = {
 		{"1920.1080.f", {1920, 1080, true}},
 		{"1920.1080.w", {1920, 1080, false}},
@@ -25,10 +27,15 @@ namespace Game {
 	};
 
 	const pair<int, int> GraphicsEngine::Resolutions[GraphicsEngine::ResolutionCount] = {
+		{2560, 1440},
 		{1920, 1080},
+		{1680, 1050},
 		{1600, 900},
+		{1440, 900},
 		{1366, 768},
 		{1280, 720}
+		//{1024, 768}
+		//{800, 600}
 	};
 
 	GraphicsEngine::GraphicsEngine() :
@@ -38,7 +45,7 @@ namespace Game {
 		windowHeight = 1280;
 		renderWidth = 1280;
 		renderHeight = 1280;
-		SetDisplayMode(VideoModes.at("1280.720.w"));
+		SetDisplayMode({ 1280, 720, false });
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	}
 
@@ -56,7 +63,10 @@ namespace Game {
 		if (mode.fullscreen) {
 			SDL_DisplayMode display = { SDL_PIXELFORMAT_RGBA32, mode.width, mode.height, 60, 0 };
 			if (fullscreen == mode.fullscreen) {
+				// EmptyRender and position should hopefully reduce epileptic crap from resolution change
+				EmptyRender();
 				SDL_SetWindowFullscreen(GraphicsEngine::Window, 0);
+				SDL_SetWindowPosition(GraphicsEngine::Window, 0, 0);
 			}
 			if (SDL_SetWindowDisplayMode(Window, &display) == -1) {
 				SDL_SetWindowDisplayMode(Window, nullptr);
@@ -72,6 +82,9 @@ namespace Game {
 			}
 			SDL_SetWindowSize(Window, mode.width, mode.height);
 			SDL_GetWindowSize(Window, &windowWidth, &windowHeight);
+
+			// Position it so that user can move it around afterwards (or just see most of the window)
+			SDL_SetWindowPosition(GraphicsEngine::Window, 0, 30);
 		}
 		fullscreen = mode.fullscreen;
 		SDL_RenderSetClipRect(Renderer, &Utility::MakeSDLRect(0, 0, ResolutionTargetWidth, ResolutionTargetWidth));
@@ -124,6 +137,13 @@ namespace Game {
 		SDL_RenderPresent(Renderer);
 	}
 
+	void GraphicsEngine::EmptyRender() {
+		SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
+		SDL_RenderClear(Renderer);
+
+		SDL_RenderPresent(Renderer);
+	}
+
 	void GraphicsEngine::SetCameraPosition(Vector2 position)
 	{
 		cameraPosition = position;
@@ -160,5 +180,4 @@ namespace Game {
 		}
 		
 	}
-
 }

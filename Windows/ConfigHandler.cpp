@@ -105,8 +105,8 @@ namespace Game {
 
 	pair<int, int> ConfigHandler::GetConfigResolution() {
 		string cfgResolution = ConfigHandler::RetrieveItem("resolution");
-		int width = 1280;
-		int height = 720;
+		int width = 800;
+		int height = 600;
 
 		string cfgResolutionWidth = cfgResolution.substr(0, cfgResolution.find('.'));
 		if (cfgResolutionWidth != "") {
@@ -118,11 +118,11 @@ namespace Game {
 			height = std::stoi(cfgResolutionHeight);
 		}
 		
-		if (width <= 1280) {
-			width = 1280;
+		if (width <= 800) {
+			width = 800;
 		}
-		if (height <= 720) {
-			height = 720;
+		if (height <= 600) {
+			height = 600;
 		}
 		return { width, height };
 	}

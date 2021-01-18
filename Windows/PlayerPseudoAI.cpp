@@ -121,12 +121,13 @@ namespace Game {
         using KeyCode = Game::InputHandler::KeyCode;
         using ButtonCode = Game::InputHandler::ButtonCode;
 
+        counter++;
 
         // Low HP Vignette. Serves as a "You're taking too much damage" warning for the player
         uint8_t vignetteAlpha = lowHPVignette.GetAlpha();
         if (stats.health <= 0.0 || stats.maxHealth <= 20.0) {
-            if (vignetteCounter % 5 == 0) {
-                lowHPVignette.SetAlpha(vignetteAlpha + uint8_t((255 - vignetteAlpha) * 0.04));
+            if (vignetteCounter % 3 == 0) {
+                lowHPVignette.SetAlpha(vignetteAlpha + uint8_t(ceil((255 - vignetteAlpha) * 0.04)));
             }
             heartbeatTime = 60;
             if (stats.maxHealth <= 60.0) {
@@ -134,8 +135,8 @@ namespace Game {
             }
         }
         else {
-            if (vignetteCounter % 7 == 0) {
-                lowHPVignette.SetAlpha(vignetteAlpha + uint8_t((0 - vignetteAlpha) * 0.04));
+            if (vignetteCounter % 4 == 0) {
+                lowHPVignette.SetAlpha(vignetteAlpha - uint8_t(ceil(vignetteAlpha * 0.04)));
             }
         }
 
@@ -149,7 +150,7 @@ namespace Game {
         if (perfectGuardCounter > 0) { perfectGuardCounter--; }
 
         if (rifleRecoil > 0.0) {
-            rifleRecoil *= 0.98;
+            rifleRecoil *= 0.99;
             rifleRecoil -= 0.1;
             if (rifleRecoil <= 0.4) {
                 rifleRecoil = 0.0;
@@ -391,6 +392,9 @@ namespace Game {
         // Boost is applied here - over time
         if (boostVector != Vector2::Zero) {
             entity->Move(boostVector * 0.2);
+            if (counter % 3 == 0) {
+                Globals::Game().CreateAfterImageEffect(entity->GetTransform(), entity->GetComponent().GetCurrentAnimationID(), entity->GetComponent().GetFrame());
+            }
             boostVector *= 0.8;
             if (boostVector.Length() < 1.0) {
                 boostVector = Vector2::Zero;
@@ -426,7 +430,7 @@ namespace Game {
             else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
                     // 0.5 + rifleRecoil degree spread
-                    GenericWeaponFireLogic(40.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 0.5 + rand() % 10 / 10.0);
+                    GenericWeaponFireLogic(50.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 0.5 + rand() % 10 / 10.0);
                     rifleRecoil += 5.3;
                     entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;

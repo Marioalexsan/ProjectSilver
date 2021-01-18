@@ -106,7 +106,7 @@ namespace Game {
         entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
 
         double distance = targetVector.Length();
-        double forwardStrength = 4.0 + Globals::Difficulty() * 0.7;
+        double forwardStrength = 3.8 + Globals::Difficulty() * 0.7;
         double strafeStrength = 0.0;
         if (distance < 600.0) {
             strafeStrength = Utility::ClampValue(600.0 - distance, 0.0, 400.0) / 400.0 * 2.8;
@@ -171,10 +171,14 @@ namespace Game {
         }
         else {
             targetSpeed = 1.6;
-            changeFactor = 0.25;
+            changeFactor = 0.15;
         }
 
         currentSpeed = currentSpeed + (targetSpeed - currentSpeed) * 0.07 * changeFactor;
+
+        if (currentSpeed >= 1.28 && counter % 6 == 0) {
+            Globals::Game().CreateAfterImageEffect(entity->GetTransform(), entity->GetComponent().GetCurrentAnimationID(), entity->GetComponent().GetFrame());
+        }
 
         double speedToUse = currentSpeed;
         if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing") {
@@ -232,9 +236,12 @@ namespace Game {
 
     void ChaserAI::OnHitByAttack(Actor* attacker, double damage) {
         if (!EntityIsDeadAF()) {
-            painCounter += int(damage * (3 - 0.4 * Globals::Difficulty()));
-            if (painCounter > 120) {
-                painCounter = 120;
+            if (painCounter <= 20) {
+                painCounter = 20;
+            }
+            painCounter += int(damage * (3.0 - 0.3 * Globals::Difficulty()));
+            if (painCounter > 200) {
+                painCounter = 200;
             }
             Globals::Audio().PlaySound("HurtBeta");
             Globals::Audio().PlaySound("ZerkHurt");
