@@ -163,7 +163,7 @@ namespace Game {
 	}
 
 	// Has Camera feature
-	// Has Offset feature
+	
 	void GraphicsEngine::RenderCopyExAdvanced(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip, bool useCamera) {
 		
 		if (dstrect) {

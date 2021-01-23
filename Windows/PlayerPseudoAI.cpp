@@ -404,6 +404,7 @@ namespace Game {
         // Shielding logic
         if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(playerAnimation) && !IsWeaponSwitch(playerAnimation)) {
             wasReloadingPistol = false;
+            wasReloadingRifle = false;
             inShield = true;
             perfectGuardCounter = 12;
             entity->GetComponent().SwitchAnimation("Player_ShieldUp");

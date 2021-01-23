@@ -19,7 +19,6 @@ namespace Game {
 		static GameMaster* theGame;
 		static string gameVersion;
 	public:
-		// Referenceul ma face mai confident ca obiectul este valid
 		static void SetTheGame(GameMaster& game);
 
 		static void GameDeaded();

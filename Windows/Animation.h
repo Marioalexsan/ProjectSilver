@@ -59,7 +59,7 @@ namespace Game {
 
 	protected:
 		string textureID;
-		function<void()> callback;
+		function<void()> callback; // Should rethink what the callback should be
 		vector<Action> actions;
 
 		Info info;

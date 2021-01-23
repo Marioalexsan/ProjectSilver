@@ -22,7 +22,7 @@ namespace Game {
 		int		ClampValue(int val, int min, int max);
 		double	ClampValue(double val, double min, double max);
 
-		int    ScrollValue(int val, int leftBorder, int rightBorder);
+		//int    ScrollValue(int val, int leftBorder, int rightBorder);
 		double ScrollValue(double val, double leftBorder, double rightBorder);
 
 		bool	InRange(int val, int min, int max);
