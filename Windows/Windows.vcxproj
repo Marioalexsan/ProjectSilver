@@ -180,6 +180,7 @@
     <ClCompile Include="KnightAI.cpp" />
     <ClCompile Include="LevelDirector.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Medkit.cpp" />
     <ClCompile Include="MenuDirector.cpp" />
     <ClCompile Include="MiscUtility.cpp" />
     <ClCompile Include="Drawable.cpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="RifleAmmoPack.cpp" />
     <ClCompile Include="ShadowAI.cpp" />
+    <ClCompile Include="ShadowHPBar.cpp" />
     <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="GunTurretAI.cpp" />
@@ -224,6 +226,7 @@
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="KnightAI.h" />
     <ClInclude Include="LevelDirector.h" />
+    <ClInclude Include="Medkit.h" />
     <ClInclude Include="MenuDirector.h" />
     <ClInclude Include="MiscUtility.h" />
     <ClInclude Include="PathFinder.h" />
@@ -233,6 +236,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="RifleAmmoPack.h" />
     <ClInclude Include="ShadowAI.h" />
+    <ClInclude Include="ShadowHPBar.h" />
     <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="PCHeader.h" />

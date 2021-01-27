@@ -23,6 +23,7 @@ namespace Game {
         shieldFadeOutDelay(0),
         shieldRegenCounter(0),
         perfectGuardCounter(0),
+        hasPerfectGuarded(false),
 
         doingSwing(false),
 
@@ -150,7 +151,10 @@ namespace Game {
         if (perfectGuardCounter > 0) { perfectGuardCounter--; }
 
         if (rifleRecoil > 0.0) {
-            rifleRecoil *= 0.99;
+            rifleRecoil *= 0.98;
+            if (rifleRecoil >= 5.0) {
+                rifleRecoil *= 0.96;
+            }
             rifleRecoil -= 0.1;
             if (rifleRecoil <= 0.4) {
                 rifleRecoil = 0.0;
@@ -187,9 +191,9 @@ namespace Game {
             }
 
             shieldRegenCounter++;
-            if (shieldRegenCounter >= 180) {
-                shieldRegenCounter = 150;
-                double healing = 6.0 - difficultySetting;
+            if (shieldRegenCounter >= 120) {
+                shieldRegenCounter = 90;
+                double healing = 7.0 - difficultySetting;
 
                 if (stats.shieldHealth < stats.maxShieldHealth) {
                     stats.shieldHealth = Utility::ClampValue(stats.shieldHealth += healing, 0.0, stats.maxShieldHealth);
@@ -236,8 +240,8 @@ namespace Game {
                 playerHealth.SetColor(Color::White);
             }
 
-            stamina.SetText("Boost: " + std::to_string(int(stats.stamina / 45.0)) + " / " + std::to_string(int(stats.maxStamina / 45.0)));
-            if (stats.stamina < 45.0) {
+            stamina.SetText("Boost: " + std::to_string(int(stats.stamina / 30.0)) + " / " + std::to_string(int(stats.maxStamina / 30.0)));
+            if (stats.stamina <= 30.0) {
                 stamina.SetColor(Color::Orange);
             }
             else{
@@ -257,7 +261,7 @@ namespace Game {
         double vol = Globals::Audio().GetMusicVolume();
         if (heartbeatTime > 0) {
             if (vignetteCounter % 2 == 0) {
-                Globals::Audio().SetMusicVolume(Utility::ClampValue(vol - 1.0, 35.0, 100.0));
+                Globals::Audio().SetMusicVolume(Utility::ClampValue(vol - 1.0, 55.0, 100.0));
             }
             
             if (heartbeatCounter == 0) {
@@ -270,7 +274,7 @@ namespace Game {
         }
         else {
             if (vignetteCounter % 2 == 0) {
-                Globals::Audio().SetMusicVolume(Utility::ClampValue(vol + 1.0, 35.0, 100.0));
+                Globals::Audio().SetMusicVolume(Utility::ClampValue(vol + 1.0, 55.0, 100.0));
             }
         }
 
@@ -377,8 +381,8 @@ namespace Game {
         }
 
         // Dash mechanic logic
-        if (boostCooldown == 0 && stats.stamina >= 45.0 && targetSpeed != Vector2::Zero && Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift)) {
-            stats.stamina -= 45.0;
+        if (boostCooldown == 0 && stats.stamina >= 30.0 && targetSpeed != Vector2::Zero && Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift)) {
+            stats.stamina -= 30.0;
             staminaRegenCounter = 0;
             boostVector = targetSpeedNormal * 140.0;
             boostCooldown = 18;
@@ -402,7 +406,7 @@ namespace Game {
         }
         
         // Shielding logic
-        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && !IsUninterruptible(playerAnimation) && !IsWeaponSwitch(playerAnimation)) {
+        if (shieldRegenCounter >= 0 && game.Input.IsButtonDown(ButtonCode::Right) && (!IsUninterruptible(playerAnimation) || playerAnimation == "Player_ShieldDown" && hasPerfectGuarded ) && !IsWeaponSwitch(playerAnimation)) {
             wasReloadingPistol = false;
             wasReloadingRifle = false;
             inShield = true;
@@ -431,8 +435,8 @@ namespace Game {
             else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
                     // 0.5 + rifleRecoil degree spread
-                    GenericWeaponFireLogic(50.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0 - 0.5 + rand() % 10 / 10.0);
-                    rifleRecoil += 5.3;
+                    GenericWeaponFireLogic(50.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0);
+                    rifleRecoil += 4.8;
                     entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;
                 }
@@ -455,6 +459,7 @@ namespace Game {
         // Makes sure we're out of shield if the shield animation was cancelled (which can be done with Melee Attacks)
         if (playerAnimation != "Player_ShieldWalk" && playerAnimation != "Player_ShieldUp" && playerAnimation != "Player_ShieldDown") {
             inShield = false;
+            hasPerfectGuarded = false;
         }
 
         // Melee Attack Execution Logic
@@ -551,6 +556,9 @@ namespace Game {
     void PlayerPseudoAI::OnHitByAttack(Actor* attacker, double damage) {
         if (entity != nullptr) {
             auto& stats = entity->GetStatsReference();
+            if (stats.invulnerable) {
+                return;
+            }
             if (damage < 0.0) {
                 return;
             }
@@ -571,19 +579,20 @@ namespace Game {
             }
             if (shieldBlock) {
                 if (perfectGuardCounter > 0) {
-                    damage *= 0.35;
+                    damage *= 0.25;
                 }
                 stats.shieldHealth -= damage;
                 shieldRegenCounter = 0;
                 if (stats.shieldHealth <= 0.0) {
                     stats.shieldHealth = 0.0;
-                    shieldRegenCounter = -240;
+                    shieldRegenCounter = -150;
                     stats.currentInvincibilityFrames = 40;
                     Globals::Audio().PlaySound("ShieldBreak");
                 }
                 else {
                     if (perfectGuardCounter > 0) {
                         Globals::Audio().PlaySound("PerfectGuard");
+                        hasPerfectGuarded = true;
                     }
                     else {
                         Globals::Audio().PlaySound("ShieldImpact");
@@ -637,6 +646,7 @@ namespace Game {
                     auto actor = (Actor*)entity;
                     auto actorAI = actor->GetAI();
                     if (actorAI != nullptr) {
+                        this->OnAttackHit();
                         actorAI->OnHitByAttack(this->entity, damageToDeal);
                     }
                 }

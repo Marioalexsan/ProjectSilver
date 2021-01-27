@@ -27,7 +27,8 @@ namespace Game {
 			DefaultHeight,
 			BelowCeiling,
 			Ceiling,
-			GUI = 192,
+			BelowGUI = 191,
+			GUI,
 			AboveGUI,
 			WorldTop = 255
 		};
@@ -60,6 +61,8 @@ namespace Game {
 		// Library of Drawable objects
 		map<uint64_t, Drawable*> drawableLibrary;
 
+		static double gameWinFadeout;
+
 		uint64_t NextID();
 
 		static Vector2 cameraPosition;
@@ -77,6 +80,8 @@ namespace Game {
 
 		inline bool IsFullscreen() { return fullscreen; }
 		inline void SetFullscreen(bool mode) { fullscreen = mode; }
+
+		inline void SetGameWinFadeout(double value) { gameWinFadeout = Utility::ClampValue(value, 0.0, 100.0); }
 
 		uint64_t AddDrawable(Drawable* element);
 		bool	 RemoveDrawable(uint64_t ID);

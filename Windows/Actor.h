@@ -55,6 +55,11 @@ namespace Game {
 		void MoveForward(double amount);
 		ActorStats& GetStatsReference();
 
+		void Rotate(double amount);
+
+		// Rotate on shortest path
+		void RotateTowardsDirection(double amount, double targetDirection);
+
 		virtual void Update();
 	};
 }

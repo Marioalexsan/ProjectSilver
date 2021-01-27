@@ -157,7 +157,7 @@ namespace Game {
 			case MusicAction::Type::Start:
 				if (Mix_PlayingMusic() == 0) {
 					// GOGOGOGOGOGOGO, play and discard action
-					if (Mix_FadeInMusicPos(SearchMusicLib(action.param).samples, -1, defaultFadeTime, double(action.extraParams[0]) / 1000.0) == -1) {
+					if (Mix_FadeInMusicPos(SearchMusicLib(action.param).samples, -1, musicSwitchFadeTime, double(action.extraParams[0]) / 1000.0) == -1) {
 						// Error
 						break;
 					}
@@ -172,7 +172,7 @@ namespace Game {
 			case MusicAction::Type::Stop:
 				if (Mix_PlayingMusic() != 0) {
 					// Try to stop (even if already doing so)
-					Mix_FadeOutMusic(defaultFadeTime);
+					Mix_FadeOutMusic(musicSwitchFadeTime);
 				}
 				else {
 					// GOGOGOGO
@@ -198,14 +198,14 @@ namespace Game {
 				case MusicAction::SubType::None:
 					if (Mix_PlayingMusic() != 0) {
 						// Use fast fade
-						Mix_FadeOutMusic(int(defaultFadeTime * 0.4));
+						Mix_FadeOutMusic(int(sectionSwitchFadeTime * 0.4));
 						actionQueue.front().subType = MusicAction::SubType::FadeOutSection;
 					}
 					break;
 				case MusicAction::SubType::FadeOutSection:
 					if (Mix_PlayingMusic() == 0) {
 						music.timePos = SearchMusicLib(music.dataID).sectionList.at(action.param).start;
-						Mix_FadeInMusicPos(SearchMusicLib(music.dataID).samples, -1, int(defaultFadeTime * 0.4), double(music.timePos) / 1000.0);
+						Mix_FadeInMusicPos(SearchMusicLib(music.dataID).samples, -1, int(sectionSwitchFadeTime * 0.4), double(music.timePos) / 1000.0);
 						actionQueue.front().subType = MusicAction::SubType::FadeInSection;
 					}
 					break;

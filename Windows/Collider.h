@@ -46,8 +46,11 @@ namespace Game {
 
 		vector<Entity*> hitEntities;
 
+		uint64_t colliderGameMasterID;
+
 		bool destructionSignalled;
 		bool alsoSignalEntityDestruction;
+
 	public:
 		Collider();
 		Collider(const Vector2& position, ColliderType type);

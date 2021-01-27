@@ -36,14 +36,7 @@ namespace Game {
             return;
         }
 
-        if (entity->GetStatsReference().isDead == true) {
-            destroyDelay--;
-            if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
-            }
-            if (destroyDelay == 0) {
-                entity->SignalDestruction();
-            }
+        if (ProcessGenericDestroyDelay()) {
             return;
         }
 
@@ -72,26 +65,8 @@ namespace Game {
             if (counter < previousShot + 10) {
                 turnStrength /= 5;
             }
-            if (abs(targetDirection - entityDirection) > 180.0) {
-                if (targetDirection > 180.0) {
-                    entity->GetTransform().direction -= turnStrength;
-                }
-                else {
-                    entity->GetTransform().direction += turnStrength;
-                }
-            }
-            else {
-                if (targetDirection - entityDirection > 0) {
-                    entity->GetTransform().direction += turnStrength;
-                }
-                else {
-                    entity->GetTransform().direction -= turnStrength;
-                }
-            }
-            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+            entity->RotateTowardsDirection(turnStrength, targetDirection);
         }
-
-
 
         double distance = targetVector.Length();
 
@@ -114,28 +89,14 @@ namespace Game {
             }
         }
 
-        
-
         if (counter + aimTime > nextShot) {
             shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0).Angle();
 
-            double shootAngleDelta = abs(shootDirection - entityDirection);
+            double shootAngleDelta = Math::GetAngleDifference(entityDirection, shootDirection) * 0.3;
 
-            if (shootAngleDelta > 180.0) {
-                if (shootDirection > 180.0) {
-                    shootAngleDelta = -shootAngleDelta;
-                }
-            }
-            else {
-                if (shootDirection - entityDirection < 0.0) {
-                    shootAngleDelta = -shootAngleDelta;
-                }
-            }
+            shootAngleDelta = Utility::ClampValue(shootAngleDelta, -4.0, 4.0);
 
-            shootAngleDelta = Utility::ClampValue(shootAngleDelta, -10.0, 10.0);
-
-            entity->GetTransform().direction += shootAngleDelta * 0.3;
-            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+            entity->Rotate(shootAngleDelta);
         }
 
         if (counter > nextShot) {

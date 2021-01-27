@@ -38,16 +38,22 @@ namespace Game {
         int spawnCredits;
 
         bool didTurretSpawns;
+        bool bossSequence;
+        bool bossSpawned;
+        bool didBossTurrets;
 
         vector<uint64_t> entitiesToKill;
 
         vector<pair<Vector2, double>> dynamicSpawnPoints;
         vector<pair<Vector2, double>> staticSpawnPoints;
+
+        int ressuplyCounter;
     public:
         LevelDirector();
         ~LevelDirector();
 
         void RunWaveSpawnLogic();
+        void RunBossSpawnLogic();
 
         void KillTrackedEntities();
 

@@ -6,6 +6,7 @@
 namespace Game {
 
     ChaserAI::ChaserAI() :
+        specialHurtSoundCooldown(0),
         fastSwingCounter(60),
         currentSpeed(1.0),
         painCounter(100),
@@ -38,6 +39,10 @@ namespace Game {
             fastSwingCounter++;
         }
 
+        if (specialHurtSoundCooldown > 0) {
+            specialHurtSoundCooldown--;
+        }
+
         if (skipLogic) {
             return;
         }
@@ -53,14 +58,7 @@ namespace Game {
             return;
         }
 
-        if (entity->GetStatsReference().isDead == true) {
-            destroyDelay--;
-            if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
-            }
-            if (destroyDelay == 0) {
-                entity->SignalDestruction();
-            }
+        if (ProcessGenericDestroyDelay()) {
             return;
         }
 
@@ -87,23 +85,8 @@ namespace Game {
         if (entity->GetComponent().GetCurrentAnimationID() == "Berserker_AxeSwing" && turnStrength > maxSwingStrength) {
             turnStrength = maxSwingStrength;
         }
-        if (abs(targetDirection - entityDirection) > 180.0) {
-            if (targetDirection > 180.0) {
-                entity->GetTransform().direction -= turnStrength;
-            }
-            else {
-                entity->GetTransform().direction += turnStrength;
-            }
-        }
-        else {
-            if (targetDirection - entityDirection > 0) {
-                entity->GetTransform().direction += turnStrength;
-            }
-            else {
-                entity->GetTransform().direction -= turnStrength;
-            }
-        }
-        entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+        
+        entity->RotateTowardsDirection(turnStrength, targetDirection);
 
         double distance = targetVector.Length();
         double forwardStrength = 3.8 + Globals::Difficulty() * 0.7;
@@ -244,7 +227,16 @@ namespace Game {
                 painCounter = 200;
             }
             Globals::Audio().PlaySound("HurtBeta");
-            Globals::Audio().PlaySound("ZerkHurt");
+            if (specialHurtSoundCooldown <= 0) {
+                Globals::Audio().PlaySound("ZerkHurt");
+                specialHurtSoundCooldown = 44 + rand() % 20;
+            }
+            else {
+                specialHurtSoundCooldown -= 10;
+                if (specialHurtSoundCooldown < 0) {
+                    specialHurtSoundCooldown = 0;
+                }
+            }
             AI::OnHitByAttack(attacker, damage);
         }
     }

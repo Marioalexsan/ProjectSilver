@@ -22,6 +22,8 @@ namespace Game {
 
 		Vector2 lastFramePlayerPos;
 
+		int specialHurtSoundCooldown;
+
 	public:
 		ChaserAI();
 

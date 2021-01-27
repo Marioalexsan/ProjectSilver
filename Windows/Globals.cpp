@@ -3,7 +3,7 @@
 
 namespace Game {
 	GameMaster* Globals::theGame = nullptr;
-	string Globals::gameVersion = "v0.87.3";
+	string Globals::gameVersion = "v0.91";
 
 	void Globals::SetTheGame(GameMaster& game) {
 		theGame = &game;

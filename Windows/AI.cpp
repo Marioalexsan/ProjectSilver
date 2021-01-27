@@ -59,4 +59,18 @@ namespace Game {
 		}
 		return false;
 	}
+
+	bool AI::ProcessGenericDestroyDelay() {
+		if (entity->GetStatsReference().isDead == true) {
+			destroyDelay--;
+			if (destroyDelay <= 150) {
+				entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
+			}
+			if (destroyDelay == 0) {
+				entity->SignalDestruction();
+			}
+			return true;
+		}
+		return false;
+	}
 }

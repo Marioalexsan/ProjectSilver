@@ -43,14 +43,7 @@ namespace Game {
             return;
         }
 
-        if (entity->GetStatsReference().isDead == true) {
-            destroyDelay--;
-            if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
-            }
-            if (destroyDelay == 0) {
-                entity->SignalDestruction();
-            }
+        if (ProcessGenericDestroyDelay()) {
             return;
         }
 
@@ -81,23 +74,8 @@ namespace Game {
         if (entity->GetComponent().GetCurrentAnimationID() == "Knight_Swing" && turnStrength > maxSwingStrength) {
             turnStrength = maxSwingStrength;
         }
-        if (abs(targetDirection - entityDirection) > 180.0) {
-            if (targetDirection > 180.0) {
-                entity->GetTransform().direction -= turnStrength;
-            }
-            else {
-                entity->GetTransform().direction += turnStrength;
-            }
-        }
-        else {
-            if (targetDirection - entityDirection > 0) {
-                entity->GetTransform().direction += turnStrength;
-            }
-            else {
-                entity->GetTransform().direction -= turnStrength;
-            }
-        }
-        entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+        
+        entity->RotateTowardsDirection(turnStrength, targetDirection);
 
         double distance = targetVector.Length();
         double forwardStrength = 4.0 + Globals::Difficulty();
@@ -196,7 +174,7 @@ namespace Game {
             double angleDelta = abs(attackAngle - entity->GetTransform().direction);
             angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
             if (angleDelta < 90.0) {
-                damage *= 0.2;
+                damage *= 0.28;
                 Globals::Audio().PlaySound("ShieldImpact");
             }
             Globals::Audio().PlaySound("HurtBeta");

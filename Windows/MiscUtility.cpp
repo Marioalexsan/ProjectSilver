@@ -4,6 +4,22 @@
 
 namespace Game {
 
+	double Math::GetAngleDifference(double firstDirection, double secondDirection) {
+		double delta = abs(secondDirection - firstDirection);
+
+		if (delta > 180.0) {
+			if (secondDirection > 180.0) {
+				delta = -delta;
+			}
+		}
+		else {
+			if (secondDirection - firstDirection < 0.0) {
+				delta = -delta;
+			}
+		}
+		return delta;
+	}
+
 	const Vector2 Vector2::Zero = { 0, 0 };
 
 	Vector2::Vector2():

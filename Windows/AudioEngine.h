@@ -25,7 +25,8 @@ namespace Game {
 	public:
 		static const int maxChannels = 64;
 		static const int maxDistance = 1000; // UNUSED
-		static const int defaultFadeTime = 400;
+		static const int sectionSwitchFadeTime = 150;
+		static const int musicSwitchFadeTime = 720;
 
 	private:
 		// A sound instance that's currently playing

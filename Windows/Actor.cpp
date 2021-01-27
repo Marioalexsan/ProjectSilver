@@ -68,4 +68,28 @@ namespace Game {
 	Actor::ActorStats& Actor::GetStatsReference() {
 		return baseStats;
 	}
+
+	void Actor::Rotate(double amount) {
+		GetTransform().direction = Utility::ScrollValue(GetTransform().direction + amount, 0.0, 360.0);
+	}
+
+	void Actor::RotateTowardsDirection(double amount, double targetDirection) {
+		double entityDirection = GetTransform().direction;
+		if (abs(targetDirection - entityDirection) > 180.0) {
+			if (targetDirection > 180.0) {
+				Rotate(-amount);
+			}
+			else {
+				Rotate(amount);
+			}
+		}
+		else {
+			if (targetDirection - entityDirection > 0) {
+				Rotate(amount);
+			}
+			else {
+				Rotate(-amount);
+			}
+		}
+	}
 }

@@ -18,6 +18,9 @@ using std::string;
 #include <map>
 using std::map;
 
+#include <unordered_map>
+using std::unordered_map;
+
 #include <stack>
 using std::stack;
 

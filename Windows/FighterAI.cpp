@@ -37,14 +37,7 @@ namespace Game {
             return;
         }
 
-        if (entity->GetStatsReference().isDead == true) {
-            destroyDelay--;
-            if (destroyDelay <= 150) {
-                entity->GetComponent().SetAlpha(uint8_t(destroyDelay / 150.0 * 255.0));
-            }
-            if (destroyDelay == 0) {
-                entity->SignalDestruction();
-            }
+        if (ProcessGenericDestroyDelay()) {
             return;
         }
 
@@ -65,23 +58,7 @@ namespace Game {
             if (counter < previousShot + 10) {
                 turnStrength /= 5;
             }
-            if (abs(targetDirection - entityDirection) > 180.0) {
-                if (targetDirection > 180.0) {
-                    entity->GetTransform().direction -= turnStrength;
-                }
-                else {
-                    entity->GetTransform().direction += turnStrength;
-                }
-            }
-            else {
-                if (targetDirection - entityDirection > 0) {
-                    entity->GetTransform().direction += turnStrength;
-                }
-                else {
-                    entity->GetTransform().direction -= turnStrength;
-                }
-            }
-            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+            entity->RotateTowardsDirection(turnStrength, targetDirection);
         }
 
         
@@ -179,8 +156,6 @@ namespace Game {
             previousShot = nextShot;
             nextShot += 110 - 15 * Globals::Difficulty() + rand() % 20;
         }
-
-        
 
         lastFramePlayerPos = player->GetTransform().position;
     }

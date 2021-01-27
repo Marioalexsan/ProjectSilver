@@ -12,6 +12,8 @@ namespace Game {
 	int GraphicsEngine::renderWidth = 0;
 	int GraphicsEngine::renderHeight = 0;
 
+	double GraphicsEngine::gameWinFadeout = 0.0;
+
 	Vector2	GraphicsEngine::cameraPosition = { 0.0, 0.0 };
 
 	// Deprecated
@@ -46,7 +48,6 @@ namespace Game {
 		renderWidth = 1280;
 		renderHeight = 1280;
 		SetDisplayMode({ 1280, 720, false });
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	}
 
 	GraphicsEngine::~GraphicsEngine() {
@@ -166,6 +167,13 @@ namespace Game {
 	
 	void GraphicsEngine::RenderCopyExAdvanced(SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip, bool useCamera) {
 		
+		// Game Win Fadeout
+		Color color;
+		int reverseFadeout = Utility::ClampValue(100 - int(gameWinFadeout), 0, 100);
+
+		SDL_GetTextureColorMod(texture, &color.r, &color.g, &color.b);
+		SDL_SetTextureColorMod(texture, color.r * reverseFadeout / 100, color.g * reverseFadeout / 100, color.b * reverseFadeout / 100);
+
 		if (dstrect) {
 			SDL_Rect newdstrect = Utility::MakeSDLRect(int(dstrect->x - center->x), int(dstrect->y - center->y), dstrect->w, dstrect->h);
 			if (useCamera) {

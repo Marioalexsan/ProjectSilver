@@ -17,12 +17,15 @@
 #include "Tracer.h"
 #include "AfterImage.h"
 #include "LogHandler.h"
+#include "ShadowAI.h"
+#include "Medkit.h"
 
 namespace Game {
 	GameMaster::GameMaster() :
 		renderDisableCounter(0),
 		entityID(1),
 		effectID(1),
+		colliderID(1),
 		gameRunning(true),
 		difficulty(DifficultyLevel::Easy)
 	{
@@ -71,9 +74,38 @@ namespace Game {
 
 		auto& stats = player.GetStatsReference();
 		stats.maxHealth = stats.health = 100.0;
-		stats.shieldHealth = stats.maxShieldHealth = 60.0;
+		stats.shieldHealth = stats.maxShieldHealth = 75.0;
 		stats.stamina = stats.maxStamina = 90.0;
 		stats.onHitInvincibilityFrames = 7;
+	}
+
+	void GameMaster::AddTheShadow() {
+		if (GetTheShadow() != nullptr) {
+			return;
+		}
+		entityMasterList[maxAutoEntityID + SpecialEntities::Shadow].reset(new Actor(new ShadowAI()));
+		Game::Actor& shadow = *(Actor*)entityMasterList[maxAutoEntityID + SpecialEntities::Shadow].get();
+		shadow.GetComponent().AddAnimation("Shadow_AxeIdle");
+		shadow.GetComponent().SetDefaultAnimation("Shadow_AxeIdle");
+		shadow.GetComponent().SwitchAnimation("Shadow_AxeIdle");
+
+		shadow.GetComponent().AddAnimation("Shadow_AxeSwing");
+		shadow.GetComponent().AddAnimation("Shadow_TakeOutPistol");
+		shadow.GetComponent().AddAnimation("Shadow_PutAwayPistol");
+		shadow.GetComponent().AddAnimation("Shadow_PistolIdle");
+		shadow.GetComponent().AddAnimation("Shadow_PistolShoot");
+
+		shadow.GetComponent().AddAnimation("Shadow_RecoveryStart");
+		shadow.GetComponent().AddAnimation("Shadow_Recovery");
+		shadow.GetComponent().AddAnimation("Shadow_RecoveryEnd");
+
+		shadow.GetCollider().SetCombatLayer(Collider::CombatLayer::Enemies);
+		shadow.GetCollider().SetRadius(40.0);
+
+		shadow.SetType(EntityType::Shadow);
+
+		auto& stats = shadow.GetStatsReference();
+		stats.maxHealth = stats.health = 2500.0 + Globals::Difficulty() * 1000.0;
 	}
 
 	void GameMaster::RemoveThePlayer() {
@@ -83,8 +115,23 @@ namespace Game {
 		entityMasterList.erase(maxAutoEntityID + SpecialEntities::Player);
 	}
 
+	void GameMaster::RemoveTheShadow() {
+		if (GetTheShadow() == nullptr) {
+			return;
+		}
+		entityMasterList.erase(maxAutoEntityID + SpecialEntities::Shadow);
+	}
+
 	Entity* GameMaster::GetThePlayer() {
 		uint64_t position = maxAutoEntityID + SpecialEntities::Player;
+		if (entityMasterList.find(position) == entityMasterList.end()) {
+			return nullptr;
+		}
+		return entityMasterList[position].get();
+	}
+
+	Entity* GameMaster::GetTheShadow() {
+		uint64_t position = maxAutoEntityID + SpecialEntities::Shadow;
 		if (entityMasterList.find(position) == entityMasterList.end()) {
 			return nullptr;
 		}
@@ -197,13 +244,24 @@ namespace Game {
 		case EntityType::RifleAmmoPackThing: {
 			ID = NextEntityID();
 			entityMasterList[ID].reset(new RifleAmmoPack());
-			Game::Actor& turret = *(Actor*)entityMasterList[ID].get();
-			turret.GetComponent().AddAnimation("RifleAmmoPack");
-			turret.GetComponent().SwitchAnimation("RifleAmmoPack");
-			turret.GetComponent().SetDefaultAnimation("RifleAmmoPack");
+			Game::Actor& pack = *(Actor*)entityMasterList[ID].get();
+			pack.GetComponent().AddAnimation("RifleAmmoPack");
+			pack.GetComponent().SwitchAnimation("RifleAmmoPack");
+			pack.GetComponent().SetDefaultAnimation("RifleAmmoPack");
 
-			turret.SetType(EntityType::RifleAmmoPackThing);
-			turret.GetTransform().position = worldPos;
+			pack.SetType(EntityType::RifleAmmoPackThing);
+			pack.GetTransform().position = worldPos;
+		} break;
+		case EntityType::MedkitThing: {
+			ID = NextEntityID();
+			entityMasterList[ID].reset(new Medkit());
+			Game::Actor& medkit = *(Actor*)entityMasterList[ID].get();
+			medkit.GetComponent().AddAnimation("Medkit");
+			medkit.GetComponent().SwitchAnimation("Medkit");
+			medkit.GetComponent().SetDefaultAnimation("Medkit");
+
+			medkit.SetType(EntityType::MedkitThing);
+			medkit.GetTransform().position = worldPos;
 		} break;
 		default:
 			std::cout << "Unknown enemy bro!" << endl;
@@ -326,6 +384,12 @@ namespace Game {
 		return returnID;
 	}
 
+	uint64_t GameMaster::NextColliderID() {
+		uint64_t returnID = colliderID++;
+		colliderID = (colliderID >= maxAutoColliderID ? 1 : colliderID);
+		return returnID;
+	}
+
 	void GameMaster::Update(bool skipGraphicsFrame = false) {
 		if (!gameRunning) {
 			return;
@@ -346,7 +410,7 @@ namespace Game {
 			pair.second->Update();
 		}
 
-		BuildSpacialHashMap();
+		BuildSpatialHashMap();
 		ResolveMovementCollisions();
 		ResolveCombatCollisions();
 
@@ -398,11 +462,13 @@ namespace Game {
 		Audio.Update();
 	}
 
-	void GameMaster::BuildSpacialHashMap() {
-		if (spacialHashMap.size() > 0) {
-			spacialHashMap.clear();
+	// Rebuilding hash maps in Update() always works, butit's bad performance wise
+	void GameMaster::BuildSpatialHashMap() {
+		if (spatialHashMap.size() > 0) {
+			spatialHashMap.clear();
 		}
-		for (auto& alpha : colliderLibrary) {
+		for (auto& alphaPair : colliderLibrary) {
+			auto& alpha = alphaPair.second;
 			// Get bounding box of colliders
 			BoxCollider* ABox = dynamic_cast<BoxCollider*>(alpha);
 			SphereCollider* ASphere = nullptr;
@@ -412,7 +478,6 @@ namespace Game {
 
 			int startX, endX, startY, endY;
 
-			// Is currently broken, needs fixing
 			if (ABox != nullptr || ASphere != nullptr) {
 				auto result = alpha->GetBoundingBox();
 				startX = (int)floor(result.first.x / cellSize);
@@ -427,7 +492,7 @@ namespace Game {
 
 			for (int X = startX; X <= endX; X++) {
 				for (int Y = startY; Y <= endY; Y++) {
-					spacialHashMap[{X, Y}].push_back(alpha);
+					spatialHashMap[{X, Y}].insert(alpha);
 				}
 			}
 		}
@@ -440,7 +505,7 @@ namespace Game {
 		size_t prediction = 0;
 		for (int X = startX; X <= endX; X++) {
 			for (int Y = startY; Y <= endY; Y++) {
-				prediction += spacialHashMap[{X, Y}].size();
+				prediction += spatialHashMap[{X, Y}].size();
 			}
 		}
 
@@ -448,7 +513,7 @@ namespace Game {
 		results.reserve(prediction + 1);
 		for (int X = startX; X <= endX; X++) {
 			for (int Y = startY; Y <= endY; Y++) {
-				for (auto& elem : spacialHashMap[{X, Y}]) {
+				for (auto& elem : spatialHashMap[{X, Y}]) {
 					// This may generate duplicates
 					// If duplicates shouldn't happen, make sure to remove them in destination method
 					results.push_back(elem);
@@ -511,6 +576,10 @@ namespace Game {
 		Assets.LoadTexture("Button", assetFolder + "Button.png");
 		Assets.LoadTexture("LowHP", assetFolder + "LowHP.png");
 		Assets.LoadTexture("ValueButton", assetFolder + "ValueButton.png");
+
+		Assets.LoadTexture("ShadowHealthBar", assetFolder + "ShadowHealthBar.png");
+		Assets.LoadTexture("ShadowHealth", assetFolder + "ShadowHealth.png");
+		Assets.LoadTexture("ShadowMaxHealth", assetFolder + "ShadowMaxHealth.png");
 		
 		// Knight Enemy
 		assetFolder = texturePath + "Knight/";
@@ -534,11 +603,19 @@ namespace Game {
 		assetFolder = texturePath + "Misc/";
 		Assets.LoadTexture("RifleAmmoPack", assetFolder + "Ammo.png");
 		Assets.LoadTexture("Bullet", assetFolder + "Bullet.png");
+		Assets.LoadTexture("Medkit", assetFolder + "Medkit.png");
 
 		// Shadow - Boss
 		assetFolder = texturePath + "Shadow/";
 		Assets.LoadTexture("Shadow_PistolIdle", assetFolder + "PistolIdle.png");
+		Assets.LoadTexture("Shadow_PistolShoot", assetFolder + "PistolShoot.png");
+		Assets.LoadTexture("Shadow_TakeOutPistol", assetFolder + "TakeOutPistol.png");
+		Assets.LoadTexture("Shadow_PutAwayPistol", assetFolder + "PutAwayPistol.png");
 		Assets.LoadTexture("Shadow_AxeSwing", assetFolder + "AxeSwing.png");
+		Assets.LoadTexture("Shadow_AxeIdle", assetFolder + "AxeIdle.png");
+		Assets.LoadTexture("Shadow_RecoveryStart", assetFolder + "RecoveryStart.png");
+		Assets.LoadTexture("Shadow_Recovery", assetFolder + "Recovery.png");
+		Assets.LoadTexture("Shadow_RecoveryEnd", assetFolder + "RecoveryEnd.png");
 
 		// Effects
 		const string effectPath = texturePath + "Effects/";
@@ -560,6 +637,10 @@ namespace Game {
 			});
 
 		Assets.LoadMusic("Menu", audioPath + "menu.ogg");
+		Assets.LoadMusic("Shadows", audioPath + "shadows.ogg");
+		Assets.LoadMusicSections("Shadows", {
+			{"Loop", {(1 * 60 + 4) * 1000 + 232, (3 * 60 + 58) * 1000 + 887 }}
+			});
 
 		// Sound
 		Assets.LoadSound("PlayerShoot", audioPath + "shot.ogg");
@@ -584,6 +665,7 @@ namespace Game {
 		Assets.LoadSound("TurretBreak", audioPath + "turretbreak.ogg");
 		Assets.LoadSound("TurretDown", audioPath + "turretdown.ogg");
 		Assets.LoadSound("TurretCharge", audioPath + "turretcharge.ogg");
+		Assets.LoadSound("ShadowHurt", audioPath + "shadowhurt.ogg");
 
 		// Settings
 
@@ -644,7 +726,7 @@ namespace Game {
 			{ {AnimationCriteria::TriggerAtFrameX, "16"}, {AnimationInstruction::PlaySound, "PlayerReload2"} },
 			{ {AnimationCriteria::TriggerAtFrameX, "19"}, {AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("Player_RifleReload", { 7, 21, 1, LoopMode::PlayOnce });
+		SetAnimationInfo("Player_RifleReload", { 6, 21, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_RifleReload", Vector2(48, 67));
 
 		AddAnimation("Player_ShieldUp", Animation("Player_ShieldUp", {
@@ -654,7 +736,7 @@ namespace Game {
 		SetAnimationCenter("Player_ShieldUp", Vector2(73, 66));
 
 		AddAnimation("Player_ShieldDown", Animation("Player_ShieldDown", {}));
-		SetAnimationInfo("Player_ShieldDown", { 3, 4, 1, LoopMode::PlayOnce });
+		SetAnimationInfo("Player_ShieldDown", { 5, 4, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_ShieldDown", Vector2(73, 66));
 
 		AddAnimation("Player_ShieldWalk", Animation("Player_ShieldWalk", {}));
@@ -741,6 +823,59 @@ namespace Game {
 		AddAnimation("RifleAmmoPack", Animation("RifleAmmoPack", {}));
 		SetAnimationInfo("RifleAmmoPack", { 1337, 1, 1, LoopMode::Static });
 		SetAnimationCenter("RifleAmmoPack", Vector2(20, 15));
+
+		AddAnimation("Medkit", Animation("Medkit", {}));
+		SetAnimationInfo("Medkit", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Medkit", Vector2(20, 15));
+
+		// Shadow - Boss
+
+		AddAnimation("Shadow_AxeSwing", Animation("Shadow_AxeSwing", {
+			{ {AnimationCriteria::TriggerAtFrameX, "4"}, {AnimationInstruction::PlaySound, "SwordSwing"} }
+			}));
+		SetAnimationInfo("Shadow_AxeSwing", { 4, 12, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_AxeSwing", Vector2(73, 116));
+
+		AddAnimation("Shadow_AxeIdle", Animation("Shadow_AxeIdle", {}));
+		SetAnimationInfo("Shadow_AxeIdle", { 12, 4, 1, LoopMode::NormalLoop });
+		SetAnimationCenter("Shadow_AxeIdle", Vector2(73, 116));
+
+		AddAnimation("Shadow_PistolShoot", Animation("Shadow_PistolShoot", {
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerShoot"} }
+			}));
+		SetAnimationInfo("Shadow_PistolShoot", { 4, 4, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_PistolShoot", Vector2(48, 67));
+
+		AddAnimation("Shadow_PistolIdle", Animation("Shadow_PistolIdle", {}));
+		SetAnimationInfo("Shadow_PistolIdle", { 1337, 1, 1, LoopMode::Static });
+		SetAnimationCenter("Shadow_PistolIdle", Vector2(48, 67));
+
+		AddAnimation("Shadow_TakeOutPistol", Animation("Shadow_TakeOutPistol", {
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerReload1"} }
+			}));
+		SetAnimationInfo("Shadow_TakeOutPistol", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_TakeOutPistol", Vector2(48, 67));
+
+		AddAnimation("Shadow_PutAwayPistol", Animation("Shadow_PutAwayPistol", {
+			{ {AnimationCriteria::TriggerAtStart, ""}, {AnimationInstruction::PlaySound, "PlayerReload1"} } 
+			}));
+		SetAnimationInfo("Shadow_PutAwayPistol", { 4, 5, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_PutAwayPistol", Vector2(48, 67));
+
+		AddAnimation("Shadow_RecoveryStart", Animation("Shadow_RecoveryStart", {
+			{ {AnimationCriteria::TriggerAtFrameX, "5"}, {AnimationInstruction::PlaySound, "PlayerDeath"} }
+			}));
+		SetAnimationInfo("Shadow_RecoveryStart", { 8, 6, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_RecoveryStart", Vector2(48, 67));
+
+		AddAnimation("Shadow_Recovery", Animation("Shadow_Recovery", {}));
+		SetAnimationInfo("Shadow_Recovery", { 14, 4, 1, LoopMode::NormalLoop });
+		SetAnimationCenter("Shadow_Recovery", Vector2(48, 67));
+
+		AddAnimation("Shadow_RecoveryEnd", Animation("Shadow_RecoveryEnd", {}));
+		SetAnimationInfo("Shadow_RecoveryEnd", { 8, 6, 1, LoopMode::PlayOnce });
+		SetAnimationCenter("Shadow_RecoveryEnd", Vector2(48, 67));
+
 	}
 
 	void GameMaster::ArmageddonExitProcedures() {
@@ -799,25 +934,29 @@ namespace Game {
 		animationLibrary[ID].SetCustomCenter(center);
 	}
 
-	void GameMaster::AddCollider(Collider* collider) {
-		if (collider != nullptr) {
-			colliderLibrary.insert(collider);
+	uint64_t GameMaster::AddCollider(Collider* collider) {
+		uint64_t ID = NextColliderID();
+		colliderLibrary[ID] = collider;
+		return ID;
+	}
+
+	bool GameMaster::RemoveCollider(uint64_t ID) {
+		if (colliderLibrary.find(ID) == colliderLibrary.end()) {
+			return false;
 		}
+		colliderLibrary.erase(ID);
+		return true;
 	}
 
-	void GameMaster::RemoveCollider(Collider* collider) {
-		colliderLibrary.erase(collider);
-	}
-
-	void GameMaster::AddColliderToRemovalQueue(Collider* collider) {
-		colliderUnregisterQueue.push(collider);
+	void GameMaster::AddColliderToRemovalQueue(uint64_t ID) {
+		colliderUnregisterQueue.push(ID);
 	}
 
 	void GameMaster::ResolveMovementCollisions() {
 		using CType = Collider::ColliderType;
 		auto libEnd = colliderLibrary.end();
 		for (auto firstIt = colliderLibrary.begin(); firstIt != libEnd; firstIt++) {
-			Collider* alpha = *firstIt;
+			Collider* alpha = firstIt->second;
 			// Discard pure combat colliders
 			if (alpha->GetColliderType() == CType::Combat) {
 				continue;
@@ -936,7 +1075,7 @@ namespace Game {
 		set<pair<Collider*, Collider*>> collidedPairs;
 
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			Collider* alpha = *firstIt;
+			Collider* alpha = firstIt->second;
 			// Discard anything which isn't a combat collider
 			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
 				continue;
@@ -1096,7 +1235,7 @@ namespace Game {
 
 		// Destroy combat colliders on contact with Statics
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			Collider* alpha = *firstIt;
+			Collider* alpha = firstIt->second;
 
 			// Discard anything which isn't a combat collider
 			if (!(alpha->GetColliderType() == CType::Combat || alpha->GetColliderType() == CType::CombatDynamic || alpha->GetColliderType() == CType::CombatStatic)) {
@@ -1203,7 +1342,7 @@ namespace Game {
 		vector<pair<double, Collider*>> hitList;
 		using CType = Collider::ColliderType;
 		for (auto firstIt = colliderLibrary.begin(); firstIt != colliderLibrary.end(); firstIt++) {
-			Collider* alpha = *firstIt;
+			Collider* alpha = firstIt->second;
 			// Get alpha true type
 			BoxCollider* ABox = dynamic_cast<BoxCollider*>(alpha);
 			SphereCollider* ASphere = nullptr;

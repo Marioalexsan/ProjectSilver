@@ -145,6 +145,12 @@
     <Filter Include="Utility\LogHandler">
       <UniqueIdentifier>{bc300dde-c226-4dc0-bf3f-1ca432c58822}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Drawables Library\ShadowHPBar">
+      <UniqueIdentifier>{36f63f8c-d121-4a5e-b6a5-ee36c937141f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity Library\Medkit">
+      <UniqueIdentifier>{9b98860e-f463-463d-8dc9-1445af8dedc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -264,6 +270,12 @@
     <ClCompile Include="LogHandler.cpp">
       <Filter>Utility\LogHandler</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowHPBar.cpp">
+      <Filter>Graphics\Drawables Library\ShadowHPBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Medkit.cpp">
+      <Filter>Entity Library\Medkit</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioEngine.h">
@@ -380,6 +392,12 @@
     </ClInclude>
     <ClInclude Include="LogHandler.h">
       <Filter>Utility\LogHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowHPBar.h">
+      <Filter>Graphics\Drawables Library\ShadowHPBar</Filter>
+    </ClInclude>
+    <ClInclude Include="Medkit.h">
+      <Filter>Entity Library\Medkit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

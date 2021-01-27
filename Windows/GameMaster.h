@@ -1,6 +1,8 @@
 #ifndef GAME_HEADER
 #define GAME_HEADER
 
+#include "PCHeader.h"
+
 #include "AssetManager.h"
 #include "AudioEngine.h"
 #include "GraphicsEngine.h"
@@ -22,7 +24,8 @@ namespace Game {
 		enum SpecialEntities {
 			Player = 1,
 			TheLevelDirector = 2,
-			TheMenuDirector = 3
+			TheMenuDirector = 3,
+			Shadow = 4,
 		};
 
 		enum DifficultyLevel {
@@ -39,22 +42,27 @@ namespace Game {
 		bool gameRunning;
 
 		map<string, Animation> animationLibrary;
-		set<Collider*> colliderLibrary;
-		queue<Collider*> colliderUnregisterQueue;
+		
+		map<uint64_t, Collider*> colliderLibrary;
+		uint64_t colliderID;
+		static const uint64_t maxAutoColliderID = 1000000;
+		
+		queue<uint64_t> colliderUnregisterQueue;
 
-		double cellSize = 100.0;
-		map<pair<int, int>, vector<Collider*>> spacialHashMap;
+		double cellSize = 200.0;
+		map<pair<int, int>, set<Collider*>> spatialHashMap;
 
 		map<uint64_t, std::unique_ptr<Entity>> entityMasterList;
 		uint64_t entityID;
-		static const uint64_t maxAutoEntityID = 16384;
+		static const uint64_t maxAutoEntityID = 1000000;
 
 		map<uint64_t, std::unique_ptr<Effect>> effectMasterList;
 		uint64_t effectID;
-		static const uint64_t maxAutoEffectID = 16384;
+		static const uint64_t maxAutoEffectID = 1000000;
 
 		uint64_t NextEntityID();
 		uint64_t NextEffectID();
+		uint64_t NextColliderID();
 
 		DifficultyLevel difficulty;
 
@@ -72,6 +80,10 @@ namespace Game {
 		void AddThePlayer();
 		void RemoveThePlayer();
 
+		Entity* GetTheShadow();
+		void AddTheShadow();
+		void RemoveTheShadow();
+
 		uint64_t AddEntity(EntityType type, Vector2 worldPos);
 		Entity* GetEntity(uint64_t ID);
 		int GetAliveEnemyCount();
@@ -84,10 +96,10 @@ namespace Game {
 		void RemoveNonSpecialEntities();
 		void ClearEffects();
 
-		void BuildSpacialHashMap();
+		void BuildSpatialHashMap();
 		vector<Collider*> GetCollisionCandidates(int startX, int startY, int endX, int endY);
 
-		const double fixedTimeStep = 16.67;
+		const int fixedTimeStepInMilliseconds = 17;
 		const int maxFrameRate = 60;
 
 		Game::AudioEngine Audio;
@@ -121,9 +133,9 @@ namespace Game {
 			return animationLibrary;
 		}
 
-		void AddCollider(Collider* collider);
-		void RemoveCollider(Collider* collider);
-		void AddColliderToRemovalQueue(Collider* collider);
+		uint64_t AddCollider(Collider* collider);
+		bool RemoveCollider(uint64_t);
+		void AddColliderToRemovalQueue(uint64_t ID);
 
 		void ResolveMovementCollisions();
 		void ResolveCombatCollisions();

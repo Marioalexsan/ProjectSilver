@@ -16,6 +16,7 @@ namespace Game {
 		Actor* entity;
 
 		bool EntityIsDeadAF();
+		bool ProcessGenericDestroyDelay();
 
 	public:
 		AI(Actor* owner);

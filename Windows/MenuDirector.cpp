@@ -195,6 +195,7 @@ namespace Game {
 	}
 
 	void MenuDirector::StateEnter(MenuDirector::MenuState state) {
+		Globals::Graphics().SetGameWinFadeout(0.0);
 		currentState = state;
 		switch (currentState) {
 		case MenuDirector::MainScreen: {

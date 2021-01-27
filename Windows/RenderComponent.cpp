@@ -157,7 +157,7 @@ namespace Game {
 		else if (finished) {
 			string lastID = currentAnimation;
 			if (!parsedEnd) {
-				ParseActions(totalFrames - 1, totalFrames - 1);
+				ParseActions(totalFrames, totalFrames);
 			}
 			if (currentAnimation == lastID) {
 				SwitchToDefault();

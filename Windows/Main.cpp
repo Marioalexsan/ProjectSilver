@@ -36,26 +36,30 @@ using std::endl;
 bool SystemInit() {
     // Init SDL and SDL_mixer
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) != 0) {
-        cerr << "Error in " << __FILE__ << " at line " << __LINE__ << ": Failed to init SDL." << endl;
+        Game::LogHandler::Log("Failed to Init SDL!", Game::LogHandler::MessageType::Error);
         return false;
     }
     if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG || Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
-        cerr << "Error in " << __FILE__ << " at line " << __LINE__ << ": Failed to init SDL_mixer." << endl;
+        Game::LogHandler::Log("Failed to Init SDL Mix!", Game::LogHandler::MessageType::Error);
         return false;
     }
     if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
-        cerr << "Error in " << __FILE__ << " at line " << __LINE__ << ": Failed to init SDL_image." << endl;
-        cerr << IMG_GetError() << endl;
+        Game::LogHandler::Log("Failed to Init SDL Image!", Game::LogHandler::MessageType::Error);
         return false;
     }
     
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
     Game::GraphicsEngine::Window = SDL_CreateWindow("Project Silver", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900, 0);
     if (Game::GraphicsEngine::Window == nullptr) {
+        Game::LogHandler::Log("Failed to create Window!", Game::LogHandler::MessageType::Error);
         return false;
     }
     
     Game::GraphicsEngine::Renderer = SDL_CreateRenderer(Game::GraphicsEngine::Window, -1, SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_ACCELERATED);
     if (Game::GraphicsEngine::Renderer == nullptr) {
+        Game::LogHandler::Log("Failed to create Renderer!", Game::LogHandler::MessageType::Error);
         return false;
     }
 
@@ -85,12 +89,14 @@ int main(int argc, char* args[]) {
     #pragma region Initialization Stuff
 
     if (!SystemInit()) {
+        Game::LogHandler::Log("Failed to Init System! Exiting.", Game::LogHandler::MessageType::Error);
         SystemQuit();
         return -1;
     }
     srand(unsigned(time(0)));
 
     int prevTime = SDL_GetTicks();
+    double accumulatedTimeLoss = 0.0;
 
     Game::GameMaster ProjectSilver;
     Game::Globals::SetTheGame(ProjectSilver);
@@ -105,8 +111,16 @@ int main(int argc, char* args[]) {
     targetSprite.SetPosition({ 1266, 668 });
     targetSprite.SetCenter({ 21, 21 });
     targetSprite.SetRelativeToCamera(false);
-    ProjectSilver.Graphics.AddDrawable(&targetSprite);
+    targetSprite.RegisterToGame();
     targetSprite.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
+
+    Game::BasicText FPSCounter;
+    FPSCounter.SetPosition({ 1900, 20 });
+    FPSCounter.SetRenderType(Game::BasicText::TextRenderType::ContinuousRight);
+    FPSCounter.SetFont("Medium");
+    FPSCounter.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
+    FPSCounter.SetRelativeToCamera(false);
+    FPSCounter.RegisterToGame();
 
     #pragma endregion
 
@@ -125,18 +139,26 @@ int main(int argc, char* args[]) {
 
     bool crash = false;
 
+    std::deque<int> lastFrameTimes;
+
+    bool FPSEnabled = true;
+
     while (ProjectSilver.IsGameRunning()) 
     {
         try {
             // Wait for next engine frame
-            double step = ProjectSilver.fixedTimeStep;
+            int step = ProjectSilver.fixedTimeStepInMilliseconds;
+            if (accumulatedTimeLoss >= 1.0) {
+                step -= 1;
+                accumulatedTimeLoss -= 1.0;
+            }
             int currentTime = SDL_GetTicks();
             int delta = currentTime - prevTime;
-            if ((double)delta < step) {
+            if (delta < step) {
                 // Do a small delay
-                SDL_Delay((uint32_t)(step - (double)delta));
+                SDL_Delay((uint32_t)(step - delta));
                 currentTime = SDL_GetTicks();
-                delta = (int)step;
+                delta = step;
             }
             //angleDebug.SetText("FPS: " + std::to_string(17 / delta * 60.0));
             int bonusUpdates = (int)round(delta / step) - 1;
@@ -147,10 +169,29 @@ int main(int argc, char* args[]) {
                 if (bonusUpdates > 2) {
                     bonusUpdates = 2;
                 }
-                cout << "Lag: " << delta - step << " ";
                 for (int i = 0; i < bonusUpdates; i++) {
                     ProjectSilver.Update(true); // Skips rendering for all bonus updates
                 }
+            }
+
+            if (FPSEnabled) {
+                int frameCount = 60;
+                if (lastFrameTimes.size() >= frameCount) {
+                    lastFrameTimes.pop_front();
+                }
+                lastFrameTimes.push_back(delta);
+
+                int accumulatedTime = 0;
+                for (auto elem : lastFrameTimes) {
+                    accumulatedTime += elem;
+                }
+
+
+                double FPS = 0.0;
+                if (accumulatedTime != 0) {
+                   FPS = (16.68 * frameCount) / accumulatedTime * 60.0;
+                }
+                FPSCounter.SetText("FPS: " + std::to_string((int)FPS));
             }
 
             ProjectSilver.Update(false);
@@ -165,8 +206,10 @@ int main(int argc, char* args[]) {
             //cout << angle << endl;
             // Code end
 
-
             prevTime = currentTime;
+
+            // Account for SDL_GetTicks() inaccuracy
+            accumulatedTimeLoss += 0.333;
         }
         catch (std::exception& e) {
             string message = "A standard exception occured!\n\tException message: " + string(e.what());

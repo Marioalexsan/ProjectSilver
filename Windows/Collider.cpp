@@ -12,7 +12,8 @@ namespace Game {
 		owner(nullptr),
 		type(Static),
 		damage(0.0),
-		combatLayer(None) {}
+		combatLayer(None),
+		colliderGameMasterID(0) {}
 
 	Collider::Collider(const Vector2& position, ColliderType type):
 		destructionSignalled(false),
@@ -22,7 +23,8 @@ namespace Game {
 		owner(nullptr),
 		type(type),
 		damage(0.0),
-		combatLayer(None)
+		combatLayer(None),
+		colliderGameMasterID(0)
 	{
 		transform->position = position;
 	}
@@ -58,14 +60,17 @@ namespace Game {
 	}
 
 	void Collider::RegisterToGame() {
-		Globals::Game().AddCollider(this);
+		if (colliderGameMasterID == 0) {
+			colliderGameMasterID = Globals::Game().AddCollider(this);
+		}
 	}
 
 	void Collider::UnregisterFromGame() {
-		Globals::Game().RemoveCollider(this);
+		Globals::Game().RemoveCollider(colliderGameMasterID);
+		colliderGameMasterID = 0;
 	}
 
 	void Collider::QueueUnregisterFromGame() {
-		Globals::Game().AddColliderToRemovalQueue(this);
+		Globals::Game().AddColliderToRemovalQueue(colliderGameMasterID);
 	}
 }

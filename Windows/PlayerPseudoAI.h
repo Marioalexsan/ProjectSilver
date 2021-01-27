@@ -24,6 +24,7 @@ namespace Game {
 		int shieldRegenCounter;
 		int shieldFadeOutDelay;
 		int perfectGuardCounter;
+		bool hasPerfectGuarded;
 
 		bool doingSwing;
 
@@ -46,7 +47,6 @@ namespace Game {
 		Vector2 smoothSpeed;
 		Vector2 boostVector;
 
-		
 
 		SphereCollider axe;
 

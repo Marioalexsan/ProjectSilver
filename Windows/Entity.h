@@ -18,7 +18,9 @@ namespace Game {
 		Knight,
 		Chaser,
 		RifleAmmoPackThing,
-		GunTurret
+		GunTurret,
+		Shadow,
+		MedkitThing
 	};
 
 	class Entity {

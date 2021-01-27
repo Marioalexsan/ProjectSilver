@@ -4,6 +4,9 @@
 #include "Actor.h"
 #include "GunTurretAI.h"
 #include "LogHandler.h"
+#include "ShadowAI.h"
+#include "RifleAmmoPack.h"
+#include "Medkit.h"
 
 namespace Game {
     LevelDirector::LevelDirector() :
@@ -46,7 +49,9 @@ namespace Game {
         counter(0),
         resetCounter(0),
         currentSpawnCount({ 0, 0, 0 }),
-        didTurretSpawns(false)
+        didTurretSpawns(false),
+        bossSequence(false),
+        bossSpawned(false)
     {
         auto& ProjectSilver = Globals::Game();
 
@@ -155,6 +160,7 @@ namespace Game {
         // Sprites and colliders should be unregistered via their destructor code
         auto& ProjectSilver = Globals::Game();
         ProjectSilver.RemoveThePlayer();
+        ProjectSilver.RemoveTheShadow();
         ProjectSilver.RemoveNonSpecialEntities();
         ProjectSilver.ClearEffects(); // Removes bullet trails and whatnot
         Game::LogHandler::Log("Exited Level", Game::LogHandler::MessageType::Info);
@@ -163,12 +169,25 @@ namespace Game {
     void LevelDirector::Update() {
         // 'Should' be safe
         Actor* player = (Actor*)Globals::ThePlayer();
+        Actor* shadow = (Actor*)Globals::Game().GetTheShadow();
         if (player != nullptr) {
-            if (player->GetStatsReference().isDead) {
+            bool deadPlayer = player->GetStatsReference().isDead;
+            if (deadPlayer || bossSpawned && shadow != nullptr && shadow->GetStatsReference().isDead) {
+                bool deadBoss = shadow->GetStatsReference().isDead;
                 resetCounter++;
-                if (resetCounter == 180) {
-                    toBeDestroyed = true;
-                    Globals::Game().InitMenu();
+                if (deadPlayer) {
+                    if (resetCounter == 180) {
+                        toBeDestroyed = true;
+                        Globals::Game().InitMenu();
+                    }
+                }
+                else if (deadBoss) {
+                    player->GetStatsReference().invulnerable = true;
+                    Globals::Graphics().SetGameWinFadeout(resetCounter / 2.7);
+                    if (resetCounter == 300) {
+                        toBeDestroyed = true;
+                        Globals::Game().InitMenu();
+                    }
                 }
                 return;
             }
@@ -177,20 +196,96 @@ namespace Game {
         if (audioStartDelay > 0) {
             audioStartDelay--;
             if (audioStartDelay == 0) {
-                Globals::Audio().PlayMusic("DigitalGhost");
-                Globals::Audio().SetLoopSection("Loop");
+                if (bossSequence) {
+                    Globals::Audio().PlayMusic("Shadows");
+                    Globals::Audio().SetLoopSection("Loop");
+                }
+                else {
+                    Globals::Audio().PlayMusic("DigitalGhost");
+                    Globals::Audio().SetLoopSection("Loop");
+                }
             }
+        }
+
+        if (bossSequence) {
+            ressuplyCounter++;
+            if (ressuplyCounter >= 400 + 200 * Globals::Difficulty()) {
+                for (int i = 0; i < 2; i++) {
+                    uint64_t ID = Globals::Game().AddEntity(EntityType::RifleAmmoPackThing, staticSpawnPoints[rand() % staticSpawnPoints.size()].first + Vector2::NormalVector(rand() % 360) * 55);
+                    RifleAmmoPack* pack = (RifleAmmoPack*)Globals::Game().GetEntity(ID);
+                    if (pack != nullptr) {
+                        pack->SetAmmoToGrant(10 - Globals::Difficulty());
+                    }
+                }
+                ressuplyCounter = 0;
+                auto& stats = ((Actor*)Globals::ThePlayer())->GetStatsReference();
+                if (stats.maxHealth <= 95.0) {
+                    uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, staticSpawnPoints[rand() % staticSpawnPoints.size()].first + Vector2::NormalVector(rand() % 360) * 55);
+                    Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
+                    if (pack != nullptr) {
+                        pack->SetHealthToGrant(18 - 3 * Globals::Difficulty());
+                    }
+                    ressuplyCounter -= 570 + 180 * Globals::Difficulty();
+                }
+            }
+        }
+
+        bool lastStand = false;
+        if (shadow != nullptr && ((ShadowAI*)((Actor*)shadow)->GetAI()) != nullptr) {
+            lastStand = ((ShadowAI*)((Actor*)shadow)->GetAI())->InLastStand();
+        }
+
+        if (!didBossTurrets && lastStand) {
+            didBossTurrets = true;
+            counter = nextSpawns;
+            int turretCount = 0;
+
+            set<int> availableStaticSpawnPoints;
+            for (int i = 0; i < staticSpawnPoints.size(); i++) {
+                availableStaticSpawnPoints.insert(i);
+            }
+
+            while (turretCount < 1 + (Globals::Difficulty() > 0 ? 1 : 0)) {
+                int spawnPoint = rand() % staticSpawnPoints.size();
+                int tries = 50;
+                while (availableStaticSpawnPoints.find(spawnPoint) == availableStaticSpawnPoints.end() && tries > 0) {
+                    tries--;
+                    spawnPoint = rand() % staticSpawnPoints.size();
+                }
+
+                uint64_t ID = Globals::Game().AddEntity(EntityType::GunTurret, staticSpawnPoints[spawnPoint].first);
+                Entity* entity = Globals::Game().GetEntity(ID);
+                entity->GetTransform().direction = staticSpawnPoints[spawnPoint].second;
+                entitiesToKill.push_back(ID);
+
+                availableStaticSpawnPoints.erase(spawnPoint);
+                turretCount++;
+            }
+
+            
         }
 
         bool outOfCredits = spawnCredits <= 0;
 
         // Threat Level of 1 means low enemy count Threat Level of 4 should mean you're getting swarmed
 
-        int activeThreat = Globals::Game().GetActiveThreat() / (35 + Globals::Difficulty() * 5 + currentWave * 5);
+        int waveScale = currentWave;
+        if (bossSequence) {
+            waveScale = 10;
+        }
+
+        int activeThreat = Globals::Game().GetActiveThreat() / (35 + Globals::Difficulty() * 5 + waveScale * 8);
         double mercyChance = activeThreat / (2.0 + activeThreat) * 100.0;
 
         if (mercyChance > 60.0) {
-            mercyChance = 50.0;
+            mercyChance = 60.0;
+        }
+
+        if (bossSequence) {
+            mercyChance *= 1.2;
+            if (lastStand) {
+                mercyChance *= 1.2;
+            }
         }
 
         if (rand() % 100 > mercyChance) {
@@ -205,13 +300,13 @@ namespace Game {
 
         // Waits until next spawns. If out of credits, advances the counter to current next spawns
         if (counter <= nextSpawns) {
-            if (outOfCredits) {
+            if (outOfCredits && !bossSequence) {
                 counter = nextSpawns;
             }
             return;
         }
 
-        if (outOfCredits) {
+        if (outOfCredits && !bossSequence) {
             int enemiesAlive = Globals::Game().GetAliveEnemyCount();
             if (enemiesAlive < 3) {
                 // Turrets get disabled, dropping one ammo pack
@@ -226,6 +321,25 @@ namespace Game {
                 waveText.SetText("Wave cleared!");
                 Globals::Audio().PlaySound("NextWave");
             }
+
+            // Start Boss sequence on wave 7
+            if (!bossSequence && currentWave == 6) {
+                Globals::Audio().StopMusic();
+                audioStartDelay = 60;
+                bossSequence = true;
+
+                // Scope Start
+                {
+                    uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, Vector2(1200, 1000) + Vector2::NormalVector(rand() % 360) * 255);
+                    Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
+                    if (pack != nullptr) {
+                        pack->SetHealthToGrant(200);
+                    }
+                }
+                // Scope end
+            }
+
+
             currentWave++;
             currentSpawnCount.fill(0);
 
@@ -239,9 +353,16 @@ namespace Game {
             return;
         }
 
-        waveText.SetText("Wave " + std::to_string(currentWave));
+        
 
-        RunWaveSpawnLogic();
+        if (bossSequence) {
+            RunBossSpawnLogic();
+            waveText.SetText("Last Fight");
+        }
+        else {
+            RunWaveSpawnLogic();
+            waveText.SetText("Wave " + std::to_string(currentWave));
+        }
 
         counter = 0;
     }
@@ -285,12 +406,12 @@ namespace Game {
         // Fighter, Swordsman, Zerk - in this order
         array<int, dynamicSpawnListSize> dynamicSpawnsLimits = {
             1337,
-            2 + (currentWave >= 4 ? 1 : 0) + (currentWave >= 7 ? 1 : 0),
-            2 + (currentWave >= 6 ? 1 : 0) + (currentWave >= 8 ? 1 : 0)
+            2 + (currentWave >= 4 ? 1 : 0) + (currentWave >= 6 ? 1 : 0),
+            2 + (currentWave >= 6 ? 1 : 0)
         };
 
         // This code may get expanded for other turret types in the deep dark future. For now, there's only Gun Turrets
-        int turretLimit = 1 + (currentWave > 5 ? 1 : 0) + (currentWave > 7 ? 1 : 0) + (Globals::Difficulty() > 0 && currentWave > 8 ? 1 : 0);
+        int turretLimit = 1 + (currentWave > 2 ? 1 : 0) + (currentWave > 4 ? 1 : 0) + (Globals::Difficulty() > 0 && currentWave > 5 ? 1 : 0);
 
 
         // Turret spawns here
@@ -391,5 +512,68 @@ namespace Game {
             availableSpawnPoints.erase(spawnPoint);
             spawnsThisSubwave++;
         }
+    }
+
+    void LevelDirector::RunBossSpawnLogic() {
+        if (!bossSpawned) {
+            auto& playerStats = ((Actor*)Globals::ThePlayer())->GetStatsReference();
+            playerStats.maxHealth = Utility::ClampValue(playerStats.maxHealth + 50.0, 0.0, 100.0);
+            playerStats.health = Utility::ClampValue(playerStats.health + 40.0, 0.0, playerStats.maxHealth);
+
+            bossSpawned = true;
+            Globals::Game().AddTheShadow();
+            Globals::Game().GetTheShadow()->GetTransform().position = Game::Vector2(800, 200);
+            Globals::Game().GetTheShadow()->GetTransform().direction = 170.0;
+        }
+
+        Entity* shadow = Globals::Game().GetTheShadow();
+
+        if (shadow == nullptr) {
+            return;
+        }
+
+        nextSpawns = rand() % 30;
+
+        int difficulty = ((ShadowAI*)((Actor*)shadow)->GetAI())->GetDifficultyLevel();
+
+        bool lastStand = ((ShadowAI*)((Actor*)shadow)->GetAI())->InLastStand();
+
+        int enemy = rand() % 3;
+
+        int spawnPoint = rand() % dynamicSpawnPoints.size();
+
+        int chillFactor = Globals::Game().GetActiveThreat() / 4;
+
+        if (enemy == 1 && rand() % 100 < 20 + chillFactor) {
+            // 20% Chance to replace Swordsman spawn with Fighter
+            enemy = 0;
+        }
+
+        if (enemy == 2 && rand() % 100 < 20 + chillFactor) {
+            // Same with Zerk
+            enemy = 0;
+        }
+
+        EntityType enemyToAdd = EntityType::Fighter;
+        switch (enemy) {
+        case 0: {
+            enemyToAdd = EntityType::Fighter;
+            nextSpawns += 100;
+        } break;
+        case 1: {
+            enemyToAdd = EntityType::Knight;
+            nextSpawns += 320;
+        } break;
+        case 2: {
+            enemyToAdd = EntityType::Chaser;
+            nextSpawns += 180;
+        } break;
+        }
+
+        uint64_t ID = Globals::Game().AddEntity(enemyToAdd, dynamicSpawnPoints[spawnPoint].first);
+        Entity* entity = Globals::Game().GetEntity(ID);
+        entity->GetTransform().direction = dynamicSpawnPoints[spawnPoint].second;
+
+        nextSpawns += 420 + difficulty * 2;
     }
 }
