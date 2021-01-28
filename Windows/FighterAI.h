@@ -7,15 +7,19 @@
 namespace Game {
 	class FighterAI : public AI {
 	private:
-		bool strafesLeft;
+		Vector2 lastFramePlayerPos;
+
+		double predictionStrengthToUse;
+
 		int nextStrafeChange;
 		int nextShot;
 		int previousShot;
 		int aimAnnoyance;
 
-		double predictionStrengthToUse;
+		bool strafesLeft;
 
-		Vector2 lastFramePlayerPos;
+		bool seesPlayer;
+
 	public:
 		FighterAI();
 

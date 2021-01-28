@@ -49,13 +49,7 @@ namespace Game {
 
         Entity* player = Globals::ThePlayer();
 
-        double predictionStrength = 0.0;
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
-            predictionStrength = 0.1;
-        }
-        if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
-            predictionStrength = 0.2;
-        }
+        double predictionStrength = 0.05;
 
         Vector2 targetVector = player->GetTransform().position - this->entity->GetTransform().position + (player->GetTransform().position - lastFramePlayerPos) * predictionStrength * 60.0;
 
@@ -66,12 +60,14 @@ namespace Game {
         angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
 
         double turnStrength = angleDelta > 8.0 ? 5.0 : 0.5;
-        if (postSwingDelay > 0) {
-            turnStrength /= 4;
-            turnStrength /= 2.0 - Utility::ClampValue(60.0 - postSwingDelay, 0.0, 60.0) / 60.0 + 1.0;
+        if (postSwingDelay > 55) {
+            turnStrength /= 6;
         }
-        double maxSwingStrength = Globals::Difficulty() + 1.0;
+        double maxSwingStrength = 0.3 * Globals::Difficulty() + 0.6;
         if (entity->GetComponent().GetCurrentAnimationID() == "Knight_Swing" && turnStrength > maxSwingStrength) {
+            if (entity->GetComponent().GetFrame() <= 2 * Globals::Difficulty()) {
+                maxSwingStrength *= 3;
+            }
             turnStrength = maxSwingStrength;
         }
         
@@ -112,23 +108,24 @@ namespace Game {
             else {
                 factor = 1;
             }
-            strafeStrength *= 0.7 * factor + 0.3;
-            forwardStrength *= 0.7 * factor + 0.3;
+            strafeStrength *= (0.7 * factor + 0.3) * 1.2;
+            forwardStrength *= (0.7 * factor + 0.3) * 1.2;
         }
-        else if (postSwingDelay > 60) {
-            strafeStrength /= 4;
-            forwardStrength /= 4;
-        }
-        else if (postSwingDelay > 0) {
-            double factor = (60.0 - postSwingDelay) / 60.0;
-            strafeStrength /= 4 - 3 * factor;
-            forwardStrength /= 4 - 3 * factor;
+        else {
+            if (postSwingDelay > 20) {
+                forwardStrength /= 16;
+                strafeStrength /= 16;
+            }
+            else if (postSwingDelay > 0) {
+                forwardStrength /= 16 - 15 * (20.0 - postSwingDelay) / 20.0;
+                strafeStrength /= 16 - 15 * (20.0 - postSwingDelay) / 20.0;
+            }
         }
 
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength);
         entity->MoveForward(forwardStrength);
 
-        if (entity->GetComponent().GetCurrentAnimationID() != "Knight_Swing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 100) {
+        if (entity->GetComponent().GetCurrentAnimationID() != "Knight_Swing" && distance < 200 && angleDelta < 40.0 && postSwingDelay < 50 + 15 * Globals::Difficulty()) {
             entity->GetComponent().SwitchAnimation("Knight_Swing");
         }
 
@@ -145,7 +142,7 @@ namespace Game {
             if (entity->GetComponent().GetFrame() == 10) {
                 doingSwing = false;
                 sword.UnregisterFromGame();
-                postSwingDelay = 120 - Globals::Difficulty() * 32;
+                postSwingDelay = 140 - Globals::Difficulty() * 20;
             }
         }
 
@@ -171,10 +168,15 @@ namespace Game {
     void KnightAI::OnHitByAttack(Actor* attacker, double damage) {
         if (!EntityIsDeadAF()) {
             double attackAngle = (attacker->GetTransform().position - entity->GetTransform().position).Angle();
-            double angleDelta = abs(attackAngle - entity->GetTransform().direction);
-            angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
-            if (angleDelta < 90.0) {
-                damage *= 0.28;
+            double angleDelta = abs(Math::GetAngleDifference(entity->GetTransform().direction, attackAngle));
+
+            if (angleDelta < 80.0) {
+                if (damage > 50.0) {
+                    // Nerfs high damage attacks
+                    damage -= (damage - 50.0) * 0.5;
+                }
+                damage *= 0.35;
+                damage = damage < 0.0 ? 0.0 : damage;
                 Globals::Audio().PlaySound("ShieldImpact");
             }
             Globals::Audio().PlaySound("HurtBeta");

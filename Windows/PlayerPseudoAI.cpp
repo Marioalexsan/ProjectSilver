@@ -7,12 +7,12 @@
 
 namespace Game {
     PlayerPseudoAI::PlayerPseudoAI():
-        pistolPenaltyCountdown(0),
+        shootPenaltyCountdown(0),
         currentPistolAmmo(12),
         maxPistolAmmo(12),
         wasReloadingPistol(false),
 
-        currentRifleAmmo(15),
+        currentRifleAmmo(30),
         maxRifleAmmo(30),
         rifleAmmoPool(0),
         rifleRecoil(0.0),
@@ -41,8 +41,6 @@ namespace Game {
 
         equippedWeapon(0),
         targetWeaponEquip(-1),
-        
-        smoothSpeed(0.0, 0.0),
         boostVector(0.0, 0.0),
         
         axe(Game::Vector2(0, 0), 60, Game::Collider::ColliderType::Combat),
@@ -319,18 +317,15 @@ namespace Game {
             return;
         }
 
-        if (playerAnimation == "Player_PistolShoot") {
+        if (playerAnimation == "Player_PistolShoot" || playerAnimation == "Player_RifleShoot") {
             // No running and gunning, noob!
-            pistolPenaltyCountdown = 9;
+            shootPenaltyCountdown = 9;
         }
 
         // Move Speed Logic
         double moveSpeed = 9.0;
         if (playerAnimation == "Player_PistolReload" || playerAnimation == "Player_RifleReload") {
             moveSpeed /= 3.0;
-        }
-        else if (playerAnimation == "Player_RifleShoot") {
-            moveSpeed /= 2;
         }
         else if (inShield) {
             moveSpeed /= 1.25;
@@ -352,8 +347,12 @@ namespace Game {
             }
             moveSpeed *= factor * 0.75;
         }
-        else if (pistolPenaltyCountdown > 0) {
-            pistolPenaltyCountdown--;
+        else if (shootPenaltyCountdown > 0) {
+            if (playerAnimation == "Player_RifleShoot") {
+                // Positioning is key while using the rifle
+                moveSpeed /= 1.5;
+            }
+            shootPenaltyCountdown--;
             moveSpeed /= 1.7;
         }
 
@@ -415,6 +414,7 @@ namespace Game {
         }
         if ((!game.Input.IsButtonDown(ButtonCode::Right) || shieldRegenCounter < 0) && playerAnimation == "Player_ShieldWalk") {
             entity->GetComponent().SwitchAnimation("Player_ShieldDown");
+            hasPerfectGuarded = false;
             perfectGuardCounter = 0;
             shieldFadeOutDelay = 30;
         }
@@ -556,31 +556,27 @@ namespace Game {
     void PlayerPseudoAI::OnHitByAttack(Actor* attacker, double damage) {
         if (entity != nullptr) {
             auto& stats = entity->GetStatsReference();
-            if (stats.invulnerable) {
+            if (stats.invulnerable || stats.currentInvincibilityFrames > 0 || damage < 0.0) {
                 return;
             }
-            if (damage < 0.0) {
-                return;
-            }
-            if (stats.currentInvincibilityFrames > 0) {
-                return;
-            }
-            stats.currentInvincibilityFrames = stats.onHitInvincibilityFrames;
-
 
             bool shieldBlock = false;
             if (inShield) {
                 auto attackAngle = (attacker->GetTransform().position - entity->GetTransform().position).Angle();
-                auto angleDelta = abs(attackAngle - entity->GetTransform().direction);
-                angleDelta = angleDelta > 180.0 ? 360.0 - angleDelta : angleDelta;
-                if (angleDelta < 90.0) {
+                auto angleDelta = abs(Math::GetAngleDifference(entity->GetTransform().direction, attackAngle));
+                if (angleDelta < 100.0) {
                     shieldBlock = true;
                 }
             }
             if (shieldBlock) {
                 if (perfectGuardCounter > 0) {
                     damage *= 0.25;
+                    hasPerfectGuarded = true;
                 }
+                else {
+                    hasPerfectGuarded = false;
+                }
+                stats.currentInvincibilityFrames = 2;
                 stats.shieldHealth -= damage;
                 shieldRegenCounter = 0;
                 if (stats.shieldHealth <= 0.0) {
@@ -590,9 +586,8 @@ namespace Game {
                     Globals::Audio().PlaySound("ShieldBreak");
                 }
                 else {
-                    if (perfectGuardCounter > 0) {
+                    if (hasPerfectGuarded) {
                         Globals::Audio().PlaySound("PerfectGuard");
-                        hasPerfectGuarded = true;
                     }
                     else {
                         Globals::Audio().PlaySound("ShieldImpact");
@@ -600,6 +595,7 @@ namespace Game {
                 }
             }
             else {
+                stats.currentInvincibilityFrames = stats.onHitInvincibilityFrames;
                 stats.health -= damage;
                 regenCounter = -120 - Globals::Difficulty() * 20;
                 if (stats.health > 0.0) {
@@ -610,13 +606,13 @@ namespace Game {
                     stats.health = 0.0;
                     if (stats.maxHealth <= 0.0) {
                         OnDeath();
-                        std::cout << "Your guy is DEAD!" << endl;
                     }
                     else {
                         Globals::Audio().PlaySound("PlayerHurt");
                     }
                 }
             }
+            Globals::Audio().PlaySound("HurtBeta");
         }
     }
 

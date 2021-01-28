@@ -67,6 +67,10 @@ namespace Game {
 			alsoSignalEntityDestruction = mode;
 		}
 
+		inline bool IsRegistered() {
+			return colliderGameMasterID != 0;
+		}
+
 		inline vector<Entity*>& GetHitList() { return hitEntities; }
 
 		void SignalDestruction();

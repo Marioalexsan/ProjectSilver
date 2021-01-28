@@ -9,14 +9,21 @@ namespace Game {
 
 	class AI {
 	protected:
+		Actor* entity;
+
+		Vector2 smoothSpeed;
+
 		int counter;
 		int disableUpdatesCounter;
 		int destroyDelay;
 
-		Actor* entity;
-
 		bool EntityIsDeadAF();
 		bool ProcessGenericDestroyDelay();
+
+		bool DelayedSpawningLogic();
+		bool PlayerIsUnavailable();
+		bool HasPlayerLineOfSight();
+		bool HasLineOfSight(Vector2 point);
 
 	public:
 		AI(Actor* owner);
@@ -31,8 +38,6 @@ namespace Game {
 		inline Actor* GetEntity() {
 			return entity;
 		}
-
-		bool DelayedSpawningLogic();
 
 		virtual void OnAttackHit() = 0;
 		virtual void OnHitByAttack(Actor* attacker, double damage) = 0;

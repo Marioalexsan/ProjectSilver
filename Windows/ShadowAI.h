@@ -56,7 +56,6 @@ namespace Game {
 		void CounterLogic();
 		void SwingAxe();
 		double CalculateSwingFactor();
-		bool HasLineOfSight();
 
 
 		void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);

@@ -42,11 +42,9 @@ namespace Game {
 
 		int equippedWeapon;
 		int targetWeaponEquip;
-		int pistolPenaltyCountdown;
+		int shootPenaltyCountdown;
 		
-		Vector2 smoothSpeed;
 		Vector2 boostVector;
-
 
 		SphereCollider axe;
 

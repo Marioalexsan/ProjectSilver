@@ -67,41 +67,24 @@ namespace Game {
         hp.UnregisterFromGame();
     }
 
-    bool ShadowAI::HasLineOfSight() {
-        auto results = Globals::Game().CreateRayCastHitList(entity->GetCollider().GetPosition(), ((Actor*)Globals::ThePlayer())->GetCollider().GetPosition());
-
-        if (results.size() > 1) {
-            // Collide with first result that is a static collider
-            Collider* hit = nullptr;
-            double distance = 0.0;
-            for (auto& elem : results) {
-                auto entity = elem.second->GetEntity();
-                if (elem.second->GetColliderType() == Collider::ColliderType::Static) {
-                    hit = elem.second;
-                    distance = elem.first;
-                    break;
-                }
-            }
-            if (hit != nullptr) {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
+    
 
     int ShadowAI::GetDifficultyLevel() {
-        int difficulty = Globals::Difficulty() * 3;
+        int difficulty = Globals::Difficulty() * 2;
         auto& stats = entity->GetStatsReference();
 
         double healthRatio = stats.health / stats.maxHealth;
 
-        if (stats.health < 80.0) { difficulty++; }
-        if (stats.health < 50.0) { difficulty++; }
-        if (stats.health < 30.0) { difficulty++; }
+        if (healthRatio < 0.8) { difficulty++; }
+        if (healthRatio < 0.5) { difficulty++; }
+        if (healthRatio < 0.3) { difficulty++; }
 
         if (lastStand) {
-            difficulty += 6;
+            difficulty += 5;
+
+            if (healthRatio < 0.4 + Globals::Difficulty() * 0.15) {
+                difficulty++;
+            }
         }
 
         return difficulty;
@@ -234,7 +217,7 @@ namespace Game {
         double movePredictionStrength = 0.02;
 
         if (counter % 7 == 0) {
-            seesPlayer = HasLineOfSight();
+            seesPlayer = HasPlayerLineOfSight();
         }
 
         if (action != Actions::PistolRetaliation) {
@@ -250,8 +233,13 @@ namespace Game {
         
         
 
-        if (action != Actions::Recovery && painCounter > 100) {
-            painCounter--;
+        if (action != Actions::Recovery) {
+            if (painCounter >= 100) {
+                painCounter--;
+            }
+            if (painCounter >= 200) {
+                painCounter --;
+            }
         }
 
         if (action == Actions::Recovery && painCounter <= 0 && entity->GetComponent().GetCurrentAnimationID() == "Shadow_Recovery") {
@@ -319,24 +307,28 @@ namespace Game {
         double maxForwardStrength = 4.8 + 15.0 / 12.0;
         double baseForwardStrength = 4.8 + currentDifficulty / 12.0;
         double forwardStrength = baseForwardStrength;
-        if (painCounter <= 20) {
+        if (painCounter <= 40) {
             forwardStrength *= 1.1;
         }
-        if (painCounter >= 60) {
-            forwardStrength *= 0.9;
+        else if (painCounter >= 120) {
+            forwardStrength *= 0.84;
         }
-        if (painCounter >= 90) {
+        else if (painCounter >= 70) {
             forwardStrength *= 0.9;
         }
 
         double strafeStrength = 0.0;
 
-        if (counter % 6 == 0) {
+
+
+        if ((lastStand || entity->GetComponent().GetCurrentAnimationID() == "Shadow_AxeSwing") && counter % 5 == 0) {
             int frame = entity->GetComponent().GetFrame();
             if (frame == -1) {
                 frame = 0;
             }
-            Globals::Game().CreateAfterImageEffect(entity->GetTransform(), entity->GetComponent().GetCurrentAnimationID(), frame);
+            Game::Transform tform = entity->GetTransform();
+            tform.position += Vector2::NormalVector(entity->GetTransform().direction) * -1 * (rand() % 6) + Vector2::NormalVector(rand() % 360) * 4;
+            Globals::Game().CreateAfterImageEffect(tform, entity->GetComponent().GetCurrentAnimationID(), frame);
         }
 
         // Movement logic related switch

@@ -44,14 +44,16 @@ namespace Game {
         }),
         audioStartDelay(60),
         spawnCredits(0),
-        currentWave(0),
+        currentWave(6),
         nextSpawns(0),
         counter(0),
         resetCounter(0),
         currentSpawnCount({ 0, 0, 0 }),
         didTurretSpawns(false),
         bossSequence(false),
-        bossSpawned(false)
+        bossSpawned(false),
+        didBossTurrets(false),
+        ressuplyCounter(0)
     {
         auto& ProjectSilver = Globals::Game();
 
@@ -184,7 +186,9 @@ namespace Game {
                 else if (deadBoss) {
                     player->GetStatsReference().invulnerable = true;
                     Globals::Graphics().SetGameWinFadeout(resetCounter / 2.7);
+                    Globals::Audio().SetMusicVolume(Globals::Audio().GetMusicVolume() - 0.2);
                     if (resetCounter == 300) {
+                        Globals::Audio().SetMusicVolume(100);
                         toBeDestroyed = true;
                         Globals::Game().InitMenu();
                     }
@@ -218,14 +222,17 @@ namespace Game {
                     }
                 }
                 ressuplyCounter = 0;
-                auto& stats = ((Actor*)Globals::ThePlayer())->GetStatsReference();
-                if (stats.maxHealth <= 95.0) {
-                    uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, staticSpawnPoints[rand() % staticSpawnPoints.size()].first + Vector2::NormalVector(rand() % 360) * 55);
-                    Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
-                    if (pack != nullptr) {
-                        pack->SetHealthToGrant(18 - 3 * Globals::Difficulty());
+                auto player = Globals::ThePlayer();
+                if (player != nullptr) {
+                    auto& stats = ((Actor*)player)->GetStatsReference();
+                    if (Globals::Game().GetEntityCountOfType(EntityType::MedkitThing) < 2 && stats.maxHealth + stats.health <= 65.0) {
+                        uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, staticSpawnPoints[rand() % staticSpawnPoints.size()].first + Vector2::NormalVector(rand() % 360) * 55);
+                        Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
+                        if (pack != nullptr) {
+                            pack->SetHealthToGrant(18 - 3 * Globals::Difficulty());
+                        }
+                        ressuplyCounter -= 570 + 180 * Globals::Difficulty();
                     }
-                    ressuplyCounter -= 570 + 180 * Globals::Difficulty();
                 }
             }
         }
@@ -323,19 +330,34 @@ namespace Game {
             }
 
             // Start Boss sequence on wave 7
-            if (!bossSequence && currentWave == 6) {
-                Globals::Audio().StopMusic();
-                audioStartDelay = 60;
-                bossSequence = true;
+            if (!bossSequence) {
+                if (currentWave == 6) {
+                    Globals::Audio().StopMusic();
+                    audioStartDelay = 60;
+                    bossSequence = true;
 
-                // Scope Start
-                {
-                    uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, Vector2(1200, 1000) + Vector2::NormalVector(rand() % 360) * 255);
-                    Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
-                    if (pack != nullptr) {
-                        pack->SetHealthToGrant(200);
+                    for (int i = 0; i < 3; i++) {
+                        uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, Vector2(1200, 1000) + Vector2::NormalVector(rand() % 360) * 255);
+                        Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
+                        if (pack != nullptr) {
+                            pack->SetHealthToGrant(18 - 3 * Globals::Difficulty());
+                        }
                     }
                 }
+                else {
+                    auto player = Globals::ThePlayer();
+                    if (player != nullptr) {
+                        auto& stats = ((Actor*)player)->GetStatsReference();
+                        if (Globals::Game().GetEntityCountOfType(EntityType::MedkitThing) < 2 && stats.maxHealth + stats.health <= 75.0) {
+                            uint64_t ID = Globals::Game().AddEntity(EntityType::MedkitThing, Vector2(1200, 1000) + Vector2::NormalVector(rand() % 360) * 255);
+                            Medkit* pack = (Medkit*)Globals::Game().GetEntity(ID);
+                            if (pack != nullptr) {
+                                pack->SetHealthToGrant(18 - 3 * Globals::Difficulty());
+                            }
+                        }
+                    }
+                }
+                
                 // Scope end
             }
 
@@ -574,6 +596,6 @@ namespace Game {
         Entity* entity = Globals::Game().GetEntity(ID);
         entity->GetTransform().direction = dynamicSpawnPoints[spawnPoint].second;
 
-        nextSpawns += 420 + difficulty * 2;
+        nextSpawns += 350 + difficulty * 2;
     }
 }

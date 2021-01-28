@@ -19,7 +19,7 @@ namespace Game {
 			double shieldHealth;
 			double maxShieldHealth;
 
-			double knockbackResistance; // 0-100%
+			double knockbackResistance; // UNIMPLEMENTED
 
 			bool invulnerable;
 			bool isDead;

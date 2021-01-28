@@ -290,6 +290,17 @@ namespace Game {
 		return count;
 	}
 
+	int GameMaster::GetEntityCountOfType(EntityType searchType) {
+		int count = 0;
+		for (auto& entity : entityMasterList) {
+			auto type = entity.second->GetType();
+			if (type == searchType) {
+				count++;
+			}
+		}
+		return count;
+	}
+
 	int GameMaster::GetActiveThreat() {
 		int threat = 0;
 		for (auto& entity : entityMasterList) {
@@ -726,7 +737,7 @@ namespace Game {
 			{ {AnimationCriteria::TriggerAtFrameX, "16"}, {AnimationInstruction::PlaySound, "PlayerReload2"} },
 			{ {AnimationCriteria::TriggerAtFrameX, "19"}, {AnimationInstruction::PlaySound, "PlayerReload3"} }
 			}));
-		SetAnimationInfo("Player_RifleReload", { 6, 21, 1, LoopMode::PlayOnce });
+		SetAnimationInfo("Player_RifleReload", { 5, 21, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_RifleReload", Vector2(48, 67));
 
 		AddAnimation("Player_ShieldUp", Animation("Player_ShieldUp", {
@@ -736,7 +747,7 @@ namespace Game {
 		SetAnimationCenter("Player_ShieldUp", Vector2(73, 66));
 
 		AddAnimation("Player_ShieldDown", Animation("Player_ShieldDown", {}));
-		SetAnimationInfo("Player_ShieldDown", { 5, 4, 1, LoopMode::PlayOnce });
+		SetAnimationInfo("Player_ShieldDown", { 2, 4, 1, LoopMode::PlayOnce });
 		SetAnimationCenter("Player_ShieldDown", Vector2(73, 66));
 
 		AddAnimation("Player_ShieldWalk", Animation("Player_ShieldWalk", {}));

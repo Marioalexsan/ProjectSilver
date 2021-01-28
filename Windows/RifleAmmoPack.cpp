@@ -9,6 +9,7 @@ namespace Game {
 		pickUpDelay(30)
 	{
 		collider.UnregisterFromGame();
+		render.SetAlpha(63);
 	}
 
 	RifleAmmoPack::~RifleAmmoPack() {
@@ -16,10 +17,12 @@ namespace Game {
 
 	void RifleAmmoPack::Update() {
 		if (pickUpDelay > 0) {
+			render.SetAlpha((30 - pickUpDelay) * 192 / 30 + 63);
 			pickUpDelay--;
 		}
-		if (pickUpDelay == 0 && !IsDestructionSignalled() && (Globals::ThePlayer()->GetTransform().position - transform.position).Length() < 40.0) {
-			((PlayerPseudoAI*)((Actor*)Globals::ThePlayer())->GetAI())->AddRifleAmmo(ammoToGrant);
+		auto player = Globals::ThePlayer();
+		if (player != nullptr  && !IsDestructionSignalled() && (player->GetTransform().position - transform.position).Length() < 40.0) {
+			((PlayerPseudoAI*)((Actor*)player)->GetAI())->AddRifleAmmo(ammoToGrant);
 			Globals::Audio().PlaySound("PlayerReload3");
 			SignalDestruction();
 		}

@@ -13,16 +13,19 @@ namespace Game {
         nextShot(110 - 15 * Globals::Difficulty() + rand() % 20),
         previousShot(-100),
         lastFramePlayerPos(Vector2::Zero),
+        seesPlayer(true),
         AI()
     {
     }
 
     void FighterAI::Update() {
-        bool skipLogic = DelayedSpawningLogic();
+        if (entity == nullptr) {
+            return;
+        }
 
         counter++;
         
-        if (skipLogic) {
+        if (DelayedSpawningLogic() || ProcessGenericDestroyDelay()) {
             return;
         }
 
@@ -33,12 +36,8 @@ namespace Game {
             nextStrafeChange += 200 - 20 * Globals::Difficulty() + rand() % 200;
         }
 
-        if (entity == nullptr) {
-            return;
-        }
-
-        if (ProcessGenericDestroyDelay()) {
-            return;
+        if (counter % 8 == 0) {
+            seesPlayer = HasPlayerLineOfSight();
         }
 
         Entity* player = Globals::ThePlayer();
@@ -85,16 +84,21 @@ namespace Game {
 
         
 
-        bool playerOutOfAim = (abs(targetDirection - entityDirection) > 30.0 || distance > 600.0);
+        bool playerOutOfAim = abs(targetDirection - entityDirection) > 30.0;
+        bool playerOutOfRange = distance > 700.0;
 
         double shootDirection = 0.0;
 
         if (counter + aimTime == nextShot) {
+            predictionStrengthToUse = 0.10 + rand() % 15 / 100.0;
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Normal) {
-                predictionStrengthToUse = 0.15 + rand() % 15 / 100.0;
+                predictionStrengthToUse = 0.25 + rand() % 15 / 100.0;
             }
             if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard) {
-                predictionStrengthToUse = 0.3 + rand() % 15 / 100.0;
+                predictionStrengthToUse = 0.4 + rand() % 15 / 100.0;
+            }
+            if (distance <= 450.0) {
+                predictionStrengthToUse *= 0.75;
             }
             if (distance <= 300.0) {
                 predictionStrengthToUse *= 0.25;
@@ -104,44 +108,59 @@ namespace Game {
             }
         }
 
+        Vector2 shootVector = targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0;
         
-        
-        if (counter + aimTime > nextShot) {
-            shootDirection = (targetVector + (player->GetTransform().position - lastFramePlayerPos) * predictionStrengthToUse * 60.0).Angle();
-            
-            double shootAngleDelta = abs(shootDirection - entityDirection);
-
-            if (shootAngleDelta > 180.0) {
-                if (shootDirection > 180.0) {
-                    shootAngleDelta = -shootAngleDelta;
-                }
+        bool shouldAim = counter + aimTime > nextShot;
+        if (shouldAim) {
+            if (!seesPlayer) {
+                nextShot += ((double)counter + aimTime - nextShot) * (0.6 - 0.15 * Globals::Difficulty());
             }
             else {
-                if (shootDirection - entityDirection < 0.0) {
-                    shootAngleDelta = -shootAngleDelta;
-                }
             }
+        }
 
-            if (!playerOutOfAim) {
+        
+
+        if (shouldAim) {
+            if (!playerOutOfAim && !playerOutOfRange && seesPlayer) {
                 double amplifiedRatio = (double(nextShot) - counter) / aimTime;
                 amplifiedRatio *= amplifiedRatio;
 
                 forwardStrength *= (0.1 + 0.9 * amplifiedRatio);
-                strafeStrength *= (0.1 + 0.9 * amplifiedRatio);
+                if (seesPlayer) {
+                    strafeStrength *= (0.1 + 0.9 * amplifiedRatio);
+                }
+                else {
+                    strafeStrength *= (0.4 + 0.6 * amplifiedRatio);
+                }
             }
 
-            shootAngleDelta = Utility::ClampValue(shootAngleDelta, -18.0, 18.0);
+            shootDirection = shootVector.Angle();
+
+            double shootAngleDelta = Math::GetAngleDifference(entityDirection, shootDirection);
+
+            shootAngleDelta = Utility::ClampValue(shootAngleDelta, -4.8, 4.8);
+
+            if (!seesPlayer) {
+                shootAngleDelta *= 0.24;
+            }
             
-            entity->GetTransform().direction += shootAngleDelta * 0.3;
-            entity->GetTransform().direction = Utility::ScrollValue(entity->GetTransform().direction, 0.0, 360.0);
+            entity->Rotate(shootAngleDelta);
+        }
+
+        if (!seesPlayer) {
+            strafeStrength += 1.2;
+            strafeStrength *= 1.2;
         }
 
         entity->Move(Vector2::NormalVector(strafeAngle) * strafeStrength);
 
         entity->MoveForward(forwardStrength);
 
-        if (counter > nextShot) {
-            if (playerOutOfAim && aimAnnoyance <= 16) {
+       
+
+        if (counter >= nextShot) {
+            if (!seesPlayer || playerOutOfRange && aimAnnoyance <= 16) {
                 nextShot += 6;
                 aimAnnoyance++;
                 return;
@@ -152,7 +171,7 @@ namespace Game {
             entity->GetComponent().SwitchAnimation("Player_PistolShoot");
             uint64_t bulletID = Globals::Game().AddEntity(EntityType::FighterBulletProjectile, entity->GetTransform().position + Vector2::NormalVector(entity->GetTransform().direction) * 40);
             Entity* theBullet = Globals::Game().GetEntity(bulletID);
-            theBullet->GetTransform().direction = Utility::ScrollValue(entityDirection + (shootDirection - entityDirection) * 0.18, 0.0, 360.0);
+            theBullet->GetTransform().direction = Utility::ScrollValue(entityDirection + (shootDirection - entityDirection) * 0.06, 0.0, 360.0);
             previousShot = nextShot;
             nextShot += 110 - 15 * Globals::Difficulty() + rand() % 20;
         }
