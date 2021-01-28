@@ -44,7 +44,7 @@ namespace Game {
         }),
         audioStartDelay(60),
         spawnCredits(0),
-        currentWave(6),
+        currentWave(0),
         nextSpawns(0),
         counter(0),
         resetCounter(0),
