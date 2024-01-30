@@ -1,5 +1,8 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/RenderComponent.hpp>
+
+module ProjectSilver.RenderComponent;
 
 namespace Game {
 	RenderComponent::RenderComponent() :

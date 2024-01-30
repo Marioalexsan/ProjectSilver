@@ -1,5 +1,9 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/FighterBullet.hpp>
+
+module ProjectSilver.FighterBullet;
+import ProjectSilver.Globals;
 
 namespace Game {
 	FighterBullet::FighterBullet() :

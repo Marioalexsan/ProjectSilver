@@ -1,5 +1,8 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Effect.hpp>
+
+module ProjectSilver.Effect;
 
 namespace Game {
 	Effect::Effect():

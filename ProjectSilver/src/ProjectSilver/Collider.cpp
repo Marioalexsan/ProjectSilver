@@ -1,7 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Collider.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/Entity.hpp>
+
+module ProjectSilver.Collider;
+import ProjectSilver.Globals;
+import ProjectSilver.Entity;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	Collider::Collider():

@@ -1,8 +1,12 @@
-#include <ProjectSilver/AudioEngine.hpp>
-#include <ProjectSilver/ConfigHandler.hpp>
-#include <ProjectSilver/Globals.hpp> // Also includes the required AssetManager
-#include <ProjectSilver/LogHandler.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.AudioEngine;
+import ProjectSilver.Globals;
+import ProjectSilver.ConfigHandler;
+import ProjectSilver.LogHandler;
+import ProjectSilver.MiscUtility;
 
 namespace Game
 {

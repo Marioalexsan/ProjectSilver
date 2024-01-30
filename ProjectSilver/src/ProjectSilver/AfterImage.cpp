@@ -1,6 +1,9 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/AfterImage.hpp>
-#include <ProjectSilver/Globals.hpp>
+
+module ProjectSilver.AfterImage;
+import ProjectSilver.Globals;
 
 namespace Game {
 	AfterImage::AfterImage():

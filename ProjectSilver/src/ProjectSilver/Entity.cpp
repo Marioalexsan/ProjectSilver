@@ -1,6 +1,9 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/AI.hpp>
-#include <ProjectSilver/Entity.hpp>
+
+module ProjectSilver.Entity;
+import ProjectSilver.AI;
 
 namespace Game {
 	Entity::Entity():

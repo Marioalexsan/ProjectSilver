@@ -1,8 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/GunTurretAI.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/RifleAmmoPack.hpp>
+
+module ProjectSilver.GunTurretAI;
+import ProjectSilver.Globals;
+import ProjectSilver.Actor;
+import ProjectSilver.RifleAmmoPack;
 
 namespace Game {
 

@@ -3,7 +3,7 @@ add_executable(ProjectSilver)
 target_compile_features(ProjectSilver PUBLIC cxx_std_23)
 target_include_directories(ProjectSilver PRIVATE "include")
 target_link_libraries(ProjectSilver PRIVATE SFML::Graphics SFML::Audio SFML::System)
-target_precompile_headers(ProjectSilver PRIVATE "include/ProjectSilver/PCHeader.hpp")
+
 target_sources(ProjectSilver
   PUBLIC
     "src/ProjectSilver/Actor.cpp"
@@ -25,9 +25,9 @@ target_sources(ProjectSilver
     "src/ProjectSilver/FighterAI.cpp"
     "src/ProjectSilver/FighterBullet.cpp"
     "src/ProjectSilver/GameMaster.cpp"
-    "src/ProjectSilver/Globals.cpp"
     "src/ProjectSilver/GraphicsEngine.cpp"
     "src/ProjectSilver/GunTurretAI.cpp"
+    "src/ProjectSilver/Globals.cpp"
     "src/ProjectSilver/InputHandler.cpp"
     "src/ProjectSilver/KnightAI.cpp"
     "src/ProjectSilver/LevelDirector.cpp"
@@ -36,9 +36,7 @@ target_sources(ProjectSilver
     "src/ProjectSilver/Medkit.cpp"
     "src/ProjectSilver/MenuDirector.cpp"
     "src/ProjectSilver/MiscUtility.cpp"
-    
     "src/ProjectSilver/PCHeader.cpp"
-    "src/ProjectSilver/Player.cpp"
     "src/ProjectSilver/PlayerPseudoAI.cpp"
     "src/ProjectSilver/RenderComponent.cpp"
     "src/ProjectSilver/RifleAmmoPack.cpp"
@@ -47,4 +45,49 @@ target_sources(ProjectSilver
     "src/ProjectSilver/SphereCollider.cpp"
     "src/ProjectSilver/Sprite.cpp"
     "src/ProjectSilver/Tracer.cpp"
+)
+
+target_sources(ProjectSilver
+  PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES FILES
+    # Common module
+    
+    # Sources
+    "src/ProjectSilver/Actor.ixx"
+    "src/ProjectSilver/AnimatedSprite.ixx"
+    "src/ProjectSilver/Animation.ixx"
+    "src/ProjectSilver/AfterImage.ixx"
+    "src/ProjectSilver/AssetManager.ixx"
+    "src/ProjectSilver/AudioEngine.ixx"
+    "src/ProjectSilver/AI.ixx"
+    "src/ProjectSilver/BasicText.ixx"
+    "src/ProjectSilver/BoxCollider.ixx"
+    "src/ProjectSilver/ChaserAI.ixx"
+    "src/ProjectSilver/Collider.ixx"
+    "src/ProjectSilver/CollisionMaster.ixx"
+    "src/ProjectSilver/ConfigHandler.ixx"
+    "src/ProjectSilver/Drawable.ixx"
+    "src/ProjectSilver/Effect.ixx"
+    "src/ProjectSilver/Entity.ixx"
+    "src/ProjectSilver/FighterAI.ixx"
+    "src/ProjectSilver/FighterBullet.ixx"
+    "src/ProjectSilver/GameMaster.ixx"
+    "src/ProjectSilver/Globals.ixx"
+    "src/ProjectSilver/GraphicsEngine.ixx"
+    "src/ProjectSilver/GunTurretAI.ixx"
+    "src/ProjectSilver/InputHandler.ixx"
+    "src/ProjectSilver/KnightAI.ixx"
+    "src/ProjectSilver/LevelDirector.ixx"
+    "src/ProjectSilver/LogHandler.ixx"
+    "src/ProjectSilver/Medkit.ixx"
+    "src/ProjectSilver/MenuDirector.ixx"
+    "src/ProjectSilver/MiscUtility.ixx"
+    "src/ProjectSilver/PlayerPseudoAI.ixx"
+    "src/ProjectSilver/RenderComponent.ixx"
+    "src/ProjectSilver/RifleAmmoPack.ixx"
+    "src/ProjectSilver/SphereCollider.ixx"
+    "src/ProjectSilver/ShadowAI.ixx"
+    "src/ProjectSilver/ShadowHPBar.ixx"
+    "src/ProjectSilver/Sprite.ixx"
+    "src/ProjectSilver/Tracer.ixx"
 )

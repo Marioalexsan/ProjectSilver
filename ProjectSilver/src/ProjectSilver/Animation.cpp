@@ -1,5 +1,8 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Animation.hpp>
+
+module ProjectSilver.Animation;
 
 namespace Game {
 	Animation::Animation(const std::string& textureID, const std::vector<Action>& actions) {

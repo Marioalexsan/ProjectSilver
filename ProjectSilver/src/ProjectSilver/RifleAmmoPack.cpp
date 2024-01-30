@@ -1,6 +1,10 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/RifleAmmoPack.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
+
+module ProjectSilver.RifleAmmoPack;
+import ProjectSilver.PlayerPseudoAI;
+import ProjectSilver.Globals;
 
 namespace Game {
 	RifleAmmoPack::RifleAmmoPack() :

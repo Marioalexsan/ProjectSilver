@@ -1,6 +1,9 @@
-#include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/BoxCollider.hpp>
+module;
 
+#include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.BoxCollider;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	BoxCollider::BoxCollider():

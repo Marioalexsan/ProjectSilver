@@ -1,9 +1,12 @@
-#include <ProjectSilver/CollisionMaster.hpp>
-#include <ProjectSilver/ConfigHandler.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/MenuDirector.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.MenuDirector;
+import ProjectSilver.Globals;
+import ProjectSilver.ConfigHandler;
+import ProjectSilver.LogHandler;
+import ProjectSilver.CollisionMaster;
 
 namespace Game
 {

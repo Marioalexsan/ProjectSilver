@@ -1,9 +1,12 @@
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
-#include <ProjectSilver/InputHandler.hpp>
-#include <ProjectSilver/MiscUtility.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 #include <numeric>
+
+module ProjectSilver.InputHandler;
+import ProjectSilver.Globals;
+import ProjectSilver.GraphicsEngine;
+import ProjectSilver.MiscUtility;
 
 using SFKey    = sf::Keyboard::Key;
 using SFButton = sf::Mouse::Button;

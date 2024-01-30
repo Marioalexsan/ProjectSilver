@@ -1,7 +1,10 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 
-#include <ProjectSilver/Sprite.hpp>
-#include <ProjectSilver/Globals.hpp>
+module ProjectSilver.Sprite;
+import ProjectSilver.Globals;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	Sprite::Sprite():

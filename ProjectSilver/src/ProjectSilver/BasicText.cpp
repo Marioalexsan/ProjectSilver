@@ -1,7 +1,11 @@
-#include <ProjectSilver/BasicText.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.BasicText;
+import ProjectSilver.Globals;
+import ProjectSilver.GraphicsEngine;
+import ProjectSilver.AssetManager;
 
 namespace Game
 {

@@ -1,7 +1,7 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/ConfigHandler.hpp>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -9,7 +9,9 @@
 #include <sstream>
 #include <ctime>
 
-#include <ProjectSilver/Globals.hpp>
+module ProjectSilver.LogHandler;
+import ProjectSilver.Globals;
+import ProjectSilver.ConfigHandler;
 
 namespace Game {
     bool LogHandler::hasStartedActionLog = false;

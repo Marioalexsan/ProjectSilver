@@ -1,7 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/AI.hpp>
+
+module ProjectSilver.Actor;
+import ProjectSilver.Globals;
+import ProjectSilver.MiscUtility;
+import ProjectSilver.AI;
 
 namespace Game {
 	Actor::Actor(AI* brain) :

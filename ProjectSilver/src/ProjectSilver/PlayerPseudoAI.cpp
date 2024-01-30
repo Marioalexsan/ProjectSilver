@@ -1,7 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/Actor.hpp>
+
+module ProjectSilver.PlayerPseudoAI;
+import ProjectSilver.Globals;
+import ProjectSilver.GraphicsEngine;
+import ProjectSilver.Actor;
 
 // This is an AI in name only. This class interfaces with inputs, providing behavior for the Player's character
 

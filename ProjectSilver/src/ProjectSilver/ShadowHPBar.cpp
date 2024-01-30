@@ -1,6 +1,9 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/ShadowHPBar.hpp>
-#include <ProjectSilver/Globals.hpp>
+
+module ProjectSilver.ShadowHPBar;
+import ProjectSilver.Globals;
 
 namespace Game {
 	ShadowHPBar::ShadowHPBar():

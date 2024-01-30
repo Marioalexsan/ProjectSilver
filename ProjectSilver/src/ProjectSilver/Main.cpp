@@ -12,17 +12,18 @@ using std::endl;
 
 #include <chrono>
 
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/GameMaster.hpp>
-#include <ProjectSilver/Sprite.hpp>
-#include <ProjectSilver/BasicText.hpp>
-#include <ProjectSilver/AnimatedSprite.hpp>
-#include <ProjectSilver/RenderComponent.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/CollisionMaster.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
-#include <ProjectSilver/FighterAI.hpp>
+import ProjectSilver.GameMaster;
+import ProjectSilver.Globals;
+import ProjectSilver.Actor;
+import ProjectSilver.RenderComponent;
+import ProjectSilver.LogHandler;
+import ProjectSilver.Sprite;
+import ProjectSilver.BasicText;
+import ProjectSilver.AnimatedSprite;
+import ProjectSilver.CollisionMaster;
+import ProjectSilver.PlayerPseudoAI;
+import ProjectSilver.FighterAI;
+import ProjectSilver.GraphicsEngine;
 
 bool SystemInit() {
     Game::GraphicsEngine::Window = std::make_unique<sf::RenderWindow>(sf::VideoMode{{1600, 900}},

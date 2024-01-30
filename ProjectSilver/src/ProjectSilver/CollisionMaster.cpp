@@ -1,5 +1,8 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/CollisionMaster.hpp>
+
+module ProjectSilver.CollisionMaster;
 
 namespace Game {
 	namespace CollisionMaster {

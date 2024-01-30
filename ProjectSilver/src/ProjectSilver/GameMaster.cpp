@@ -1,24 +1,29 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 
-#include <ProjectSilver/GameMaster.hpp>
-#include <ProjectSilver/AI.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
-#include <ProjectSilver/FighterAI.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/FighterBullet.hpp>
-#include <ProjectSilver/LevelDirector.hpp>
-#include <ProjectSilver/MenuDirector.hpp>
-#include <ProjectSilver/KnightAI.hpp>
-#include <ProjectSilver/ChaserAI.hpp>
-#include <ProjectSilver/GunTurretAI.hpp>
-#include <ProjectSilver/RifleAmmoPack.hpp>
-#include <ProjectSilver/ConfigHandler.hpp>
-#include <ProjectSilver/Tracer.hpp>
-#include <ProjectSilver/AfterImage.hpp>
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/ShadowAI.hpp>
-#include <ProjectSilver/Medkit.hpp>
+module ProjectSilver.GameMaster;
+import ProjectSilver.Globals;
+import ProjectSilver.Medkit;
+import ProjectSilver.Actor;
+import ProjectSilver.ConfigHandler;
+import ProjectSilver.PlayerPseudoAI;
+import ProjectSilver.AI;
+import ProjectSilver.FighterAI;
+import ProjectSilver.FighterBullet;
+import ProjectSilver.LevelDirector;
+import ProjectSilver.MenuDirector;
+import ProjectSilver.KnightAI;
+import ProjectSilver.ChaserAI;
+import ProjectSilver.GunTurretAI;
+import ProjectSilver.RifleAmmoPack;
+import ProjectSilver.Tracer;
+import ProjectSilver.AfterImage;
+import ProjectSilver.LogHandler;
+import ProjectSilver.ShadowAI;
+import ProjectSilver.CollisionMaster;
+import ProjectSilver.BoxCollider;
+import ProjectSilver.SphereCollider;
 
 namespace Game {
 	GameMaster::GameMaster() :

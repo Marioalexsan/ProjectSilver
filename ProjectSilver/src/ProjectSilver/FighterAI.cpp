@@ -1,7 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/FighterAI.hpp>
-#include <ProjectSilver/Actor.hpp>
+
+module ProjectSilver.FighterAI;
+import ProjectSilver.Globals;
+import ProjectSilver.Actor;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 

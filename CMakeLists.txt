@@ -1,8 +1,9 @@
 # Project Silver CMakeLists.txt
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.28)
 
 project(ProjectSilver)
 include(FetchContent)
+include(modules/cpp20modules.cmake)
 
 # Fetch SFML 3.0 dependency
 FetchContent_Declare(SFML

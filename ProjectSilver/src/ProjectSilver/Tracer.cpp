@@ -1,6 +1,9 @@
-#include <ProjectSilver/Globals.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Tracer.hpp>
+
+module ProjectSilver.Tracer;
+import ProjectSilver.Globals;
 
 namespace Game
 {

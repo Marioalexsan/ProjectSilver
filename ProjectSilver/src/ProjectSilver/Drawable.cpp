@@ -1,8 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 
-#include <ProjectSilver/Drawable.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
-#include <ProjectSilver/Globals.hpp>
+module ProjectSilver.Drawable;
+import ProjectSilver.Globals;
+import ProjectSilver.GraphicsEngine;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	const Color Color::White = { 255, 255, 255 };

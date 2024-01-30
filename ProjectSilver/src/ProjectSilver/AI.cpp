@@ -1,6 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/AI.hpp>
-#include <ProjectSilver/Actor.hpp>
+
+module ProjectSilver.AI;
+import ProjectSilver.Actor;
+import ProjectSilver.Globals;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	AI::AI(Actor* owner):

@@ -1,7 +1,10 @@
-#include <ProjectSilver/AssetManager.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
-#include <ProjectSilver/LogHandler.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.AssetManager;
+import ProjectSilver.GraphicsEngine;
+import ProjectSilver.LogHandler;
 
 #pragma region Helper Functions
 

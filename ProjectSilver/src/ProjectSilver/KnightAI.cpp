@@ -1,7 +1,10 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/KnightAI.hpp>
-#include <ProjectSilver/Actor.hpp>
+
+module ProjectSilver.KnightAI;
+import ProjectSilver.Globals;
+import ProjectSilver.Actor;
 
 namespace Game {
 

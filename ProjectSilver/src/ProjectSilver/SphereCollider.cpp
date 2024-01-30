@@ -1,5 +1,9 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/SphereCollider.hpp>
+
+module ProjectSilver.SphereCollider;
+import ProjectSilver.MiscUtility;
 
 namespace Game {
 	SphereCollider::SphereCollider():

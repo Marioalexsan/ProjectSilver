@@ -1,6 +1,11 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/Medkit.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
+
+module ProjectSilver.Medkit;
+import ProjectSilver.Actor;
+import ProjectSilver.PlayerPseudoAI;
+import ProjectSilver.Globals;
 
 namespace Game {
 	Medkit::Medkit() :

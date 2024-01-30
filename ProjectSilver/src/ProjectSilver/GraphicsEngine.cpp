@@ -1,6 +1,9 @@
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.GraphicsEngine;
+import ProjectSilver.Globals;
 
 namespace Game
 {

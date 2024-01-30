@@ -1,2 +1,4 @@
 .vs/
 out/
+CMakeUserPresets.json
+/vc140.pdb

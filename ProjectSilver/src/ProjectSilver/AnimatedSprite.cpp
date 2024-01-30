@@ -1,6 +1,9 @@
-#include <ProjectSilver/AnimatedSprite.hpp>
-#include <ProjectSilver/GraphicsEngine.hpp>
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
+
+module ProjectSilver.AnimatedSprite;
+import ProjectSilver.GraphicsEngine;
 
 namespace Game
 {

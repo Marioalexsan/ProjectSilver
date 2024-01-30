@@ -1,6 +1,8 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
 
-#include <ProjectSilver/MiscUtility.hpp>
+module ProjectSilver.MiscUtility;
 
 namespace Game {
 

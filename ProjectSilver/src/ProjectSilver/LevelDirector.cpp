@@ -1,12 +1,15 @@
+module;
+
 #include <ProjectSilver/PCHeader.hpp>
-#include <ProjectSilver/LevelDirector.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/GunTurretAI.hpp>
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/ShadowAI.hpp>
-#include <ProjectSilver/RifleAmmoPack.hpp>
-#include <ProjectSilver/Medkit.hpp>
+
+module ProjectSilver.LevelDirector;
+import ProjectSilver.Medkit;
+import ProjectSilver.Globals;
+import ProjectSilver.Actor;
+import ProjectSilver.GunTurretAI;
+import ProjectSilver.LogHandler;
+import ProjectSilver.ShadowAI;
+import ProjectSilver.RifleAmmoPack;
 
 namespace Game {
     LevelDirector::LevelDirector() :
