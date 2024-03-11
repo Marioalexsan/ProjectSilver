@@ -659,7 +659,7 @@ namespace Game {
 		Assets.LoadSound("PlayerReload1", audioPath + "magout.ogg");
 		Assets.LoadSound("PlayerReload2", audioPath + "magin.ogg");
 		Assets.LoadSound("PlayerReload3", audioPath + "receiverpull.ogg");
-		Assets.LoadSound("GunClick", audioPath + "gunclick.ogg");
+		Assets.LoadSound("GunClick", audioPath + "gunempty.ogg");
 		Assets.LoadSound("SwordSwing", audioPath + "swordswing.ogg");
 		Assets.LoadSound("ShieldImpact", audioPath + "shieldimpact.ogg");
 		Assets.LoadSound("PerfectGuard", audioPath + "perfectguard.ogg");
