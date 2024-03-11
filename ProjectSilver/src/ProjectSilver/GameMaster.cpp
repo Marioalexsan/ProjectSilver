@@ -635,10 +635,10 @@ namespace Game {
 
 		// Fonts
 		const std::string fontPath = "Fonts/";
-		Assets.LoadSpriteFont("Huge", fontPath + "CourierNewHuge_0.png", fontPath + "CourierNewHuge.fnt");
-		Assets.LoadSpriteFont("Big", fontPath + "CourierNewBig_0.png", fontPath + "CourierNewBig.fnt");
-		Assets.LoadSpriteFont("Medium", fontPath + "CourierNewMedium_0.png", fontPath + "CourierNewMedium.fnt");
-		Assets.LoadSpriteFont("Small", fontPath + "CourierNewSmall_0.png", fontPath + "CourierNewSmall.fnt");
+		Assets.LoadSpriteFont("Huge", fontPath + "CourierPrime72_0.png", fontPath + "CourierPrime72.fnt");
+		Assets.LoadSpriteFont("Big", fontPath + "CourierPrime48_0.png", fontPath + "CourierPrime48.fnt");
+		Assets.LoadSpriteFont("Medium", fontPath + "CourierPrime36_0.png", fontPath + "CourierPrime36.fnt");
+		Assets.LoadSpriteFont("Small", fontPath + "CourierPrime24_0.png", fontPath + "CourierPrime24.fnt");
 		
 
 		const std::string audioPath = "Audio/";

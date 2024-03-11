@@ -1,3 +1,24 @@
+# Game Textures
+
+All current game textures are created by Marioalexsan, and are covered under the same license as ProjectSilver (CC-BY-NC-SA 4.0).
+
+[License Text](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+# Game Fonts
+
+The following bitmap fonts (.fnt and .png textures) were generated from Courier Prime:
+- CourierPrime24
+- CourierPrime36
+- CourierPrime48
+- CourierPrime72
+
+### "Courier Prime" by Quote-Unquote Apps
+
+"Courier Prime" is provided under the SIL Open Font License.
+
+[Link](https://quoteunquoteapps.com/courierprime/)
+[License Text](https://openfontlicense.org/open-font-license-official-text/)
+
 # Game Audio
 
 The following audio files are modified, cropped and mixed versions of third-party assets:
@@ -27,8 +48,6 @@ The following audio files are modified, cropped and mixed versions of third-part
 - turretdown.ogg - ["Basic Deactivate.wav" by SirusAmory]
 - turrethurt.ogg - same as shieldimpact.ogg
 - zerkhurt.ogg - ["oof - qdo.wav" by qdo]
-
-# Original Audio
 
 ### "Digital Ghost" by Lucky Lion Studios
 
