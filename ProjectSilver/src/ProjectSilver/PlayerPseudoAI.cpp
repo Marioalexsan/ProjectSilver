@@ -149,14 +149,11 @@ namespace Game {
         if (perfectGuardCounter > 0) { perfectGuardCounter--; }
 
         if (rifleRecoil > 0.0) {
-            rifleRecoil *= 0.98;
-            if (rifleRecoil >= 5.0) {
-                rifleRecoil *= 0.96;
+            if (rifleRecoil >= 3.0) {
+                rifleRecoil -= 0.15;
             }
             rifleRecoil -= 0.1;
-            if (rifleRecoil <= 0.4) {
-                rifleRecoil = 0.0;
-            }
+            rifleRecoil = std::clamp(rifleRecoil, 0.0, 19.0);
         }
 
         // Vignette Counter (periodic)
@@ -183,7 +180,7 @@ namespace Game {
                 
                 if (stats.maxHealth <= 100.0 && stats.health == stats.maxHealth) {
                     stats.maxHealth = Utility::ClampValue(stats.maxHealth += healing, 0.0, 100.0);
-                    regenCounter -= 75 + 15 * difficultySetting;
+                    regenCounter -= 90 + 30 * difficultySetting;
                 }
                 stats.health = Utility::ClampValue(stats.health += healing, 0.0, stats.maxHealth);
             }
@@ -350,7 +347,7 @@ namespace Game {
         else if (shootPenaltyCountdown > 0) {
             if (playerAnimation == "Player_RifleShoot") {
                 // Positioning is key while using the rifle
-                moveSpeed /= 1.5;
+                moveSpeed /= 2.0;
             }
             shootPenaltyCountdown--;
             moveSpeed /= 1.7;
@@ -423,8 +420,8 @@ namespace Game {
         if (game.Input.IsButtonDown(ButtonCode::Left)) {
             if (equippedWeapon == 0 && playerAnimation == "Player_PistolIdle") {
                 if (currentPistolAmmo > 0) {
-                    // 1.5 degree spread
-                    GenericWeaponFireLogic(35.0, -1.5 + rand() % 30 / 10.0);
+                    // 4 degree spread
+                    GenericWeaponFireLogic(35.0, 4);
                     entity->GetComponent().SwitchAnimation("Player_PistolShoot");
                     currentPistolAmmo--;
                 }
@@ -436,9 +433,13 @@ namespace Game {
             }
             else if(equippedWeapon == 1 && (playerAnimation == "Player_RifleIdle" || playerAnimation == "Player_RifleShoot" && entity->GetComponent().GetFrame() == 4)) {
                 if (currentRifleAmmo > 0) {
-                    // 0.5 + rifleRecoil degree spread
-                    GenericWeaponFireLogic(50.0, -rifleRecoil / 2.0 + (rand() % (int(abs(rifleRecoil)) * 10 + 1)) / 10.0);
-                    rifleRecoil += 4.8;
+                    // Max 8 degree spread
+                    GenericWeaponFireLogic(50.0, std::max(rifleRecoil - 3.0, 0.0));
+                    if (rifleRecoil > 3.0)
+                    {
+                        rifleRecoil += 1.2;
+                    }
+                    rifleRecoil += 2.5;
                     entity->GetComponent().SwitchAnimation("Player_RifleShoot");
                     currentRifleAmmo--;
                 }
@@ -618,12 +619,16 @@ namespace Game {
         }
     }
 
-    void PlayerPseudoAI::GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply) {
+    void PlayerPseudoAI::GenericWeaponFireLogic(double damageToDeal, double angleSpread) {
         // Fires a non-piercing round that damages the first entity it hits, if it's an enemy
+
+        double spreadFactor = (rand() % 100) / 100.0;
+        double spreadValue  = (-angleSpread / 2) * (1 - spreadFactor) +
+                             (angleSpread / 2) * spreadFactor;
 
         auto mouse = Globals::Game().Input.GetMousePosition();
         auto shotAngle = (Game::Vector2(mouse.first, mouse.second) - Game::Vector2(960.0, 540.0)).Angle();
-        auto results = Globals::Game().CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle + angleDeltaToApply) * 1800.0 + entity->GetCollider().GetPosition());
+        auto results = Globals::Game().CreateRayCastHitList(entity->GetCollider().GetPosition(), Vector2::NormalVector(shotAngle + spreadValue) * 1800.0 + entity->GetCollider().GetPosition());
         
         double tracerDrawDistance = 1800;
         if (results.size() > 1) {
@@ -652,7 +657,7 @@ namespace Game {
             }
             
         }
-        Vector2 normal = Vector2::NormalVector(shotAngle + angleDeltaToApply);
+        Vector2 normal  = Vector2::NormalVector(shotAngle + spreadValue);
         Vector2 perpend = Vector2::NormalVector(normal.Angle() + 90.0);
         Globals::Game().CreateDefaultTracerEffect(entity->GetCollider().GetPosition() + normal * 50 + perpend * 4, normal * tracerDrawDistance + entity->GetCollider().GetPosition() + perpend * 4 + normal * 3.0);
     }

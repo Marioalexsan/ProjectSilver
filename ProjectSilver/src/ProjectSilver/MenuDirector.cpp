@@ -352,9 +352,9 @@ namespace Game
 
         currentVideoMode = nextVideoMode;
 
-        if (currentVideoMode <= 0)
+        while (currentVideoMode < 0)
         {
-            currentVideoMode = 0;
+            currentVideoMode += resList.size();
         }
         currentVideoMode %= resList.size();
 
@@ -429,7 +429,18 @@ namespace Game
             case MenuState::Options:
             {
                 if (Globals::Game().Input.IsButtonPressedThisFrame(
-                        InputHandler::ButtonCode::Left))
+                        InputHandler::ButtonCode::Right))
+                {
+                    std::pair<int, int> pos = Globals::Game().Input.GetMousePosition();
+                    if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second),
+                                                         optionsRes.col))
+                    {
+                        ChangeResolution(currentVideoMode - 1);
+                        doClick = true;
+                    }
+                }
+                else if (Globals::Game().Input.IsButtonPressedThisFrame(
+                             InputHandler::ButtonCode::Left))
                 {
                     std::pair<int, int> pos = Globals::Game().Input.GetMousePosition();
                     if (CollisionMaster::PointCheckVSBox(Vector2(pos.first, pos.second),
@@ -510,15 +521,15 @@ namespace Game
             {// Shield
              "You can shield against attacks with Right Mouse Button.",
              "Your Shield will break if it takes too much damage.",
-             "Shielding just as an attack hits you will cause a Perfect Guard, reducing "
-             "the damage the shield takes.",
+             "Shielding just as an attack hits you will greatly reduce the damage taken "
+             "by the shield.",
              "If your Shield breaks, you will be immune to damage for a very short time. "
              "Use this moment to get to safety!",
 
              // Gun stuff
              "You can swap to your Pistol with \"1\", and to your Rifle with \"2\".",
-             "The Rifle is strong, but has limited ammunition, and is affected by "
-             "recoil.",
+             "The Rifle is strong, but has limited ammunition, and becomes inaccurate "
+             "when firing continuously.",
              "Gun Turrets that deactivate drop a Rifle Ammo Pack; destroyed Gun Turrets "
              "drop two.",
              "The Pistol has infinite ammo, but a limited magazine capacity.",
@@ -534,29 +545,29 @@ namespace Game
              "or use your Rifle to destroy them quickly.",
              "Berserkers will kill you quickly if you let them get close. Luckily, they "
              "slow down if hurt.",
-             "Fighters wield Pistols! Unfortunately for them, you can dodge their "
-             "predictable bullets.",
-             "Knights wield a Shield that block most damage from the front! Hit them in "
-             "the back where they're vulnerable.",
-
+             "Fighters wield Pistols! On higher difficulties, they try to predict where "
+             "you'll go, and shoot in that direction.",
+             "Knights wield a Shield that blocks damage from the front! You can take "
+             "them down faster by hitting them in the back.",
 
              // Other
              "You can interrupt most animations by shielding or doing a melee attack. A "
              "melee attack can't be interrupted, however.",
 
              // Player
-             "You regenerate your Health over time.",
+             "You slowly regenerate your Health over time.",
              "If your Health goes below 0, damage will reduce your Max Health instead. "
              "When that hits 0, you die.",
              "If your Health is equal to your Max Health, both will start regenerating "
-             "until 100 at a very slow rate.",
+             "until 100 at a very, very slow rate.",
              "You move slower while Shooting or Shielding. Reloading, however, slows you "
              "down to a crawl.",
+             "Shooting with the Rifle slows you down much more than the Pistol.",
              "You can press Shift to dash in your current movement direction. You can "
              "also dash during actions!"
 
              // Misc
-             "Check the options menu! You can change your video and audio settings "
+             "Check the options menu! You can change your video and audio settings from "
              "there."};
 
         mainTip.SetText("Tip: " + tipList[rand() % (tipList.size() - 1)]);
