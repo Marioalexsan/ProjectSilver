@@ -220,6 +220,7 @@ namespace Game
     void MenuDirector::StateEnter(MenuDirector::MenuState state)
     {
         Globals::Graphics().SetGameWinFadeout(0.0);
+        Globals::Graphics().SetGameLoseFadeout(0.0);
         currentState = state;
         switch (currentState)
         {

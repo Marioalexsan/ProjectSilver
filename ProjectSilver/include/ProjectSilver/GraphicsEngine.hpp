@@ -38,6 +38,7 @@ namespace Game
         static const std::map<std::string, VideoMode> VideoModes;
 
         static std::unique_ptr<sf::RenderWindow> Window;
+        static std::unique_ptr<sf::RenderTexture> World;
 
         static const int ResolutionTargetWidth  = 1920;
         static const int ResolutionTargetHeight = 1080;
@@ -58,6 +59,7 @@ namespace Game
         std::map<uint64_t, Drawable*> drawableLibrary;
 
         static double gameWinFadeout;
+        static double gameLoseFadeout;
 
         uint64_t NextID();
 
@@ -83,6 +85,11 @@ namespace Game
         inline void SetGameWinFadeout(double value)
         {
             gameWinFadeout = Utility::ClampValue(value, 0.0, 100.0);
+        }
+
+        inline void SetGameLoseFadeout(double value)
+        {
+            gameLoseFadeout = Utility::ClampValue(value, 0.0, 100.0);
         }
 
         uint64_t AddDrawable(Drawable* element);

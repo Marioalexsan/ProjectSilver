@@ -94,7 +94,7 @@ namespace Game {
         sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});
         sprite.setRotation(sf::degrees(transform->direction));
 
-        GraphicsEngine::Window->draw(sprite);
+        GraphicsEngine::World->draw(sprite);
 		
 	}
 }

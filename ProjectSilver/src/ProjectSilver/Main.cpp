@@ -25,9 +25,10 @@ using std::endl;
 #include <ProjectSilver/FighterAI.hpp>
 
 bool SystemInit() {
+    sf::ContextSettings context = sf::ContextSettings(32, 0, 4);
     Game::GraphicsEngine::Window = std::make_unique<sf::RenderWindow>(sf::VideoMode{{1600, 900}},
                                                                       "Project Silver",
-                                                                      sf::Style::Default);
+                                                                      sf::Style::Default, context);
 
     if (!Game::GraphicsEngine::Window->isOpen()) {
         Game::LogHandler::Log("Failed to create Window!", Game::LogHandler::MessageType::Error);

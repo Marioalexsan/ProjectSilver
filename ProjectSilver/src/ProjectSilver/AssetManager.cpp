@@ -175,6 +175,8 @@ namespace Game
             return false;
         }
 
+        texture->setSmooth(true);
+
         textureLibrary[ID] = {path, std::move(texture)};
         return true;
     }
@@ -301,6 +303,8 @@ namespace Game
                                   Game::LogHandler::MessageType::Warn);
             return false;
         }
+
+        texture->setSmooth(true);
 
         fontLibrary[ID] = {data, {texPath, std::move(texture)}};
         return true;

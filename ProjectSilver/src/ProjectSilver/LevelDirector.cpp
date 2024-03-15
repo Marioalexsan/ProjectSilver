@@ -177,7 +177,9 @@ namespace Game {
             if (deadPlayer || bossSpawned && shadow != nullptr && shadow->GetStatsReference().isDead) {
                 bool deadBoss = shadow != nullptr && shadow->GetStatsReference().isDead;
                 resetCounter++;
-                if (deadPlayer) {
+                if (deadPlayer)
+                {
+                    Globals::Graphics().SetGameLoseFadeout(resetCounter / 2.0);
                     if (resetCounter == 180) {
                         toBeDestroyed = true;
                         Globals::Game().InitMenu();

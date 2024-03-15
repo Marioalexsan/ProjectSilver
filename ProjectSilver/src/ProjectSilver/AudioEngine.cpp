@@ -251,8 +251,8 @@ namespace Game
                         auto& data = SearchMusicLib(musicID);
                         music->setLoopPoints(
                             {sf::seconds(data.sectionList.at(action.param).start / 1000.0f),
-                             sf::seconds(data.sectionList.at(action.param).end -
-                                         data.sectionList.at(action.param).start / 1000.0f)});
+                             sf::seconds((data.sectionList.at(action.param).end -
+                                         data.sectionList.at(action.param).start) / 1000.0f)});
                         actionQueue.pop();
                         doNextAction = true;
                     }

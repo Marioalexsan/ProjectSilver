@@ -5,6 +5,7 @@
 namespace Game
 {
     std::unique_ptr<sf::RenderWindow> GraphicsEngine::Window = nullptr;
+    std::unique_ptr<sf::RenderTexture> GraphicsEngine::World  = nullptr;
 
     int GraphicsEngine::windowWidth  = 0;
     int GraphicsEngine::windowHeight = 0;
@@ -12,6 +13,7 @@ namespace Game
     int GraphicsEngine::renderHeight = 0;
 
     double GraphicsEngine::gameWinFadeout = 0.0;
+    double GraphicsEngine::gameLoseFadeout = 0.0;
 
     Vector2 GraphicsEngine::cameraPosition = {0.0, 0.0};
 
@@ -51,10 +53,6 @@ namespace Game
         {
             Window->setSize({(std::uint32_t)mode.width, (std::uint32_t)mode.height});
         }
-
-        sf::View view = Window->getView();
-        view.setSize({ResolutionTargetWidth, ResolutionTargetHeight});
-        Window->setView(view);
 
         fullscreen = mode.fullscreen;
         return true;
@@ -96,7 +94,17 @@ namespace Game
 
     void GraphicsEngine::RenderAll()
     {
-        Window->clear(sf::Color::Black);
+        if (!World || World->getSize() != Window->getSize())
+        {
+            World = std::make_unique<sf::RenderTexture>();
+            (void)World->create(Window->getSize());
+        }
+
+        sf::View worldView = World->getView();
+        worldView.setSize({ResolutionTargetWidth, ResolutionTargetHeight});
+        World->setView(worldView);
+
+        World->clear(sf::Color::Black);
 
         std::map<int, std::vector<Drawable*>> layeredDrawables;
 
@@ -113,6 +121,39 @@ namespace Game
             }
         }
 
+        World->display();
+
+        sf::View windowView = Window->getView();
+        windowView.setSize((sf::Vector2f)Window->getSize());
+        windowView.setCenter((sf::Vector2f)Window->getSize() / 2.f);
+        Window->setView(windowView);
+
+        Window->clear(sf::Color::Black);
+
+        sf::Sprite worldSprite(World->getTexture());
+
+        if (gameWinFadeout != 0)
+        {
+            auto color = sf::Color::White;
+            auto factor = (100 - gameWinFadeout) / 100;
+            color.a     = (uint8_t)std::clamp(255 * factor, 0.0, 255.0);
+            worldSprite.setColor(color);
+        }
+        else if (gameLoseFadeout != 0)
+        {
+            auto color  = sf::Color::White;
+            auto factor = (100 - gameLoseFadeout) / 100;
+
+            float avg = (color.r + color.g + color.b) / 3;
+            color.r = (uint8_t)std::clamp(factor * color.r + avg * (1 - factor), 0.0, 255.0);
+            color.g = (uint8_t)std::clamp(factor * color.g + avg * (1 - factor), 0.0, 255.0);
+            color.b = (uint8_t)std::clamp(factor * color.b + avg * (1 - factor), 0.0, 255.0);
+            color.a = (uint8_t)std::clamp(255 * (factor * 0.5 + 0.5), 0.0, 255.0);
+
+            worldSprite.setColor(color);
+        }
+
+        Window->draw(worldSprite);
         Window->display();
     }
 
@@ -146,16 +187,16 @@ namespace Game
     {
         if (useCamera)
         {
-            sf::View view = Window->getView();
+            sf::View view = World->getView();
             view.setCenter(sf::Vector2f{float(cameraPosition.x), float(cameraPosition.y)} +
                            sf::Vector2f(960.f, 540.f));
-            Window->setView(view);
+            World->setView(view);
         }
         else
         {
-            sf::View view = Window->getView();
+            sf::View view = World->getView();
             view.setCenter({960, 540});
-            Window->setView(view);
+            World->setView(view);
         }
     }
 } // namespace Game
