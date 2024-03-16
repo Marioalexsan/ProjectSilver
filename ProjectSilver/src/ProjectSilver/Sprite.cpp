@@ -34,6 +34,7 @@ namespace Game {
         sprite.setOrigin(sf::Vector2f{(float)transform->center.x, (float)transform->center.y});
         sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});
         sprite.setRotation(sf::degrees(transform->direction));
+        sprite.setScale({(float)scale.x, (float)scale.y});
 
         GraphicsEngine::World->draw(sprite);
 	}

@@ -31,6 +31,7 @@ namespace Game {
 
 		int layer;
 		bool relativeToCamera;
+        Vector2 scale = Vector2(1, 1);
 
 		uint8_t alpha;
 		Color color;
@@ -49,6 +50,18 @@ namespace Game {
 		inline void SetAlpha(uint8_t alpha) { this->alpha = alpha; }
 
 		inline uint8_t GetAlpha() { return alpha; }
+
+		/** Only implemented for BasicSprite ATM */
+        inline void SetScale(Vector2 scale)
+        {
+            this->scale = scale;
+        }
+
+        /** Only implemented for BasicSprite ATM */
+        inline Vector2 GetScale()
+        {
+            return scale;
+        }
 
 		inline void SetColor(Color color) { this->color = color; }
 

@@ -30,6 +30,9 @@ bool SystemInit() {
                                                                       "Project Silver",
                                                                       sf::Style::Default, context);
 
+    
+    Game::GraphicsEngine::Window->setMouseCursorVisible(false);
+
     if (!Game::GraphicsEngine::Window->isOpen()) {
         Game::LogHandler::Log("Failed to create Window!", Game::LogHandler::MessageType::Error);
         return false;
@@ -121,6 +124,17 @@ int main(int argc, char* args[]) {
 
             auto var = ProjectSilver.Input.GetMousePosition();
             targetSprite.SetPosition({ var.first, var.second });
+
+            auto* playerEntity = (Game::Actor*)ProjectSilver.GetThePlayer();
+            if (playerEntity)
+            {
+                Game::PlayerPseudoAI& playerLogic = *(Game::PlayerPseudoAI*)playerEntity->GetAI();
+
+                double recoil = playerLogic.GetRifleRecoil();
+                double recoilFactor = std::clamp(std::max(recoil - 3.0, 0.0) / 19.0, 0.0, 1.0);
+
+                targetSprite.SetScale(Game::Vector2(1 + recoilFactor, 1 + recoilFactor));
+            }
         }
         catch (std::exception& e) {
             std::string message = "A standard exception occured!\n\tException message: " + std::string(e.what());

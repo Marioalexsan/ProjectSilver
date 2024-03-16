@@ -72,5 +72,10 @@ namespace Game {
 		virtual void Update();
 
 		virtual void OnDeath();
+
+		double GetRifleRecoil()
+        {
+            return rifleRecoil;
+		}
 	};
 }

@@ -48,6 +48,7 @@ namespace Game
                                           (std::uint32_t)mode.height}},
                            "ProjectSilver",
                            style);
+            Window->setMouseCursorVisible(false);
         }
         else
         {
