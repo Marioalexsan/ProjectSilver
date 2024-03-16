@@ -1,6 +1,6 @@
 # Local Copies
 
-Copies of custom license texts are available in the [LICENSES-3RD-PARTY](LICENSES-3RD-PARTY) folder.
+Copies of custom license texts are available in the [LICENSES](LICENSES) folder.
 
 # SFML
 

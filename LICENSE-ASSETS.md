@@ -1,3 +1,7 @@
+# Local Copies
+
+Copies of custom license texts are available in the [LICENSES](LICENSES) folder.
+
 # Game Textures
 
 All current game textures are created by Marioalexsan, and are covered under the same license as ProjectSilver (CC-BY-NC-SA 4.0).
