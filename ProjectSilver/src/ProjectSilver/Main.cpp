@@ -134,6 +134,19 @@ int main(int argc, char* args[]) {
                 double recoilFactor = std::clamp(std::max(recoil - 3.0, 0.0) / 19.0, 0.0, 1.0);
 
                 targetSprite.SetScale(Game::Vector2(1 + recoilFactor, 1 + recoilFactor));
+
+                if (playerLogic.IsUsingJoystickAiming())
+                {
+                    targetSprite.SetAlpha(0);
+                }
+                else
+                {
+                    targetSprite.SetAlpha(255);
+                }
+            }
+            else
+            {
+                targetSprite.SetAlpha(255);
             }
         }
         catch (std::exception& e) {

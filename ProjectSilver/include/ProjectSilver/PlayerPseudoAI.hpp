@@ -54,6 +54,10 @@ namespace Game {
 
 		Game::Sprite lowHPVignette;
 
+		sf::Vector2i lastMousePos;
+        sf::Vector2f lastRightAxis;
+        bool         useJoystickAiming = false;
+
 		void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
 	public:
 		PlayerPseudoAI();
@@ -76,6 +80,11 @@ namespace Game {
 		double GetRifleRecoil()
         {
             return rifleRecoil;
+		}
+
+		bool IsUsingJoystickAiming()
+		{
+            return useJoystickAiming;
 		}
 	};
 }

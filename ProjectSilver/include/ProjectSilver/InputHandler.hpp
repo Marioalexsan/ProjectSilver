@@ -49,8 +49,33 @@ namespace Game
             LShift
         };
 
-        static const std::map<sf::Keyboard::Key, KeyCode> keyTranslation;
+        enum class JoystickCode
+        {
+            A,
+            B,
+            X,
+            Y,
+            LeftBumper,
+            RightBumper,
+            Start,
+            Back,
+            LeftStickClick,
+            RightStickClick
+        };
+
+        enum class AxisCode
+        {
+            LeftX,
+            LeftY,
+            RightX,
+            RightY,
+            Trigger,
+        };
+
+        static const std::map<sf::Keyboard::Key, KeyCode>    keyTranslation;
         static const std::map<sf::Mouse::Button, ButtonCode> buttonTranslation;
+        static const std::map<unsigned int, JoystickCode>    joystickTranslation;
+        static const std::map<sf::Joystick::Axis, AxisCode>  axisTranslation;
 
         static const int framesToRemember = 2;
 
@@ -61,11 +86,15 @@ namespace Game
         int virtualMouseX;
         int virtualMouseY;
 
-        std::map<ButtonCode, bool> LastFrameButtons;
-        std::map<KeyCode, bool>    LastFrameKeys;
+        std::map<AxisCode, float> AxisValues;
 
-        std::map<ButtonCode, bool> ThisFrameButtons;
-        std::map<KeyCode, bool>    ThisFrameKeys;
+        std::map<ButtonCode, bool>   LastFrameButtons;
+        std::map<KeyCode, bool>      LastFrameKeys;
+        std::map<JoystickCode, bool> LastFrameJoystick;
+
+        std::map<ButtonCode, bool>   ThisFrameButtons;
+        std::map<KeyCode, bool>      ThisFrameKeys;
+        std::map<JoystickCode, bool> ThisFrameJoystick;
 
         void ProcessEvents();
         void ProcessInputs();
@@ -80,10 +109,18 @@ namespace Game
         std::pair<int, int> GetMousePosition();
         std::pair<int, int> GetRelativeMousePosition();
 
+        sf::Vector2f GetLeftAxis();
+        sf::Vector2f GetRightAxis();
+
+        float GetLeftTrigger();
+        float GetRightTrigger();
+
         bool IsKeyDown(KeyCode code);
         bool IsButtonDown(ButtonCode code);
+        bool IsJoystickDown(JoystickCode code);
         bool IsKeyPressedThisFrame(KeyCode code);
         bool IsButtonPressedThisFrame(ButtonCode code);
+        bool IsJoystickPressedThisFrame(JoystickCode code);
 
         bool WasQuitCalled();
     };

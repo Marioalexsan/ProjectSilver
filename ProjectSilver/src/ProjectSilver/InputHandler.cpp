@@ -7,6 +7,7 @@
 
 using SFKey    = sf::Keyboard::Key;
 using SFButton = sf::Mouse::Button;
+using SFAxis   = sf::Joystick::Axis;
 
 namespace Game
 {
@@ -24,6 +25,28 @@ namespace Game
 
     const std::map<sf::Mouse::Button, InputHandler::ButtonCode> InputHandler::buttonTranslation =
         {{SFButton::Left, Left}, {SFButton::Right, Right}, {SFButton::Middle, Middle}};
+
+    // Probably specific to XBox
+    const std::map<unsigned int, InputHandler::JoystickCode> InputHandler::joystickTranslation =
+        {{0, JoystickCode::A},
+         {1, JoystickCode::B},
+         {2, JoystickCode::X},
+         {3, JoystickCode::Y},
+         {4, JoystickCode::LeftBumper},
+         {5, JoystickCode::RightBumper},
+         {6, JoystickCode::Back},
+         {7, JoystickCode::Start},
+         {8, JoystickCode::LeftStickClick},
+         {9, JoystickCode::RightStickClick}};
+
+
+    const std::map<SFAxis, InputHandler::AxisCode> InputHandler::axisTranslation = {
+        {SFAxis::X, AxisCode::LeftX},
+        {SFAxis::Y, AxisCode::LeftY},
+        {SFAxis::U, AxisCode::RightX},
+        {SFAxis::V, AxisCode::RightY},
+        {SFAxis::Z, AxisCode::Trigger},
+    };
 
     InputHandler::InputHandler() :
     gameFocused(false),
@@ -51,6 +74,9 @@ namespace Game
 
         for (auto& [key, state] : ThisFrameKeys)
             LastFrameKeys[key] = state;
+
+        for (auto& [key, state] : ThisFrameJoystick)
+            LastFrameJoystick[key] = state;
     }
 
     void InputHandler::Update()
@@ -108,6 +134,36 @@ namespace Game
                 }
                 break;
 
+                    // Joystick
+
+                case sf::Event::JoystickButtonPressed:
+                {
+                    auto button = event.joystickButton.button;
+
+                    if (joystickTranslation.contains(button))
+                        ThisFrameJoystick[joystickTranslation.at(button)] = true;
+                }
+                break;
+
+                case sf::Event::JoystickButtonReleased:
+                {
+                    auto button = event.joystickButton.button;
+
+                    if (joystickTranslation.contains(button))
+                        ThisFrameJoystick[joystickTranslation.at(button)] = false;
+                }
+                break;
+
+                case sf::Event::JoystickMoved:
+                {
+                    auto axis = event.joystickMove.axis;
+
+                    if (axisTranslation.contains(axis))
+                    {
+                        AxisValues[axisTranslation.at(axis)] = event.joystickMove.position;
+                    }
+                }
+                break;
 
                     // Misc
 
@@ -134,6 +190,31 @@ namespace Game
         }
     }
 
+    sf::Vector2f InputHandler::GetLeftAxis()
+    {
+        return {!AxisValues.contains(AxisCode::LeftX) ? 0 : AxisValues[AxisCode::LeftX],
+                !AxisValues.contains(AxisCode::LeftY) ? 0 : AxisValues[AxisCode::LeftY]};
+    }
+
+    sf::Vector2f InputHandler::GetRightAxis()
+    {
+        return {!AxisValues.contains(AxisCode::RightX) ? 0 : AxisValues[AxisCode::RightX],
+                !AxisValues.contains(AxisCode::RightY) ? 0 : AxisValues[AxisCode::RightY]};
+    }
+
+    float InputHandler::GetLeftTrigger()
+    {
+        return !AxisValues.contains(AxisCode::Trigger)
+                   ? 0
+                   : std::max(AxisValues[AxisCode::Trigger], 0.f);
+    }
+
+    float InputHandler::GetRightTrigger()
+    {
+        return !AxisValues.contains(AxisCode::Trigger)
+                   ? 0
+                   : std::max(-AxisValues[AxisCode::Trigger], 0.f);
+    }
 
     bool InputHandler::IsKeyDown(KeyCode code)
     {
@@ -145,6 +226,11 @@ namespace Game
         return ThisFrameButtons[code];
     }
 
+    bool InputHandler::IsJoystickDown(JoystickCode code)
+    {
+        return ThisFrameJoystick[code];
+    }
+
     bool InputHandler::IsKeyPressedThisFrame(KeyCode code)
     {
         return ThisFrameKeys[code] && !LastFrameKeys[code];
@@ -153,6 +239,11 @@ namespace Game
     bool InputHandler::IsButtonPressedThisFrame(ButtonCode code)
     {
         return ThisFrameButtons[code] && !LastFrameButtons[code];
+    }
+
+    bool InputHandler::IsJoystickPressedThisFrame(JoystickCode code)
+    {
+        return ThisFrameJoystick[code] && !LastFrameJoystick[code];
     }
 
     bool InputHandler::WasQuitCalled()
