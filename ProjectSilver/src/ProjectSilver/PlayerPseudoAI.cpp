@@ -490,8 +490,7 @@ namespace Game
 
         // Dash mechanic logic
         bool dashInput = Globals::Game().Input.IsKeyPressedThisFrame(KeyCode::LShift) ||
-                         Globals::Game().Input.IsJoystickPressedThisFrame(
-                             InputHandler::JoystickCode::LeftBumper);
+                         Globals::Game().Input.GetLeftTrigger() > Deadzone;
         if (boostCooldown == 0 && stats.stamina >= 30.0 && targetSpeed != Vector2::Zero &&
             dashInput)
         {
@@ -599,7 +598,8 @@ namespace Game
         }
 
         bool meleeInput = Globals::Game().Input.IsKeyDown(KeyCode::E) ||
-                          Globals::Game().Input.GetLeftTrigger() > Deadzone;
+                          Globals::Game().Input.IsJoystickPressedThisFrame(
+                              InputHandler::JoystickCode::LeftBumper);
 
         // Melee Attack Start Logic
         if (meleeInput && (playerAnimation != "Player_AxeSwing") &&
