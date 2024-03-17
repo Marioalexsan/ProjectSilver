@@ -90,6 +90,7 @@ namespace Game {
 		int GetEntityCountOfType(EntityType searchType);
 
 		uint64_t CreateDefaultTracerEffect(const Vector2& start, const Vector2& end);
+        uint64_t CreateLine(const Vector2& start, const Vector2& end, Color color);
 		uint64_t CreateAfterImageEffect(const Transform& parentTransform, const std::string& texAnimID, int frame = -1);
 
 		int GetActiveThreat();

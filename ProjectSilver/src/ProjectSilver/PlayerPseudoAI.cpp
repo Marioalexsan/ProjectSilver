@@ -757,6 +757,14 @@ namespace Game
 
             Vector2 vect = Vector2(lastRightAxis.x, lastRightAxis.y);
             aimAngle     = vect.Angle();
+
+            auto length = Game::Vector2::NormalVector(entity->GetTransform().direction) * 500;
+            auto offset = Game::Vector2::NormalVector(entity->GetTransform().direction) * 60;
+
+            Globals::Game().CreateLine(entity->GetTransform().position + offset,
+                                       entity->GetTransform().position + offset +
+                                           length,
+                                       Game::Color::Red);
         }
 
         entity->GetComponent().SetDirection(aimAngle);
@@ -871,7 +879,7 @@ namespace Game
                              (angleSpread / 2) * spreadFactor;
 
         auto shotAngle = entity->GetTransform().direction;
-        auto results = Globals::Game()
+        auto results   = Globals::Game()
                            .CreateRayCastHitList(entity->GetCollider().GetPosition(),
                                                  Vector2::NormalVector(shotAngle + spreadValue) *
                                                          1800.0 +

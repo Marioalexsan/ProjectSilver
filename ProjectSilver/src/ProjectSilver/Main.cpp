@@ -4,36 +4,38 @@
 // Ensure that if a resource is destroyed (texture, data, etc.), all existin pointers to it are also set to nullptr.
 
 #include <ProjectSilver/PCHeader.hpp>
-
 #include <iostream>
-using std::cout;
 using std::cerr;
+using std::cout;
 using std::endl;
 
+#include <ProjectSilver/Actor.hpp>
+#include <ProjectSilver/AnimatedSprite.hpp>
+#include <ProjectSilver/BasicText.hpp>
+#include <ProjectSilver/CollisionMaster.hpp>
+#include <ProjectSilver/FighterAI.hpp>
+#include <ProjectSilver/GameMaster.hpp>
+#include <ProjectSilver/Globals.hpp>
+#include <ProjectSilver/LogHandler.hpp>
+#include <ProjectSilver/PlayerPseudoAI.hpp>
+#include <ProjectSilver/RenderComponent.hpp>
+#include <ProjectSilver/Sprite.hpp>
+#include <ProjectSilver/Tracer.hpp>
 #include <chrono>
 
-#include <ProjectSilver/LogHandler.hpp>
-#include <ProjectSilver/GameMaster.hpp>
-#include <ProjectSilver/Sprite.hpp>
-#include <ProjectSilver/BasicText.hpp>
-#include <ProjectSilver/AnimatedSprite.hpp>
-#include <ProjectSilver/RenderComponent.hpp>
-#include <ProjectSilver/Globals.hpp>
-#include <ProjectSilver/CollisionMaster.hpp>
-#include <ProjectSilver/Actor.hpp>
-#include <ProjectSilver/PlayerPseudoAI.hpp>
-#include <ProjectSilver/FighterAI.hpp>
-
-bool SystemInit() {
+bool SystemInit()
+{
     sf::ContextSettings context = sf::ContextSettings(32, 0, 4);
     Game::GraphicsEngine::Window = std::make_unique<sf::RenderWindow>(sf::VideoMode{{1600, 900}},
                                                                       "Project Silver",
-                                                                      sf::Style::Default, context);
+                                                                      sf::Style::Default,
+                                                                      context);
 
-    
+
     Game::GraphicsEngine::Window->setMouseCursorVisible(false);
 
-    if (!Game::GraphicsEngine::Window->isOpen()) {
+    if (!Game::GraphicsEngine::Window->isOpen())
+    {
         Game::LogHandler::Log("Failed to create Window!", Game::LogHandler::MessageType::Error);
         return false;
     }
@@ -41,18 +43,22 @@ bool SystemInit() {
     return true;
 }
 
-void SystemQuit() {
+void SystemQuit()
+{
     Game::GraphicsEngine::Window->close();
 }
 
-int main(int argc, char* args[]) {
+int main(int argc, char* args[])
+{
 
     Game::LogHandler::Log("Starting Game", Game::LogHandler::MessageType::Info);
 
-    #pragma region Initialization Stuff
+#pragma region Initialization Stuff
 
-    if (!SystemInit()) {
-        Game::LogHandler::Log("Failed to Init System! Exiting.", Game::LogHandler::MessageType::Error);
+    if (!SystemInit())
+    {
+        Game::LogHandler::Log("Failed to Init System! Exiting.",
+                              Game::LogHandler::MessageType::Error);
         SystemQuit();
         return -1;
     }
@@ -68,23 +74,23 @@ int main(int argc, char* args[]) {
 
     Game::Sprite targetSprite;
     targetSprite.SetTexture("Target");
-    targetSprite.SetPosition({ 1266, 668 });
-    targetSprite.SetCenter({ 21, 21 });
+    targetSprite.SetPosition({1266, 668});
+    targetSprite.SetCenter({21, 21});
     targetSprite.SetRelativeToCamera(false);
     targetSprite.RegisterToGame();
     targetSprite.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
 
     Game::BasicText FPSCounter;
-    FPSCounter.SetPosition({ 1900, 20 });
+    FPSCounter.SetPosition({1900, 20});
     FPSCounter.SetRenderType(Game::BasicText::TextRenderType::ContinuousRight);
     FPSCounter.SetFont("Medium");
     FPSCounter.SetLayer(Game::GraphicsEngine::CommonLayers::GUI);
     FPSCounter.SetRelativeToCamera(true);
     FPSCounter.RegisterToGame();
 
-    #pragma endregion
+#pragma endregion
 
-    #pragma region Game Loop
+#pragma region Game Loop
 
     ProjectSilver.InitMenu();
 
@@ -94,13 +100,14 @@ int main(int argc, char* args[]) {
 
     bool FPSEnabled = true;
 
-    sf::Time accumulator = sf::Time::Zero;
+    sf::Time  accumulator = sf::Time::Zero;
     sf::Clock clock;
     sf::Time  frameTime = sf::seconds(1) / 60.f;
 
-    while (ProjectSilver.IsGameRunning()) 
+    while (ProjectSilver.IsGameRunning())
     {
-        try {
+        try
+        {
             while (accumulator < frameTime)
             {
                 sf::sleep(sf::milliseconds(1));
@@ -123,7 +130,7 @@ int main(int argc, char* args[]) {
             }
 
             auto var = ProjectSilver.Input.GetMousePosition();
-            targetSprite.SetPosition({ var.first, var.second });
+            targetSprite.SetPosition({var.first, var.second});
 
             auto* playerEntity = (Game::Actor*)ProjectSilver.GetThePlayer();
             if (playerEntity)
@@ -148,34 +155,36 @@ int main(int argc, char* args[]) {
             {
                 targetSprite.SetAlpha(255);
             }
-        }
-        catch (std::exception& e) {
-            std::string message = "A standard exception occured!\n\tException message: " + std::string(e.what());
+        } catch (std::exception& e)
+        {
+            std::string message = "A standard exception occured!\n\tException message: " +
+                                  std::string(e.what());
             Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
             crash = true;
-        }
-        catch (...) {
+        } catch (...)
+        {
             std::string message = "An unknown exception occured!";
             Game::LogHandler::Log(message, Game::LogHandler::MessageType::Error);
             ProjectSilver.Stop();
             crash = true;
         }
-        
-
     }
 
     ProjectSilver.UnloadLevel();
     ProjectSilver.UnloadMenu();
     ProjectSilver.ArmageddonExitProcedures();
     ProjectSilver.Audio.HaltEngine();
-    
-    #pragma endregion
 
-    if (crash) {
-        Game::LogHandler::Log("Exiting Game due to an Error", Game::LogHandler::MessageType::Info);
+#pragma endregion
+
+    if (crash)
+    {
+        Game::LogHandler::Log("Exiting Game due to an Error",
+                              Game::LogHandler::MessageType::Info);
     }
-    else {
+    else
+    {
         Game::LogHandler::Log("Exiting Game normally", Game::LogHandler::MessageType::Info);
     }
 

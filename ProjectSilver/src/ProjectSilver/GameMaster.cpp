@@ -338,6 +338,21 @@ namespace Game {
 		return ID;
 	}
 
+	uint64_t GameMaster::CreateLine(const Vector2& start, const Vector2& end, Color color)
+    {
+        uint64_t ID = NextEffectID();
+        effectMasterList[ID].reset(new Tracer(start, end));
+        auto& tracer = *((Tracer*)effectMasterList[ID].get());
+        tracer.SetTimeLeft(2);
+        tracer.SetFadeTime(2);
+        tracer.SetBodyTexture("DefaultTracer");
+        tracer.RegisterToGame();
+        tracer.SetLayer(GraphicsEngine::CommonLayers::BelowDefaultHeight);
+        tracer.SetAlpha(100);
+        tracer.SetColor(color);
+        return ID;
+    }
+
 	uint64_t GameMaster::CreateAfterImageEffect(const Transform& parentTransform, const std::string& texAnimID, int frame) {
 		uint64_t ID = NextEffectID();
 		effectMasterList[ID].reset(new AfterImage());
