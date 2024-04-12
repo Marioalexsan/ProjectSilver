@@ -698,9 +698,9 @@ namespace Game {
 
 		#pragma region Resolution Check
 
-		//pair<int, int> res = ConfigHandler::GetConfigResolution();
-		//bool mode = ConfigHandler::GetConfigFullscreen();
-		Graphics.SetDisplayMode({ 1024, 768, false });
+		std::pair<int, int> res = ConfigHandler::GetConfigResolution();
+		bool mode = ConfigHandler::GetConfigFullscreen();
+        Graphics.SetDisplayMode({res.first, res.second, mode});
 
 		#pragma endregion
 

@@ -23,7 +23,7 @@ namespace Game
         windowHeight = 720;
         renderWidth  = 1280;
         renderHeight = 720;
-        SetDisplayMode({1280, 720, false});
+        //SetDisplayMode({1280, 720, false});
     }
 
     GraphicsEngine::~GraphicsEngine()
@@ -38,23 +38,27 @@ namespace Game
 
     bool GraphicsEngine::SetDisplayMode(VideoMode mode)
     {
+        auto style = mode.fullscreen ? sf::Style::None : sf::Style::Titlebar | sf::Style::Close;
+        auto state = mode.fullscreen ? sf::State::Fullscreen : sf::State::Windowed;
+
         if (fullscreen || mode.fullscreen)
         {
             // Use create if we were in fullscreen, or are going into fullscreen
-            auto style = mode.fullscreen ? sf::Style::Fullscreen
-                                         : sf::Style::Titlebar | sf::Style::Close;
-
+            Window->setVisible(false);
             Window->create(sf::VideoMode{{(std::uint32_t)mode.width,
                                           (std::uint32_t)mode.height}},
                            "ProjectSilver",
-                           style);
-            Window->setMouseCursorVisible(false);
+                           style,
+                           state);
         }
         else
         {
             Window->setSize({(std::uint32_t)mode.width, (std::uint32_t)mode.height});
         }
 
+        Window->setMouseCursorVisible(false);
+        renderWidth = mode.width;
+        renderHeight = mode.height;
         fullscreen = mode.fullscreen;
         return true;
     }

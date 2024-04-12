@@ -29,6 +29,7 @@ bool SystemInit()
     Game::GraphicsEngine::Window = std::make_unique<sf::RenderWindow>(sf::VideoMode{{1600, 900}},
                                                                       "Project Silver",
                                                                       sf::Style::Default,
+                                                                      sf::State::Windowed,
                                                                       context);
 
 

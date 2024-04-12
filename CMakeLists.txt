@@ -7,7 +7,7 @@ include(FetchContent)
 # Fetch SFML 3.0 dependency
 FetchContent_Declare(SFML
 	GIT_REPOSITORY https://github.com/SFML/SFML
-	GIT_TAG a71d6bc078d653c719e7ad96b3812028a81749b2)
+	GIT_TAG 7e1765717a81d7d3782b20cd4c10c679146d44c7)
 FetchContent_MakeAvailable(SFML)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)

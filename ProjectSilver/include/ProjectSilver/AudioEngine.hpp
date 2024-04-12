@@ -85,7 +85,7 @@ namespace Game
 
         bool     fadeToSilence        = false;
         float    fadeVolumeMultiplier = 0.0f;
-        sf::Time fadeDuration         = sf::Time::Zero;
+        sf::Time fadeDuration         = sf::milliseconds(musicSwitchFadeTime);
 
         // General Volume
         uint8_t musicVolume;
