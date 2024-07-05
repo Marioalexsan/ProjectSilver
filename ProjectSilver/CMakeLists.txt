@@ -37,7 +37,6 @@ set(PROJECT_SILVER_SRC
     "MenuDirector.cpp"
     "MiscUtility.cpp"
     "PCHeader.cpp"
-    "Player.cpp"
     "PlayerPseudoAI.cpp"
     "RenderComponent.cpp"
     "RifleAmmoPack.cpp"
