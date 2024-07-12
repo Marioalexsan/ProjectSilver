@@ -1,31 +1,37 @@
-#include <ProjectSilver/PCHeader.hpp>
-
-#include <ProjectSilver/Sprite.hpp>
 #include <ProjectSilver/Globals.hpp>
+#include <ProjectSilver/PCHeader.hpp>
+#include <ProjectSilver/Sprite.hpp>
 
-namespace Game {
-	Sprite::Sprite():
-		texture(nullptr) {}
+namespace Game
+{
+    Sprite::Sprite() : texture(nullptr)
+    {
+    }
 
-	void Sprite::SetTexture(const std::string& ID) {
-		auto& lib = Globals::Assets().GetTextureLibrary();
-		if (lib.find(ID) == lib.end()) {
-			//Error
-			return;
-		}
-		this->texture = lib.at(ID).texture.get();
-	}
+    void Sprite::SetTexture(const std::string& ID)
+    {
+        auto& lib = Globals::Assets().GetTextureLibrary();
+        if (lib.find(ID) == lib.end())
+        {
+            //Error
+            return;
+        }
+        this->texture = lib.at(ID).texture.get();
+    }
 
-	Vector2 Sprite::GetSize() {
+    Vector2 Sprite::GetSize()
+    {
         auto size = texture->getSize();
-		return { (double)size.x, (double)size.y };
-	}
+        return {(double)size.x, (double)size.y};
+    }
 
-	void Sprite::Draw() {
-		using namespace Game::Utility;
-		if (texture == nullptr) {
-			return;
-		}
+    void Sprite::Draw()
+    {
+        using namespace Game::Utility;
+        if (texture == nullptr)
+        {
+            return;
+        }
 
         sf::Sprite sprite(*texture);
 
@@ -37,7 +43,7 @@ namespace Game {
         sprite.setScale({(float)scale.x, (float)scale.y});
 
         GraphicsEngine::World->draw(sprite);
-	}
+    }
 
-	
-}
+
+} // namespace Game

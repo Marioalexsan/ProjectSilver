@@ -1,26 +1,28 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/GameMaster.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class Globals {
-	private:
-		static GameMaster* theGame;
-		static std::string gameVersion;
-	public:
-		static void SetTheGame(GameMaster& game);
+namespace Game
+{
+    class Globals
+    {
+    private:
+        static GameMaster* theGame;
+        static std::string gameVersion;
 
-		static void GameDeaded();
+    public:
+        static void SetTheGame(GameMaster& game);
 
-		static GameMaster& Game();
-		static AudioEngine& Audio();
-		static GraphicsEngine& Graphics();
-		static AssetManager& Assets();
-		static Entity* ThePlayer();
-		static GameMaster::DifficultyLevel Difficulty();
-		static void ChangeDifficulty(GameMaster::DifficultyLevel difficulty);
-		static std::string Version();
+        static void GameDeaded();
 
-	};
-}
+        static GameMaster&                 Game();
+        static AudioEngine&                Audio();
+        static GraphicsEngine&             Graphics();
+        static AssetManager&               Assets();
+        static Entity*                     ThePlayer();
+        static GameMaster::DifficultyLevel Difficulty();
+        static void        ChangeDifficulty(GameMaster::DifficultyLevel difficulty);
+        static std::string Version();
+    };
+} // namespace Game

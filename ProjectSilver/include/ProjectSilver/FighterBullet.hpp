@@ -1,18 +1,20 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Actor.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class FighterBullet : public Actor {
-		double distancePerFrame;
-		double currentDistance;
-		double maxDistance;
-	public:
-		FighterBullet();
-		~FighterBullet();
+namespace Game
+{
+    class FighterBullet : public Actor
+    {
+        double distancePerFrame;
+        double currentDistance;
+        double maxDistance;
 
-		virtual void Update();
-	};
-}
+    public:
+        FighterBullet();
+        ~FighterBullet();
 
+        virtual void Update();
+    };
+} // namespace Game

@@ -1,20 +1,22 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Collider.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class SphereCollider : public Collider {
-	protected:
-		double radius;
-	public:
-		SphereCollider();
-		SphereCollider(const Vector2& center, double radius, ColliderType type);
+namespace Game
+{
+    class SphereCollider : public Collider
+    {
+    protected:
+        double radius;
 
-		void SetRadius(double radius);
-		double GetRadius() const;
+    public:
+        SphereCollider();
+        SphereCollider(const Vector2& center, double radius, ColliderType type);
 
-		virtual std::pair<Vector2, Vector2> GetBoundingBox();
-	};
-}
+        void   SetRadius(double radius);
+        double GetRadius() const;
 
+        virtual std::pair<Vector2, Vector2> GetBoundingBox();
+    };
+} // namespace Game

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ProjectSilver/MiscUtility.hpp>
 #include <ProjectSilver/AssetManager.hpp>
+#include <ProjectSilver/MiscUtility.hpp>
 #include <ProjectSilver/PCHeader.hpp>
 
 class AssetManager;
@@ -76,10 +76,10 @@ namespace Game
         std::queue<MusicAction> actionQueue;
 
         // Stores the sound and music instances. For sounds, the map's key is the numerical ID
-        std::map<uint64_t, std::unique_ptr<sf::Sound>>   sounds;
-        std::map<uint64_t, std::string> soundDataIDs;
-        sf::Music*                      music = nullptr;
-        std::string                     musicID;
+        std::map<uint64_t, std::unique_ptr<sf::Sound>> sounds;
+        std::map<uint64_t, std::string>                soundDataIDs;
+        sf::Music*                                     music = nullptr;
+        std::string                                    musicID;
 
         // Stats
 
@@ -156,7 +156,7 @@ namespace Game
 
         inline uint64_t GetMusicPosition()
         {
-            return music ? music ->getPlayingOffset().asMilliseconds() : 0;
+            return music ? music->getPlayingOffset().asMilliseconds() : 0;
         }
 
         bool SetLoopSection(const std::string& section);

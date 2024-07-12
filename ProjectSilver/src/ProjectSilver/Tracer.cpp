@@ -96,8 +96,7 @@ namespace Game
 
         sf::Sprite sprite(*body);
 
-        sprite.setPosition(
-            sf::Vector2f{(float)start.x, (float)start.y});
+        sprite.setPosition(sf::Vector2f{(float)start.x, (float)start.y});
         sprite.setScale(sf::Vector2f{float((end - start).Length()), 1});
         sprite.setOrigin(sf::Vector2f{0, float(body->getSize().y / 2)});
         sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});

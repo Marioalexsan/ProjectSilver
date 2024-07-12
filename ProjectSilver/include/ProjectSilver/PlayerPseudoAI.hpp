@@ -1,90 +1,95 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/AI.hpp>
 #include <ProjectSilver/BasicText.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/SphereCollider.hpp>
 #include <ProjectSilver/Sprite.hpp>
 
-namespace Game {
-	class PlayerPseudoAI : public AI {
-		int currentPistolAmmo;
-		int maxPistolAmmo;
-		bool wasReloadingPistol;
+namespace Game
+{
+    class PlayerPseudoAI : public AI
+    {
+        int  currentPistolAmmo;
+        int  maxPistolAmmo;
+        bool wasReloadingPistol;
 
-		int currentRifleAmmo;
-		int maxRifleAmmo;
-		int rifleAmmoPool;
-		double rifleRecoil;
-		bool wasReloadingRifle;
+        int    currentRifleAmmo;
+        int    maxRifleAmmo;
+        int    rifleAmmoPool;
+        double rifleRecoil;
+        bool   wasReloadingRifle;
 
-		bool hasShield;
-		bool inShield;
-		int shieldRegenCounter;
-		int shieldFadeOutDelay;
-		int perfectGuardCounter;
-		bool hasPerfectGuarded;
+        bool hasShield;
+        bool inShield;
+        int  shieldRegenCounter;
+        int  shieldFadeOutDelay;
+        int  perfectGuardCounter;
+        bool hasPerfectGuarded;
 
-		bool doingSwing;
+        bool doingSwing;
 
-		bool wasInWeaponSwitch;
+        bool wasInWeaponSwitch;
 
-		int regenCounter;
-		
-		int staminaRegenCounter;
-		int staminaFadeOutDelay;
-		int boostCooldown;
+        int regenCounter;
 
-		int heartbeatTime;
-		int heartbeatCounter;
-		int vignetteCounter;
+        int staminaRegenCounter;
+        int staminaFadeOutDelay;
+        int boostCooldown;
 
-		int equippedWeapon;
-		int targetWeaponEquip;
-		int shootPenaltyCountdown;
-		
-		Vector2 boostVector;
+        int heartbeatTime;
+        int heartbeatCounter;
+        int vignetteCounter;
 
-		SphereCollider axe;
+        int equippedWeapon;
+        int targetWeaponEquip;
+        int shootPenaltyCountdown;
 
-		Game::BasicText playerHealth;
-		Game::BasicText shieldHealth;
-		Game::BasicText stamina;
-		Game::BasicText gunAmmo;
+        Vector2 boostVector;
 
-		Game::Sprite lowHPVignette;
+        SphereCollider axe;
 
-		sf::Vector2i lastMousePos;
+        Game::BasicText playerHealth;
+        Game::BasicText shieldHealth;
+        Game::BasicText stamina;
+        Game::BasicText gunAmmo;
+
+        Game::Sprite lowHPVignette;
+
+        sf::Vector2i lastMousePos;
         sf::Vector2f lastRightAxis;
         bool         useJoystickAiming = false;
 
-		void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
-	public:
-		PlayerPseudoAI();
-		~PlayerPseudoAI();
+        void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
 
-		inline void AddRifleAmmo(int ammo) {
-			rifleAmmoPool += ammo;
-			if (rifleAmmoPool + currentRifleAmmo > 60) {
-				rifleAmmoPool = 60 - currentRifleAmmo;
-			}
-		}
+    public:
+        PlayerPseudoAI();
+        ~PlayerPseudoAI();
 
-		virtual void OnAttackHit();
-		virtual void OnHitByAttack(Actor* attacker, double damage);
+        inline void AddRifleAmmo(int ammo)
+        {
+            rifleAmmoPool += ammo;
+            if (rifleAmmoPool + currentRifleAmmo > 60)
+            {
+                rifleAmmoPool = 60 - currentRifleAmmo;
+            }
+        }
 
-		virtual void Update();
+        virtual void OnAttackHit();
+        virtual void OnHitByAttack(Actor* attacker, double damage);
 
-		virtual void OnDeath();
+        virtual void Update();
 
-		double GetRifleRecoil()
+        virtual void OnDeath();
+
+        double GetRifleRecoil()
         {
             return rifleRecoil;
-		}
+        }
 
-		bool IsUsingJoystickAiming()
-		{
+        bool IsUsingJoystickAiming()
+        {
             return useJoystickAiming;
-		}
-	};
-}
+        }
+    };
+} // namespace Game

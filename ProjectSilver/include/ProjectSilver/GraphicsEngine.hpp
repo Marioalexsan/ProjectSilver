@@ -37,7 +37,7 @@ namespace Game
         // Deprecated
         static const std::map<std::string, VideoMode> VideoModes;
 
-        static std::unique_ptr<sf::RenderWindow> Window;
+        static std::unique_ptr<sf::RenderWindow>  Window;
         static std::unique_ptr<sf::RenderTexture> World;
 
         static const int ResolutionTargetWidth  = 1920;

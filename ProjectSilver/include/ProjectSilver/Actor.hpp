@@ -1,64 +1,76 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Entity.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/RenderComponent.hpp>
 
-namespace Game {
-	class AI;
+namespace Game
+{
+    class AI;
 
-	class Actor : public Entity {
-	public:
-		struct ActorStats {
-			double health;
-			double maxHealth;
-			double stamina;
-			double maxStamina;
-			
-			double shieldHealth;
-			double maxShieldHealth;
+    class Actor : public Entity
+    {
+    public:
+        struct ActorStats
+        {
+            double health;
+            double maxHealth;
+            double stamina;
+            double maxStamina;
 
-			double knockbackResistance; // UNIMPLEMENTED
+            double shieldHealth;
+            double maxShieldHealth;
 
-			bool invulnerable;
-			bool isDead;
+            double knockbackResistance; // UNIMPLEMENTED
 
-			int currentInvincibilityFrames;
-			int onHitInvincibilityFrames;
-		};
-	protected:
-		ActorStats baseStats;
-		Vector2 knockback;
+            bool invulnerable;
+            bool isDead;
 
-		SphereCollider collider;
-		RenderComponent render;
+            int currentInvincibilityFrames;
+            int onHitInvincibilityFrames;
+        };
 
-		AI* brain;
+    protected:
+        ActorStats baseStats;
+        Vector2    knockback;
 
-		void ApplyKnockbackStep();
-		void ApplyKnockback();
-	public:
-		Actor(AI* brain);
-		//Actor();
-		~Actor();
+        SphereCollider  collider;
+        RenderComponent render;
 
-		inline AI* GetAI() {
-			return brain;
-		}
+        AI* brain;
 
-		inline SphereCollider& GetCollider() { return collider; }
+        void ApplyKnockbackStep();
+        void ApplyKnockback();
 
-		inline RenderComponent& GetComponent() { return render; }
-		
-		void Move(Vector2 vector);
-		void MoveForward(double amount);
-		ActorStats& GetStatsReference();
+    public:
+        Actor(AI* brain);
+        //Actor();
+        ~Actor();
 
-		void Rotate(double amount);
+        inline AI* GetAI()
+        {
+            return brain;
+        }
 
-		// Rotate on shortest path
-		void RotateTowardsDirection(double amount, double targetDirection);
+        inline SphereCollider& GetCollider()
+        {
+            return collider;
+        }
 
-		virtual void Update();
-	};
-}
+        inline RenderComponent& GetComponent()
+        {
+            return render;
+        }
+
+        void        Move(Vector2 vector);
+        void        MoveForward(double amount);
+        ActorStats& GetStatsReference();
+
+        void Rotate(double amount);
+
+        // Rotate on shortest path
+        void RotateTowardsDirection(double amount, double targetDirection);
+
+        virtual void Update();
+    };
+} // namespace Game

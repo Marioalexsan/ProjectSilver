@@ -1,32 +1,35 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Effect.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class AfterImage : public Effect {
-	protected:
-		sf::Texture* image;
-		int targetFrame;
+namespace Game
+{
+    class AfterImage : public Effect
+    {
+    protected:
+        sf::Texture* image;
+        int          targetFrame;
 
-		int framesPerRow;
-		int framesPerCollumn;
+        int framesPerRow;
+        int framesPerCollumn;
 
-		int targetFadeCounter;
-		int fadeCounter;
+        int targetFadeCounter;
+        int fadeCounter;
 
-	public:
-		AfterImage();
-		~AfterImage();
+    public:
+        AfterImage();
+        ~AfterImage();
 
-		void SetStaticTexture(const std::string& texture);
-		void SetAnimationFrame(const std::string& animation, int frame = 0);
+        void SetStaticTexture(const std::string& texture);
+        void SetAnimationFrame(const std::string& animation, int frame = 0);
 
-		inline void SetFadeTime(int fade) {
-			fadeCounter = targetFadeCounter = fade;
-		}
+        inline void SetFadeTime(int fade)
+        {
+            fadeCounter = targetFadeCounter = fade;
+        }
 
-		virtual void Update();
-		virtual void Draw();
-	};
-}
+        virtual void Update();
+        virtual void Draw();
+    };
+} // namespace Game

@@ -199,7 +199,6 @@ namespace Game
         }
         std::map<std::string, int> arbitraries;
 
-        int section = 0;
         try
         {
             using std::getline;
@@ -260,7 +259,7 @@ namespace Game
                 // Read chars
                 DiscardWord(fontData);
                 ReadField(fontData, field);
-                int index = field.second;
+                char index = (char)field.second;
 
                 ReadField(fontData, field);
                 data.charLibrary[index].x = field.second;

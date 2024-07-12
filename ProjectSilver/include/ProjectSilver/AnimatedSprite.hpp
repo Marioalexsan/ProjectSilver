@@ -3,46 +3,69 @@
 #include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Sprite.hpp>
 
-namespace Game {
-	class AnimatedSprite : public Sprite {
-	public:
-		enum LoopMode {
-			NormalLoop,
-			Static,
-			PingPongLoop,
-			PlayOnce
-		};
-	protected:
-		int updatesPerFrame; // Number of game frames it takes to switch to a new animation frame
-		int framesPerRow;
-		int framesPerCollumn;
-		int totalFrames;
+namespace Game
+{
+    class AnimatedSprite : public Sprite
+    {
+    public:
+        enum LoopMode
+        {
+            NormalLoop,
+            Static,
+            PingPongLoop,
+            PlayOnce
+        };
 
-		LoopMode mode;
-		int direction;
-		int currentFrame;
-		int accumulatedUpdates;
+    protected:
+        int updatesPerFrame; // Number of game frames it takes to switch to a new animation frame
+        int framesPerRow;
+        int framesPerCollumn;
+        int totalFrames;
 
-		bool finished; // Used for animations that don't replay
-	public:
-		AnimatedSprite();
+        LoopMode mode;
+        int      direction;
+        int      currentFrame;
+        int      accumulatedUpdates;
 
-		void SetAnimationInfo(int updatesPerFrame, int framesPerRow, int framesPerCollumn, LoopMode mode = LoopMode::NormalLoop);
-		void SetFrame(int frame);
+        bool finished; // Used for animations that don't replay
 
-		inline int GetFrame() { return this->currentFrame; }
+    public:
+        AnimatedSprite();
 
-		inline int GetFrameCount() { return this->totalFrames; }
+        void SetAnimationInfo(int      updatesPerFrame,
+                              int      framesPerRow,
+                              int      framesPerCollumn,
+                              LoopMode mode = LoopMode::NormalLoop);
+        void SetFrame(int frame);
 
-		inline int GetAccumulatedUpdates() { return this->accumulatedUpdates; }
+        inline int GetFrame()
+        {
+            return this->currentFrame;
+        }
 
-		inline int GetUpdatesPerFrame() { return this->updatesPerFrame; }
+        inline int GetFrameCount()
+        {
+            return this->totalFrames;
+        }
 
-		inline int GetUpdatesCount() { return this->totalFrames * this->updatesPerFrame; }
+        inline int GetAccumulatedUpdates()
+        {
+            return this->accumulatedUpdates;
+        }
 
-		void Restart();
+        inline int GetUpdatesPerFrame()
+        {
+            return this->updatesPerFrame;
+        }
 
-		virtual void Update(int frameUpdates = 1);
-		virtual void Draw();
-	};
-}
+        inline int GetUpdatesCount()
+        {
+            return this->totalFrames * this->updatesPerFrame;
+        }
+
+        void Restart();
+
+        virtual void Update(int frameUpdates = 1);
+        virtual void Draw();
+    };
+} // namespace Game

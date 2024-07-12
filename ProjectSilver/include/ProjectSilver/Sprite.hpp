@@ -1,18 +1,21 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Drawable.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class Sprite : public Drawable {
-	protected:
-		sf::Texture* texture;
-	public:
-		Sprite();
+namespace Game
+{
+    class Sprite : public Drawable
+    {
+    protected:
+        sf::Texture* texture;
 
-		virtual void SetTexture(const std::string& ID);
-		Vector2 GetSize();
+    public:
+        Sprite();
 
-		virtual void Draw();
-	};
-}
+        virtual void SetTexture(const std::string& ID);
+        Vector2      GetSize();
+
+        virtual void Draw();
+    };
+} // namespace Game

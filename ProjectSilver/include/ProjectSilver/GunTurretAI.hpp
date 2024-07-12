@@ -1,33 +1,36 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/AI.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class GunTurretAI : public AI {
-	private:
-		int nextShot;
-		int previousShot;
-		bool waveBonus;
-		int ammo;
-		int reloadCounter;
-		int burstDelay;
+namespace Game
+{
+    class GunTurretAI : public AI
+    {
+    private:
+        int  nextShot;
+        int  previousShot;
+        bool waveBonus;
+        int  ammo;
+        int  reloadCounter;
+        int  burstDelay;
 
-		bool initiatedAttack;
+        bool initiatedAttack;
 
-		double predictionStrengthToUse;
+        double predictionStrengthToUse;
 
-		Vector2 lastFramePlayerPos;
-	public:
-		GunTurretAI();
+        Vector2 lastFramePlayerPos;
 
-		void ApplyWaveEndBonus();
+    public:
+        GunTurretAI();
 
-		virtual void OnAttackHit();
-		virtual void OnHitByAttack(Actor* attacker, double damage);
+        void ApplyWaveEndBonus();
 
-		virtual void Update();
+        virtual void OnAttackHit();
+        virtual void OnHitByAttack(Actor* attacker, double damage);
 
-		virtual void OnDeath();
-	};
-}
+        virtual void Update();
+
+        virtual void OnDeath();
+    };
+} // namespace Game

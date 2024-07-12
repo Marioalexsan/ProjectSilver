@@ -101,10 +101,14 @@ namespace Game
                     auto& info = data.charLibrary.at(text[wordPos]);
 
 
-                    sf::Sprite sprite(*texture, sf::IntRect{sf::Vector2i{info.x, info.y}, sf::Vector2i{info.width, info.height}});
+                    sf::Sprite sprite(*texture,
+                                      sf::IntRect{sf::Vector2i{info.x, info.y},
+                                                  sf::Vector2i{info.width, info.height}});
 
-                    sprite.setPosition(sf::Vector2f{(float)transform->position.x + currentX + info.xoffset - orientationOffset,
-                                                    (float)transform->position.y + info.yoffset});
+                    sprite.setPosition(
+                        sf::Vector2f{(float)transform->position.x + currentX +
+                                         info.xoffset - orientationOffset,
+                                     (float)transform->position.y + info.yoffset});
                     sprite.setOrigin(sf::Vector2f{0, 0});
                     sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});
                     sprite.setRotation(sf::degrees(transform->direction));

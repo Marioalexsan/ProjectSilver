@@ -762,8 +762,7 @@ namespace Game
             auto offset = Game::Vector2::NormalVector(entity->GetTransform().direction) * 60;
 
             Globals::Game().CreateLine(entity->GetTransform().position + offset,
-                                       entity->GetTransform().position + offset +
-                                           length,
+                                       entity->GetTransform().position + offset + length,
                                        Game::Color::Red);
         }
 

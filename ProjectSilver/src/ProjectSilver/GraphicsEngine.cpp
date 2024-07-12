@@ -4,7 +4,7 @@
 
 namespace Game
 {
-    std::unique_ptr<sf::RenderWindow> GraphicsEngine::Window = nullptr;
+    std::unique_ptr<sf::RenderWindow>  GraphicsEngine::Window = nullptr;
     std::unique_ptr<sf::RenderTexture> GraphicsEngine::World  = nullptr;
 
     int GraphicsEngine::windowWidth  = 0;
@@ -12,7 +12,7 @@ namespace Game
     int GraphicsEngine::renderWidth  = 0;
     int GraphicsEngine::renderHeight = 0;
 
-    double GraphicsEngine::gameWinFadeout = 0.0;
+    double GraphicsEngine::gameWinFadeout  = 0.0;
     double GraphicsEngine::gameLoseFadeout = 0.0;
 
     Vector2 GraphicsEngine::cameraPosition = {0.0, 0.0};
@@ -57,9 +57,9 @@ namespace Game
         }
 
         Window->setMouseCursorVisible(false);
-        renderWidth = mode.width;
+        renderWidth  = mode.width;
         renderHeight = mode.height;
-        fullscreen = mode.fullscreen;
+        fullscreen   = mode.fullscreen;
         return true;
     }
 
@@ -139,7 +139,7 @@ namespace Game
 
         if (gameWinFadeout != 0)
         {
-            auto color = sf::Color::White;
+            auto color  = sf::Color::White;
             auto factor = (100 - gameWinFadeout) / 100;
             color.a     = (uint8_t)std::clamp(255 * factor, 0.0, 255.0);
             worldSprite.setColor(color);

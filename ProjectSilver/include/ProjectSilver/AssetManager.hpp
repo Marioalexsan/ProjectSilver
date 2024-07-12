@@ -37,7 +37,7 @@ namespace Game
 
         struct TextureData
         {
-            std::string path;
+            std::string                  path;
             std::unique_ptr<sf::Texture> texture;
         };
 

@@ -252,7 +252,8 @@ namespace Game
                         music->setLoopPoints(
                             {sf::seconds(data.sectionList.at(action.param).start / 1000.0f),
                              sf::seconds((data.sectionList.at(action.param).end -
-                                         data.sectionList.at(action.param).start) / 1000.0f)});
+                                          data.sectionList.at(action.param).start) /
+                                         1000.0f)});
                         actionQueue.pop();
                         doNextAction = true;
                     }
@@ -317,26 +318,26 @@ namespace Game
 
     void AudioEngine::SetUserMusicVolume(double volume)
     {
-        userMusicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+        userMusicVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         AddAction(MusicAction::Type::ChangeVolume, "");
     }
 
     void AudioEngine::SetUserSoundVolume(double volume)
     {
-        userSoundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+        userSoundVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         for (auto& [id, sound] : sounds)
             sound->setVolume(int(soundVolume / 100.0 * double(userSoundVolume)));
     }
 
     void AudioEngine::SetMusicVolume(double volume)
     {
-        musicVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+        musicVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         AddAction(MusicAction::Type::ChangeVolume, "");
     }
 
     void AudioEngine::SetSoundVolume(double volume)
     {
-        soundVolume = (int)Utility::ClampValue(volume, 0.0, 100.0);
+        soundVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         for (auto& [id, sound] : sounds)
             sound->setVolume(int(soundVolume / 100.0 * double(userSoundVolume)));
     }

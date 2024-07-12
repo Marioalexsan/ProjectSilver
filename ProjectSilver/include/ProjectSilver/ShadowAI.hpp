@@ -1,76 +1,83 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/AI.hpp>
 #include <ProjectSilver/BasicText.hpp>
+#include <ProjectSilver/PCHeader.hpp>
+#include <ProjectSilver/ShadowHPBar.hpp>
 #include <ProjectSilver/SphereCollider.hpp>
 #include <ProjectSilver/Sprite.hpp>
-#include <ProjectSilver/ShadowHPBar.hpp>
 
-namespace Game {
-	class ShadowAI : public AI {
-		enum class Actions {
-			DoingAbsolutelyNothing,
-			Recovery,
-			MeleeChase,
-			PistolRetaliation,
-			MeleeLungeHitCombo,
-			MeleeTurnHitCombo,
-		};
-		
-		bool lastStand;
-		bool seesPlayer;
+namespace Game
+{
+    class ShadowAI : public AI
+    {
+        enum class Actions
+        {
+            DoingAbsolutelyNothing,
+            Recovery,
+            MeleeChase,
+            PistolRetaliation,
+            MeleeLungeHitCombo,
+            MeleeTurnHitCombo,
+        };
 
-		bool strafesLeft;
-		int nextStrafeChange;
+        bool lastStand;
+        bool seesPlayer;
 
-		bool doingSwing;
-		int postSwingDelay;
-		int swingCount;
-		
-		double pistolCredits;
-		int pistolShotCount;
-		int pistolUseCooldown;
-		int nextShot;
-		bool hitRecently;
+        bool strafesLeft;
+        int  nextStrafeChange;
 
-		double hurtEvasionCredits;
-		int hurtEvasionTriggerDelay;
-		int hurtEvasionCooldown;
+        bool doingSwing;
+        int  postSwingDelay;
+        int  swingCount;
 
-		double painCounter;
-		double currentSpeed;
+        double pistolCredits;
+        int    pistolShotCount;
+        int    pistolUseCooldown;
+        int    nextShot;
+        bool   hitRecently;
 
-		int specialHurtSoundCooldown;
+        double hurtEvasionCredits;
+        int    hurtEvasionTriggerDelay;
+        int    hurtEvasionCooldown;
 
-		Actions action;
+        double painCounter;
+        double currentSpeed;
 
-		ShadowHPBar hp;
+        int specialHurtSoundCooldown;
 
-		Game::SphereCollider axe;
+        Actions action;
 
-		Vector2 lastFramePlayerPos;
+        ShadowHPBar hp;
 
-		void DecideAction();
-		void CounterLogic();
-		void SwingAxe();
-		double CalculateSwingFactor();
+        Game::SphereCollider axe;
+
+        Vector2 lastFramePlayerPos;
+
+        void   DecideAction();
+        void   CounterLogic();
+        void   SwingAxe();
+        double CalculateSwingFactor();
 
 
-		void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
-	public:
-		ShadowAI();
-		~ShadowAI();
+        void GenericWeaponFireLogic(double damageToDeal, double angleDeltaToApply = 0.0);
 
-		int GetDifficultyLevel();
+    public:
+        ShadowAI();
+        ~ShadowAI();
 
-		virtual void OnAttackHit();
-		virtual void OnHitByAttack(Actor* attacker, double damage);
+        int GetDifficultyLevel();
 
-		virtual void Update();
+        virtual void OnAttackHit();
+        virtual void OnHitByAttack(Actor* attacker, double damage);
 
-		inline bool InLastStand() { return lastStand; }
+        virtual void Update();
 
-		virtual void OnDeath();
-	};
-}
+        inline bool InLastStand()
+        {
+            return lastStand;
+        }
+
+        virtual void OnDeath();
+    };
+} // namespace Game

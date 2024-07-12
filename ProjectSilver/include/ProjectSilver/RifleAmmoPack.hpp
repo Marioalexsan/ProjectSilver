@@ -1,19 +1,24 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Actor.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class RifleAmmoPack : public Actor {
-		int pickUpDelay;
-		int ammoToGrant;
-	public:
-		inline void SetAmmoToGrant(int ammo) { this->ammoToGrant = ammo; }
+namespace Game
+{
+    class RifleAmmoPack : public Actor
+    {
+        int pickUpDelay;
+        int ammoToGrant;
 
-		RifleAmmoPack();
-		~RifleAmmoPack();
+    public:
+        inline void SetAmmoToGrant(int ammo)
+        {
+            this->ammoToGrant = ammo;
+        }
 
-		virtual void Update();
-	};
-}
+        RifleAmmoPack();
+        ~RifleAmmoPack();
 
+        virtual void Update();
+    };
+} // namespace Game

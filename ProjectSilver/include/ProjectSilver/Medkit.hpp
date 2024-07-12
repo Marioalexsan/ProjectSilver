@@ -1,19 +1,24 @@
 #pragma once
 
-#include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Actor.hpp>
+#include <ProjectSilver/PCHeader.hpp>
 
-namespace Game {
-	class Medkit : public Actor {
-		int pickUpDelay;
-		int healthToGrant;
-	public:
-		inline void SetHealthToGrant(int hp) { this->healthToGrant = hp; }
+namespace Game
+{
+    class Medkit : public Actor
+    {
+        int pickUpDelay;
+        int healthToGrant;
 
-		Medkit();
-		~Medkit();
+    public:
+        inline void SetHealthToGrant(int hp)
+        {
+            this->healthToGrant = hp;
+        }
 
-		virtual void Update();
-	};
-}
+        Medkit();
+        ~Medkit();
 
+        virtual void Update();
+    };
+} // namespace Game

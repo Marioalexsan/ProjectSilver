@@ -3,23 +3,26 @@
 #include <ProjectSilver/PCHeader.hpp>
 #include <ProjectSilver/Sprite.hpp>
 
-namespace Game {
-	class ShadowHPBar : public Sprite {
-	protected:
-		sf::Texture* lastStandHPtex;
-		sf::Texture* HPtex;
+namespace Game
+{
+    class ShadowHPBar : public Sprite
+    {
+    protected:
+        sf::Texture* lastStandHPtex;
+        sf::Texture* HPtex;
 
-		double HPValue;
-		double lastStandHPValue;
-		double maxHP;
-	public:
-		ShadowHPBar();
+        double HPValue;
+        double lastStandHPValue;
+        double maxHP;
 
-		void SetHPTexture(const std::string& texture);
-		void SetLastStandHPTexture(const std::string& texture);
+    public:
+        ShadowHPBar();
 
-		void SetHPValues(double HP, double lastStandHP, double maxHP);
+        void SetHPTexture(const std::string& texture);
+        void SetLastStandHPTexture(const std::string& texture);
 
-		virtual void Draw();
-	};
-}
+        void SetHPValues(double HP, double lastStandHP, double maxHP);
+
+        virtual void Draw();
+    };
+} // namespace Game
