@@ -74,8 +74,6 @@ namespace Game
             return;
         }
 
-        int lineHeight = data.arbitraryValues.at("lineHeight");
-
         switch (type)
         {
             case TextRenderType::ContinuousLeft:
@@ -111,7 +109,7 @@ namespace Game
                                      (float)transform->position.y + info.yoffset});
                     sprite.setOrigin(sf::Vector2f{0, 0});
                     sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});
-                    sprite.setRotation(sf::degrees(transform->direction));
+                    sprite.setRotation(sf::degrees((float)transform->direction));
 
                     GraphicsEngine::World->draw(sprite);
 

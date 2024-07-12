@@ -87,7 +87,6 @@ namespace Game
             double    distance = 0.0;
             for (auto& elem : results)
             {
-                auto entity = elem.second->GetEntity();
                 if (elem.second->GetColliderType() == Collider::ColliderType::Static)
                 {
                     hit      = elem.second;
@@ -119,7 +118,6 @@ namespace Game
         double    distance = 0.0;
         for (auto& elem : results)
         {
-            auto entity = elem.second->GetEntity();
             if (elem.second->GetColliderType() == Collider::ColliderType::Static)
             {
                 hit      = elem.second;
@@ -138,7 +136,7 @@ namespace Game
     {
     }
 
-    void AI::OnHitByAttack(Actor* attacker, double damage)
+    void AI::OnHitByAttack(Actor*, double damage)
     {
         if (entity != nullptr)
         {

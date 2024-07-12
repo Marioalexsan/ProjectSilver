@@ -113,7 +113,7 @@ namespace Game
                                                 bool                  checkOnly)
         {
             // Just calls the other version and reverses push std::vector
-            auto var = CheckCollision(B, A);
+            auto var = CheckCollision(B, A, checkOnly);
             return {var.first, var.second * -1};
         }
 

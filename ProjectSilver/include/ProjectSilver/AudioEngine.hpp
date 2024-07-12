@@ -127,7 +127,7 @@ namespace Game
 
         inline int GetSoundCount()
         {
-            return sounds.size();
+            return (int)sounds.size();
         }
 
         inline double GetMusicVolume()

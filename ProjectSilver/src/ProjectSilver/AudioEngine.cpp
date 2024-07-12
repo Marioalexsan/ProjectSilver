@@ -56,7 +56,7 @@ namespace Game
         }
 
         auto sound = std::make_unique<sf::Sound>(*SearchSoundLib(ID).samples);
-        sound->setVolume(int(double(soundVolume) * userSoundVolume / 100.0));
+        sound->setVolume(float(soundVolume) * userSoundVolume / 100.f);
         sound->play();
 
         auto nextID    = NextID();
@@ -167,9 +167,9 @@ namespace Game
                         // GOGOGOGOGOGOGO, play and discard action
                         music = SearchMusicLib(action.param).music.get();
                         music->setPlayingOffset(
-                            sf::seconds(double(action.extraParams[0]) / 1000.0));
+                            sf::seconds(float(action.extraParams[0]) / 1000.f));
                         music->setVolume(fadeVolumeMultiplier *
-                                         int(double(musicVolume) * userMusicVolume / 100.0));
+                                         int(float(musicVolume) * userMusicVolume / 100.f));
                         music->setLoop(true);
                         music->play();
                         musicID       = action.param;
@@ -220,7 +220,7 @@ namespace Game
                             {
                                 // Use fast fade
                                 fadeToSilence = true;
-                                fadeDuration = sf::milliseconds(musicSwitchFadeTime * 0.4);
+                                fadeDuration = sf::milliseconds(musicSwitchFadeTime * 4 / 10);
                                 actionQueue.front().subType = MusicAction::SubType::FadeOutSection;
                             }
                             break;
@@ -326,7 +326,7 @@ namespace Game
     {
         userSoundVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         for (auto& [id, sound] : sounds)
-            sound->setVolume(int(soundVolume / 100.0 * double(userSoundVolume)));
+            sound->setVolume(soundVolume / 100.f * userSoundVolume));
     }
 
     void AudioEngine::SetMusicVolume(double volume)
@@ -339,7 +339,7 @@ namespace Game
     {
         soundVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         for (auto& [id, sound] : sounds)
-            sound->setVolume(int(soundVolume / 100.0 * double(userSoundVolume)));
+            sound->setVolume(soundVolume / 100.f * userSoundVolume);
     }
 
     bool AudioEngine::SetLoopSection(const std::string& section)

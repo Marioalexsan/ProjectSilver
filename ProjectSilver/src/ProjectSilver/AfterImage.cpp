@@ -105,7 +105,7 @@ namespace Game
             sf::Vector2f{(float)transform->position.x, (float)transform->position.y});
         sprite.setOrigin(sf::Vector2f{(float)transform->center.x, (float)transform->center.y});
         sprite.setColor(sf::Color{color.r, color.g, color.b, alpha});
-        sprite.setRotation(sf::degrees(transform->direction));
+        sprite.setRotation(sf::degrees((float)transform->direction));
 
         GraphicsEngine::World->draw(sprite);
     }
