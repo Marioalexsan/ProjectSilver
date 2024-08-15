@@ -5,10 +5,6 @@
 
 namespace Game
 {
-
-    // ULTRA SUPER DUPER UNIMPLEMENTED
-    // FOR ALL PURPOSES, THIS FILE IS BROKEN AND SHOULD NOT BE USED (until repaired)
-
     ShadowAI::ShadowAI() :
     lastStand(false),
     strafesLeft(false),
@@ -210,6 +206,9 @@ namespace Game
                 {
                     postSwingDelay = 170 - currentDifficulty * 3;
                     action         = Actions::MeleeChase;
+
+                    if (lastStand)
+                        postSwingDelay /= 2;
                 }
                 else
                 {
@@ -689,6 +688,10 @@ namespace Game
                 entity->GetComponent().SetDefaultAnimation("Shadow_Recovery");
 
                 painCounter  = 540;
+
+                if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard)
+                    painCounter -= 360;
+
                 auto& stats  = entity->GetStatsReference();
                 stats.health = stats.maxHealth;
             }
@@ -718,7 +721,10 @@ namespace Game
 
             if (action == Actions::Recovery)
             {
-                damage *= 0.3;
+                if (Globals::Difficulty() == GameMaster::DifficultyLevel::Hard)
+                    damage *= 0.3;
+                else
+                    damage *= 0.6;
             }
             else
             {

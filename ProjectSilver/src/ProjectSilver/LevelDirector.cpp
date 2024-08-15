@@ -376,6 +376,10 @@ namespace Game
             return;
         }
 
+        // Do not chill out
+        if (bossSequence && Globals::Game().GetAliveEnemyCount() == 0)
+            counter++;
+
         if (outOfCredits && !bossSequence)
         {
             int enemiesAlive = Globals::Game().GetAliveEnemyCount();
@@ -731,5 +735,9 @@ namespace Game
         entity->GetTransform().direction = dynamicSpawnPoints[spawnPoint].second;
 
         nextSpawns += 350 + difficulty * 2;
+
+        // Chill out
+        if (Globals::Game().GetAliveEnemyCount() > 2)
+            nextSpawns += 200 * (Globals::Game().GetAliveEnemyCount() - 2);
     }
 } // namespace Game
