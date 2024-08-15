@@ -326,7 +326,7 @@ namespace Game
     {
         userSoundVolume = (uint8_t)Utility::ClampValue(volume, 0.0, 100.0);
         for (auto& [id, sound] : sounds)
-            sound->setVolume(soundVolume / 100.f * userSoundVolume));
+            sound->setVolume(soundVolume / 100.f * userSoundVolume);
     }
 
     void AudioEngine::SetMusicVolume(double volume)
